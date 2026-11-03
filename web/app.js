@@ -144,17 +144,22 @@ export function renderDrawerContent() {
   container.innerHTML = html;
 }
 
-// 5. Hash Router
+// 5. Hash & Pre-rendered Page Router
 export function handleRouting() {
   const hash = window.location.hash || '';
+  const bodyRoute = document.body?.dataset?.route || 'home';
   const viewport = document.getElementById('app-viewport');
   if (!viewport) return;
+
+  const effectiveRoute = hash && hash !== '#' && hash !== '#/'
+    ? hash.slice(1)
+    : bodyRoute;
 
   // Update nav links active class
   document.querySelectorAll('.main-nav .nav-link').forEach(link => {
     const route = link.dataset.route;
-    if ((route === 'home' && (hash === '#/' || hash === '#' || hash === '')) ||
-        (route && hash.startsWith(`#${route}`))) {
+    if ((route === 'home' && (effectiveRoute === 'home' || effectiveRoute === '')) ||
+        (route && effectiveRoute.startsWith(route))) {
       link.classList.add('active');
     } else {
       link.classList.remove('active');
@@ -169,25 +174,25 @@ export function handleRouting() {
     return;
   }
 
-  // SPA Route Matching
-  if (hash === '#/' || hash === '#' || hash === '') {
-    renderHomeView(viewport);
-  } else if (hash.startsWith('#cram')) {
+  // Route Matching (supports both MPA directory URLs and SPA hash URLs)
+  if (effectiveRoute === 'cram' || effectiveRoute.startsWith('cram?')) {
     renderCramView(viewport, appState);
-  } else if (hash.startsWith('#simulator')) {
-    const query = hash.split('?')[1] || '';
+  } else if (effectiveRoute === 'simulator' || effectiveRoute.startsWith('simulator?')) {
+    const query = (hash.includes('?') ? hash.split('?')[1] : window.location.search.slice(1)) || '';
     const urlParams = new URLSearchParams(query);
     renderSimulatorView(viewport, appState, urlParams);
-  } else if (hash.startsWith('#mastery')) {
+  } else if (effectiveRoute === 'mastery' || effectiveRoute.startsWith('mastery?')) {
     renderMasteryView(viewport, appState);
-  } else if (hash.startsWith('#concept/')) {
-    const slug = hash.replace('#concept/', '').split('?')[0];
+  } else if (effectiveRoute.startsWith('concept/')) {
+    const slug = effectiveRoute.replace('concept/', '').split('?')[0];
     const catItem = appState.catalog.find(c => c.slug === slug);
     if (catItem) {
       window.location.href = resolveUrl(catItem.url);
     } else {
-      viewport.innerHTML = `<div class="quiz-card"><h2>Conceito não encontrado</h2><p>Slug: ${slug}</p><p><a href="#/">Voltar para Início</a></p></div>`;
+      viewport.innerHTML = `<div class="quiz-card"><h2>Conceito em elaboração</h2><p>O resumo para <code>${slug}</code> está mapeado na ementa oficial e pode ser gerado via <code>npm run brief -- --slug ${slug}</code>.</p><p style="margin-top:12px;"><a href="${resolveUrl('index.html')}" class="recall-toggle-btn">Voltar para Trilhas</a></p></div>`;
     }
+  } else {
+    renderHomeView(viewport);
   }
 
   initMermaid();
@@ -212,6 +217,7 @@ function renderHomeView(container) {
 
   for (const d of domains) {
     const domainChapters = (appState.blueprint.chapters || []).filter(c => {
+      if (Array.isArray(c.domains) && c.domains.includes(d.id)) return true;
       if (c.exam_domain) return c.exam_domain === d.id;
       if (c.domain) return c.domain === d.id;
       return false;

@@ -4,6 +4,8 @@
  */
 
 export function renderCramView(container, { cramIndex, catalog }) {
+  const metaBase = typeof document !== 'undefined' ? document.querySelector('meta[name="site-base"]')?.getAttribute('content') : './';
+  const basePrefix = metaBase ? (metaBase.endsWith('/') ? metaBase : `${metaBase}/`) : './';
   container.innerHTML = `
     <header class="concept-header">
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -55,7 +57,7 @@ export function renderCramView(container, { cramIndex, catalog }) {
         <div class="domain-readiness-card">
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <h3 style="font-size: 16px;">Vector Stores no Azure: Cosmos DB vs PostgreSQL vs Redis</h3>
-            <a href="comparisons/vector-stores-azure/index.html" class="nav-link" style="font-weight: 600;">Ver Matriz Completa →</a>
+            <a href="${basePrefix}comparisons/vector-stores-azure/index.html" class="nav-link" style="font-weight: 600;">Ver Matriz Completa →</a>
           </div>
           <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 8px;">
             Regra de Ouro da Prova: Use <strong>Azure Cosmos DB NoSQL</strong> para cargas multi-modelo globais com documentos JSON; use <strong>PostgreSQL pgvector</strong> para queries híbridas relacionais complexas (ACID + SQL); use <strong>Azure Managed Redis</strong> para cache de baixa latência em memória e sessões vetoriais ultrarrápidas.

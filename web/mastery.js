@@ -12,6 +12,8 @@ import {
 } from './progress-core.js';
 
 export function renderMasteryView(container, { blueprint, catalog }) {
+  const metaBase = typeof document !== 'undefined' ? document.querySelector('meta[name="site-base"]')?.getAttribute('content') : './';
+  const basePrefix = metaBase ? (metaBase.endsWith('/') ? metaBase : `${metaBase}/`) : './';
   const progressRaw = localStorage.getItem(STORAGE_KEY);
   let progressState = null;
   try {
@@ -104,7 +106,7 @@ export function renderMasteryView(container, { blueprint, catalog }) {
             return `
               <tr style="border-bottom: 1px solid var(--border);">
                 <td style="padding: 10px 16px;">
-                  <a href="${c.url}" style="font-weight: 600;">${c.title}</a>
+                  <a href="${basePrefix}${c.url.replace(/^\//, '')}" style="font-weight: 600;">${c.title}</a>
                 </td>
                 <td style="padding: 10px 16px; color: var(--text-secondary);">${formatDomainName(c.exam_domain)}</td>
                 <td style="padding: 10px 16px; color: var(--text-muted);">${c.chapter || '-'}</td>
