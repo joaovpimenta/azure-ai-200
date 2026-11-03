@@ -1,115 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="site-base" content="./">
-  <meta name="description" content="Plataforma de estudos ativos e simulados para a certificação Microsoft Azure AI-200">
-  <title>Azure AI-200 Study Hub</title>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="site-base" content="./" />
+  <meta id="article-description" name="description" content="Tech Topics · Azure AI-200 — arquivo de artigos e estudo ativo sobre arquitetura de dados e contêineres para IA." />
+  <title>Azure AI-200 — Arquivo de artigos e estudo</title>
+  <meta name="theme-color" content="#277d69" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Azure AI-200" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
   <template id="page-metadata">{}</template>
   <script type="module" src="./app.js"></script>
 </head>
 <body data-route="home" data-active-recall="true">
-  <!-- Top Application Bar -->
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="header-left">
-        <button id="drawer-toggle" class="drawer-toggle" aria-label="Abrir Ementa" aria-expanded="false">
-          ☰
-        </button>
-        <a href="#/" class="brand-link">
-          <span class="brand-badge">AI-200</span>
-          <span class="brand-title">Study Hub</span>
+  <a class="skip-link" href="#recent-posts">Ir para os artigos</a>
+  <header class="site-header">
+    <div class="header-inner home-header-inner">
+      <a class="brand" href="./index.html" aria-label="Azure AI-200 — página inicial">Azure AI-200</a>
+      <form class="top-search" action="./index.html" method="get" role="search">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+        <label class="visually-hidden" for="search-input">Buscar artigo</label>
+        <input id="search-input" name="q" type="search" placeholder="Buscar artigo" autocomplete="off" enterkeyhint="search" />
+        <div id="search-suggestions" class="search-suggestions" role="region" aria-label="Sugestões de artigos" hidden></div>
+      </form>
+      <div class="header-actions">
+        <nav class="main-nav" aria-label="Navegação Principal">
+          <a href="./index.html" class="header-link nav-link active" data-route="home">Artigos</a>
+          <a href="./cram/index.html" class="header-link nav-link" data-route="cram">Cram</a>
+          <a href="./simulator/index.html" class="header-link nav-link" data-route="simulator">Simulado</a>
+          <a href="./mastery/index.html" class="header-link nav-link" data-route="mastery">Prontidão</a>
+        </nav>
+        <a class="github-stars" href="https://github.com/joaovpimenta/azure-ai-200" target="_blank" rel="noopener noreferrer" aria-label="Ver repositório Azure AI-200 no GitHub" title="Estrelas do repositório no GitHub">
+          <svg aria-hidden="true" class="github-mark" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <span class="github-star-label"><span aria-hidden="true">★</span> <span id="github-stars">—</span></span>
         </a>
-      </div>
-      
-      <nav class="main-nav" aria-label="Navegação Principal">
-        <a href="#/" class="nav-link active" data-route="home">Trilhas</a>
-        <a href="#cram" class="nav-link" data-route="cram">Cram Sheet</a>
-        <a href="#simulator" class="nav-link" data-route="simulator">Simulador</a>
-        <a href="#mastery" class="nav-link" data-route="mastery">Prontidão</a>
-      </nav>
-      
-      <div class="header-controls">
-        <button id="search-trigger" class="search-trigger-btn" aria-label="Buscar conceitos">
-          <span>🔍 Buscar</span>
-          <kbd class="kbd-shortcut">Ctrl+K</kbd>
-        </button>
-        <button id="theme-toggle" class="btn-icon" aria-label="Alternar Tema" title="Alternar Tema (Alt+T)">🌓</button>
-        <button id="shortcuts-toggle" class="btn-icon" aria-label="Atalhos do Teclado" title="Atalhos (?)">⌨️</button>
       </div>
     </div>
   </header>
 
-  <!-- Sidebar Drawer Navigation -->
-  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
-  <aside id="sidebar-drawer" class="sidebar-drawer" aria-label="Ementa do Exame" aria-hidden="true">
-    <div class="drawer-header">
-      <span class="drawer-title">Ementa AI-200</span>
-      <button id="drawer-close" class="modal-close-btn" aria-label="Fechar Ementa">✕</button>
-    </div>
-    <div id="drawer-content" class="drawer-content">
-      <div style="padding: 16px; color: var(--text-muted); font-size: 13px;">Carregando ementa oficial...</div>
-    </div>
-  </aside>
-
-  <!-- Main Viewport Router Container -->
-  <main id="app-viewport" class="app-main" role="main">
-    <div id="home-view">
-      <header class="concept-header">
-        <h1>Trilhas de Estudo e Preparação</h1>
-        <p style="color: var(--text-secondary); margin-top: 6px;">
-          Preparatório oficial para o Exame Microsoft AI-200: Developing AI Cloud Solutions on Azure.
-        </p>
-      </header>
-      <div id="blueprint-domains-container" class="mastery-grid">
-        <!-- Rendered by app.js -->
+  <main id="app-viewport" class="page-shell" role="main">
+    <header class="archive-intro">
+      <span class="eyebrow">Certificação Microsoft Azure · AI-200</span>
+      <h1>Arquitetura de dados e contêineres para IA, um conceito por vez.</h1>
+      <p>Artigos para dominar sistemas distribuídos, bancos vetoriais, contêineres e observabilidade no Azure — dos fundamentos à prova de certificação.</p>
+    </header>
+    <section class="archive-section" id="recent-posts" aria-labelledby="archive-heading">
+      <div class="archive-toolbar">
+        <div>
+          <h2 id="archive-heading">Todos os artigos</h2>
+          <p id="article-count" class="post-meta" aria-live="polite">Carregando o arquivo…</p>
+        </div>
+        <div class="archive-filters" id="archive-filters" role="group" aria-label="Filtrar artigos"></div>
       </div>
-    </div>
+      <p id="archive-status" class="archive-status" role="status" hidden></p>
+      <div class="recent-list" id="recent-list" aria-busy="true"></div>
+      <button id="load-more" class="load-more" type="button" hidden>Carregar mais artigos</button>
+      <p class="visually-hidden" id="share-status" role="status" aria-live="polite"></p>
+      <p id="empty-state" class="empty-state" hidden>Nenhum artigo encontrado. Tente outro termo.</p>
+      <noscript><p>Ative o JavaScript para carregar os artigos deste arquivo.</p></noscript>
+    </section>
+    <section class="blueprint-section" id="blueprint-section" aria-labelledby="blueprint-heading">
+      <div class="blueprint-section-header">
+        <span class="eyebrow">Guia de Estudo Oficial · AI-200T00</span>
+        <h2 id="blueprint-heading">Mapa dos 4 Domínios e 9 Capítulos da Prova</h2>
+        <p>Roteiro completo ponderado pelos pesos oficiais do exame Microsoft AI-200.</p>
+      </div>
+      <div class="signal-grid" id="blueprint-domains-container"></div>
+    </section>
   </main>
 
-  <!-- Search Modal -->
-  <div id="search-modal-backdrop" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
-      <div class="modal-header">
-        <h3 id="search-modal-title">Buscar no Hub de Estudos</h3>
-        <button id="search-modal-close" class="modal-close-btn" aria-label="Fechar busca">✕</button>
-      </div>
-      <div class="modal-body">
-        <input type="search" id="global-search-input" class="search-input" placeholder="Digite comandos, tags, conceitos ou serviços Azure..." autocomplete="off">
-        <div id="search-results-list" class="search-results-list" role="listbox"></div>
+  <section class="recording-dock" id="recording-player" aria-label="Player do áudio gravado do artigo" hidden>
+    <audio id="article-recording" preload="none"></audio>
+    <div class="recording-cover-ring" id="recording-ring">
+      <img id="recording-cover" alt="" />
+    </div>
+    <div class="recording-info">
+      <strong id="recording-title" class="recording-title"></strong>
+      <span class="recording-subtitle" id="recording-subtitle">Azure AI-200 · Narração</span>
+      <div class="recording-progress">
+        <span id="recording-elapsed" class="recording-time">0:00</span>
+        <input id="recording-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Posição da narração" disabled />
+        <span id="recording-duration" class="recording-time">–:––</span>
       </div>
     </div>
-  </div>
-
-  <!-- Keyboard Shortcuts Modal -->
-  <div id="shortcuts-modal-backdrop" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title">
-      <div class="modal-header">
-        <h3 id="shortcuts-modal-title">Atalhos do Teclado</h3>
-        <button id="shortcuts-modal-close" class="modal-close-btn" aria-label="Fechar atalhos">✕</button>
-      </div>
-      <div class="modal-body">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
-          <tbody>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Ctrl+K</kbd> / <kbd class="kbd-shortcut">Cmd+K</kbd></td><td>Abrir busca global</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Alt+T</kbd></td><td>Alternar Modo Claro / Escuro</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Alt+R</kbd></td><td>Ligar / Desligar Active Recall (lacunas mascaradas)</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">1</kbd> .. <kbd class="kbd-shortcut">5</kbd></td><td>Selecionar alternativas no Simulado</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Space</kbd> / <kbd class="kbd-shortcut">Enter</kbd></td><td>Revelar lacuna selecionada</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">?</kbd></td><td>Exibir esta ajuda de atalhos</td></tr>
-            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Esc</kbd></td><td>Fechar menus e janelas modais</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="recording-actions">
+      <button id="recording-rate" class="recording-rate" type="button" aria-label="Velocidade da narração: 1 vez">1×</button>
+      <span id="recording-source" class="recording-source-label" hidden></span>
+      <button id="recording-previous" class="recording-skip" type="button" aria-label="Frase anterior" title="Frase anterior">
+        <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M19 5 10 12l9 7V5Z"/><path d="M6 5v14"/></svg>
+      </button>
+      <button id="recording-play" class="recording-play" type="button" data-playing="false" aria-label="Reproduzir narração" aria-pressed="false">
+        <svg class="recording-icon-play" aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5a1 1 0 0 1 1.5-.86l12 7.5a1 1 0 0 1 0 1.72l-12 7.5A1 1 0 0 1 7 19.5z"/></svg>
+        <svg class="recording-icon-pause" aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg>
+      </button>
+      <button id="recording-skip" class="recording-skip" type="button" aria-label="Próxima frase" title="Próxima frase">
+        <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="m5 5 9 7-9 7V5Z"/><path d="M18 5v14"/></svg>
+      </button>
+      <details class="recording-options">
+        <summary aria-label="Outras opções de áudio" title="Outras opções de áudio">···</summary>
+        <div class="recording-options-menu">
+          <p id="recording-source-menu" class="recording-source-current">Fonte atual: não iniciada</p>
+          <button id="listen-article" type="button" aria-pressed="false">Usar voz do dispositivo</button>
+          <label class="recording-follow"><input id="recording-follow" type="checkbox" checked /> Acompanhar frase</label>
+        </div>
+      </details>
+      <button id="recording-close" class="recording-close" type="button" aria-label="Fechar player" title="Fechar player">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path d="M5 5 19 19M19 5 5 19"/></svg>
+      </button>
     </div>
-  </div>
+  </section>
 
-  <footer class="app-footer" style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12.5px; border-top: 1px solid var(--border);">
-    <p>Azure AI-200: Developing AI Cloud Solutions on Azure — Preparatório Oficial com Engenharia Determinística</p>
+  <div class="article-quick-actions" id="article-quick-actions" role="dialog" aria-modal="false" aria-labelledby="quick-preview-title" hidden></div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>Azure AI-200 · Arquivo de arquitetura de dados e contêineres para IA · Inspirado em Tech Topics</p>
+      <button id="install-app" class="header-link install-app" type="button" hidden>Instalar app</button>
+    </div>
   </footer>
 </body>
 </html>

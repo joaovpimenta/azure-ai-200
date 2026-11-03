@@ -50,8 +50,8 @@ export function validateMermaid(code) {
  */
 export function renderMermaidBlock(code) {
   const cleanCode = escapeHtml((code || '').trim());
-  return `<figure class="mermaid-container" data-mermaid>
-  <div class="mermaid">${cleanCode}</div>
+  return `<figure class="mermaid-figure mermaid-container" data-mermaid>
+  <div class="mermaid" data-mermaid="true"><pre class="mermaid-source">${cleanCode}</pre></div>
   <noscript>
     <pre class="mermaid-fallback"><code>${cleanCode}</code></pre>
   </noscript>
