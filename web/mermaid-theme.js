@@ -4,8 +4,8 @@
  */
 
 export const TECH_TOPICS_MERMAID_CONFIG = Object.freeze({
-  version: '11.4.0',
-  moduleUrl: 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs',
+  version: '12.0.0',
+  moduleUrl: 'https://cdn.jsdelivr.net/npm/mermaid@12.0.0/dist/mermaid.esm.min.mjs',
   config: {
     startOnLoad: false,
     securityLevel: 'strict',
@@ -176,7 +176,8 @@ export async function initMermaid() {
       el.dataset.rawCode = code;
 
       try {
-        const rendered = await mermaid.render(`techTopicsDiagram_${Date.now()}_${index}`, code);
+        const diagramId = `techTopicsDiagram${Date.now()}${index}`;
+        const rendered = await mermaid.render(diagramId, code);
         const wrapper = document.createElement('div');
         wrapper.innerHTML = rendered.svg;
         const svg = wrapper.querySelector('svg');
@@ -187,7 +188,14 @@ export async function initMermaid() {
         el.replaceChildren(svg);
         mountDiagramViewport(el, svg);
       } catch (err) {
+        console.warn('[Mermaid] render error:', err);
         el.classList.add('mermaid-error');
+        const fallbackMsg = document.createElement('p');
+        fallbackMsg.className = 'mermaid-error-message';
+        fallbackMsg.textContent = 'Não foi possível renderizar este diagrama agora. O código permanece disponível abaixo.';
+        if (!el.querySelector('.mermaid-error-message')) {
+          el.prepend(fallbackMsg);
+        }
       }
     }
   } catch (err) {

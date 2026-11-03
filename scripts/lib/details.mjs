@@ -55,7 +55,6 @@ export function formatDetails(html) {
 
     return `<details${newAttrs}>
   <summary class="check-card-summary"${summaryAttrs}>
-    <span class="check-card-icon" aria-hidden="true">💡</span>
     <span class="check-card-title">${summaryText}</span>
   </summary>
   <div class="check-card-body">

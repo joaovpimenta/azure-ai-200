@@ -261,7 +261,7 @@ flowchart LR
     end
 
     Q1 -->|Roteamento Direto - Single Partition| R1
-    R1 -->|1 RU - Latência < 5ms| P1
+    R1 -->|1 RU - Latência menor que 5ms| P1
 
     Q2 -->|Fan-Out Broadcast| R1
     R1 -.->|Consulta Paralela| P1

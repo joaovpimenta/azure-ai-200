@@ -181,7 +181,7 @@ export function compileMarkdown(content, options = {}) {
 
         headings.push({ depth, text, slug });
 
-        return `<h${depth} id="${slug}">${text} <a href="#${slug}" class="heading-anchor" aria-label="Link permanente para ${text}">#</a></h${depth}>\n`;
+        return `<h${depth} id="${slug}">${text}</h${depth}>\n`;
       }
     }
   });

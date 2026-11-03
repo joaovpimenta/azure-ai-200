@@ -305,6 +305,22 @@ export function createCards({ quickActions, shareStatus, lazyImages = false } = 
     const postMeta = element('p', 'post-meta', metaLabel);
     copy.append(category, title, excerpt, postMeta);
 
+    if (Array.isArray(article.tags) && article.tags.length > 0) {
+      const tagsList = element('div', 'card-tags');
+      article.tags.slice(0, 4).forEach(t => {
+        const tagBadge = element('button', 'card-tag-pill', `#${t}`);
+        tagBadge.type = 'button';
+        tagBadge.addEventListener('click', e => {
+          e.stopPropagation();
+          appState.activeFilter = `tag:${t}`;
+          renderFilterPills();
+          renderArchiveCards();
+        });
+        tagsList.append(tagBadge);
+      });
+      copy.append(tagsList);
+    }
+
     const actions = element('div', 'card-actions');
     const like = element('button', 'card-icon-button favorite-button');
     const selected = favorites.has(article.slug);
@@ -569,7 +585,20 @@ export function setupSearchSuggestions() {
   }, { passive: true });
 }
 
-// 6. Home / Archive View Renderer (Tech Topics Layout)
+export const CHAPTER_ORDER = [
+  { id: '01-container-hosting', num: 1, title: 'Hospedagem de Contêineres (ACR & App Service)', domain: 'Desenvolver soluções em contêineres' },
+  { id: '02-container-apps', num: 2, title: 'Azure Container Apps (ACA & KEDA)', domain: 'Desenvolver soluções em contêineres' },
+  { id: '03-aks', num: 3, title: 'Azure Kubernetes Service (AKS)', domain: 'Desenvolver soluções em contêineres' },
+  { id: '04-cosmos-db-nosql', num: 4, title: 'Azure Cosmos DB for NoSQL', domain: 'Serviços de Gerenciamento de Dados para IA' },
+  { id: '05-postgresql-pgvector', num: 5, title: 'PostgreSQL & pgvector', domain: 'Serviços de Gerenciamento de Dados para IA' },
+  { id: '06-managed-redis', num: 6, title: 'Azure Managed Redis', domain: 'Serviços de Gerenciamento de Dados para IA' },
+  { id: '07-backend-integration', num: 7, title: 'Integração de Back-end (Service Bus, Event Grid & Functions)', domain: 'Conectar e consumir serviços' },
+  { id: '08-secrets-and-config', num: 8, title: 'Segredos e Configuração (Key Vault & App Config)', domain: 'Proteger e monitorar soluções' },
+  { id: '09-observe-and-troubleshoot', num: 9, title: 'Observabilidade e Diagnóstico (App Insights & KQL)', domain: 'Proteger e monitorar soluções' },
+  { id: 'comparisons', num: 10, title: 'Matrizes Comparativas · Arquitetura de Decisão', domain: 'Decisões Arquiteturais no Azure' }
+];
+
+// 6. Home / Archive View Renderer (Organized by Chapter Lanes)
 function renderArchiveCards() {
   const list = document.querySelector('#recent-list');
   const count = document.querySelector('#article-count');
@@ -587,6 +616,8 @@ function renderArchiveCards() {
     if (appState.activeFilter === 'favorites' && !favorites.has(article.slug)) return false;
     if (appState.activeFilter === 'comparisons' && article.type !== 'comparison') return false;
     if (appState.activeFilter === 'concepts' && article.type !== 'concept') return false;
+    if (appState.activeFilter.startsWith('chapter:') && article.chapter !== appState.activeFilter.slice(8)) return false;
+    if (appState.activeFilter.startsWith('tag:') && !(article.tags || []).includes(appState.activeFilter.slice(4))) return false;
     if (!query) return true;
     const searchable = normalizeText([
       article.title,
@@ -599,15 +630,74 @@ function renderArchiveCards() {
     return searchable.includes(query);
   });
 
-  list.replaceChildren(...matching.map((article, i) => articleCard(article, i)));
+  // Group matching articles by chapter
+  const chaptersMap = new Map();
+  matching.forEach(article => {
+    const chKey = article.chapter || (article.type === 'comparison' ? 'comparisons' : 'other');
+    if (!chaptersMap.has(chKey)) chaptersMap.set(chKey, []);
+    chaptersMap.get(chKey).push(article);
+  });
+
+  list.innerHTML = '';
+  let globalCardIdx = 0;
+
+  for (const meta of CHAPTER_ORDER) {
+    const chapterArticles = chaptersMap.get(meta.id);
+    if (!chapterArticles || chapterArticles.length === 0) continue;
+
+    const chapterSection = document.createElement('section');
+    chapterSection.className = 'chapter-section';
+    chapterSection.dataset.chapter = meta.id;
+
+    const header = document.createElement('header');
+    header.className = 'chapter-header-bar';
+    const numPrefix = meta.num <= 9 ? `Cap. 0${meta.num} · ` : '';
+    header.innerHTML = `
+      <div class="chapter-header-left">
+        <span class="eyebrow">${meta.domain}</span>
+        <h3 class="chapter-lane-title">${numPrefix}${meta.title}</h3>
+      </div>
+      <span class="chapter-badge-count">${chapterArticles.length} ${chapterArticles.length === 1 ? 'artigo' : 'artigos'}</span>
+    `;
+
+    const rowGrid = document.createElement('div');
+    rowGrid.className = 'recent-list chapter-cards-grid';
+
+    chapterArticles.forEach(article => {
+      rowGrid.append(articleCard(article, globalCardIdx++));
+    });
+
+    chapterSection.append(header, rowGrid);
+    list.append(chapterSection);
+  }
+
+  // Handle any extra chapters/items not in CHAPTER_ORDER
+  for (const [chKey, articles] of chaptersMap.entries()) {
+    if (CHAPTER_ORDER.some(m => m.id === chKey)) continue;
+    const extraSection = document.createElement('section');
+    extraSection.className = 'chapter-section';
+    const header = document.createElement('header');
+    header.className = 'chapter-header-bar';
+    header.innerHTML = `<h3 class="chapter-lane-title">${chKey}</h3>`;
+    const rowGrid = document.createElement('div');
+    rowGrid.className = 'recent-list chapter-cards-grid';
+    articles.forEach(article => rowGrid.append(articleCard(article, globalCardIdx++)));
+    extraSection.append(header, rowGrid);
+    list.append(extraSection);
+  }
+
   list.setAttribute('aria-busy', 'false');
 
   if (query) {
-    count.textContent = `${matching.length} de ${appState.catalog.length} artigos publicados`;
+    count.textContent = `${matching.length} de ${appState.catalog.length} artigos encontrados`;
   } else if (appState.activeFilter === 'favorites') {
     count.textContent = `${matching.length} artigo${matching.length === 1 ? '' : 's'} nos favoritos`;
+  } else if (appState.activeFilter.startsWith('tag:')) {
+    count.textContent = `${matching.length} artigo${matching.length === 1 ? '' : 's'} com #${appState.activeFilter.slice(4)}`;
+  } else if (appState.activeFilter.startsWith('chapter:')) {
+    count.textContent = `${matching.length} artigo${matching.length === 1 ? '' : 's'} neste capítulo`;
   } else {
-    count.textContent = `${matching.length} artigos publicados · 35 conceitos mapeados no guia oficial`;
+    count.textContent = `${matching.length} artigos publicados organizados por capítulo · 35 conceitos no guia oficial`;
   }
 
   if (emptyState) {
@@ -618,19 +708,46 @@ function renderArchiveCards() {
 function renderFilterPills() {
   const container = document.querySelector('#archive-filters');
   if (!container) return;
-  const filters = [
+
+  // Extract all unique tags across catalog
+  const tagCounts = new Map();
+  appState.catalog.forEach(item => {
+    (item.tags || []).forEach(t => {
+      tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+    });
+  });
+
+  // Top subjects sorted by frequency
+  const popularTags = [...tagCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7)
+    .map(([t]) => t);
+
+  const mainFilters = [
     { id: 'all', label: 'Todos' },
-    { id: 'concepts', label: 'Conceitos' },
-    { id: 'comparisons', label: 'Matrizes Comparativas' },
-    { id: 'favorites', label: '★ Favoritos' }
+    { id: 'favorites', label: '★ Favoritos' },
+    { id: 'chapter:04-cosmos-db-nosql', label: 'Cap. 04 · Cosmos DB' },
+    { id: 'comparisons', label: 'Matrizes Comparativas' }
   ];
 
-  container.innerHTML = filters
-    .map(
-      f =>
-        `<button type="button" class="archive-filter-btn ${appState.activeFilter === f.id ? 'active' : ''}" data-filter="${f.id}">${f.label}</button>`
-    )
-    .join('');
+  const tagFilters = popularTags.map(t => ({
+    id: `tag:${t}`,
+    label: `#${t}`
+  }));
+
+  container.innerHTML = `
+    <div class="filter-pill-group filter-group-main">
+      ${mainFilters.map(f => `
+        <button type="button" class="archive-filter-btn ${appState.activeFilter === f.id ? 'active' : ''}" data-filter="${f.id}">${f.label}</button>
+      `).join('')}
+    </div>
+    <div class="filter-pill-group filter-group-tags">
+      <span class="filter-tags-label">Assuntos:</span>
+      ${tagFilters.map(f => `
+        <button type="button" class="archive-filter-btn tag-filter-btn ${appState.activeFilter === f.id ? 'active' : ''}" data-filter="${f.id}">${f.label}</button>
+      `).join('')}
+    </div>
+  `;
 
   container.querySelectorAll('.archive-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {

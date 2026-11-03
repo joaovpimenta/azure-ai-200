@@ -121,14 +121,14 @@ A estrutura `vectorEmbeddingPolicy` requer quatro propriedades fundamentais:
 Dentro da `indexingPolicy`, a seção `vectorIndexes` define o algoritmo de busca:
 
 ```mermaid
-graph TD
-    V[Índices Vetoriais no Cosmos DB] --> Flat[Flat - Exato k-NN]
-    V --> QFlat[QuantizedFlat - ANN com Compressão]
-    V --> DiskANN[DiskANN - ANN em Grafo / Larga Escala]
+flowchart TD
+    V["Índices Vetoriais no Cosmos DB"] --> Flat["Flat · Exato k-NN"]
+    V --> QFlat["QuantizedFlat · ANN com Compressão"]
+    V --> DiskANN["DiskANN · ANN em Grafo / Larga Escala"]
 
-    Flat --> F_Desc["100% Recall / Força bruta\nAté 505 dimensões recomendadas\nPequenos volumes (<50k itens)"]
-    QFlat --> Q_Desc["Quantização escalar em RAM\nAté 4096 dimensões\nExcelente equilíbrio RU/Latência"]
-    DiskANN --> D_Desc["Baseado em Grafo (MSR)\nArmazena vetores compactados em disco SSD\nEscala para bilhões de vetores"]
+    Flat --> F_Desc["100% Recall / Força bruta<br/>Até 505 dimensões recomendadas<br/>Pequenos volumes (até 50.000 itens)"]
+    QFlat --> Q_Desc["Quantização escalar em RAM<br/>Até 4096 dimensões<br/>Excelente equilíbrio RU/Latência"]
+    DiskANN --> D_Desc["Baseado em Grafo (MSR)<br/>Armazena vetores compactados em disco SSD<br/>Escala para bilhões de vetores"]
 ```
 
 | Tipo de Índice | Mecanismo | Dimensões Máximas | Recall | Escala Recomendada |
