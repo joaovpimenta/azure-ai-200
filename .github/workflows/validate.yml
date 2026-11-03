@@ -1,0 +1,43 @@
+name: Validate Azure AI-200 Study Hub
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Run deterministic validation, build & test suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install toolchain dependencies
+        run: npm ci
+
+      - name: Run environment diagnostics
+        run: npm run doctor
+
+      - name: Run deterministic validation gate
+        run: npm run validate
+
+      - name: Build static site artifact (dist/)
+        run: npm run build
+
+      - name: Run automated test suite
+        run: npm test

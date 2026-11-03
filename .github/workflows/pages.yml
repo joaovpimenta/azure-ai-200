@@ -1,0 +1,103 @@
+name: Build and deploy Azure AI-200 Study Hub to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!README.md"
+      - "!.github/workflows/validate.yml"
+      - "!.github/workflows/kokoro-audio.yml"
+      - "!tools/tts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  validate-and-build:
+    name: Validate and build static artifact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install toolchain dependencies
+        run: npm ci
+
+      - name: Run deterministic validation gate
+        run: npm run validate
+
+      - name: Build production HTML artifact in dist/
+        run: npm run build
+
+      - name: Enrich audio manifest from published tts-* GitHub Releases (non-blocking)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/data
+          if gh api "repos/$GH_REPO/releases?per_page=100" > /tmp/releases.json 2>/dev/null; then
+            node -e '
+              const fs = require("node:fs");
+              const releases = JSON.parse(fs.readFileSync("/tmp/releases.json", "utf-8"));
+              const manifest = {};
+              for (const rel of Array.isArray(releases) ? releases : []) {
+                if (!rel.tag_name || !rel.tag_name.startsWith("tts-")) continue;
+                const slug = rel.tag_name.slice(4);
+                const mp3Asset = (rel.assets || []).find(a => a.name && a.name.endsWith(".mp3"));
+                const chaptersAsset = (rel.assets || []).find(a => a.name === "chapters.json");
+                if (mp3Asset) {
+                  manifest[slug] = {
+                    tag: rel.tag_name,
+                    audioUrl: mp3Asset.browser_download_url,
+                    chaptersUrl: chaptersAsset ? chaptersAsset.browser_download_url : null,
+                    publishedAt: rel.published_at
+                  };
+                }
+              }
+              fs.writeFileSync("dist/data/audio-manifest.json", JSON.stringify(manifest, null, 2), "utf-8");
+            '
+          else
+            echo "{}" > dist/data/audio-manifest.json
+          fi
+
+      - name: Run full automated test suite against built artifact
+        run: npm test
+
+      - name: Upload validated site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy GitHub Pages
+    needs: validate-and-build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy validated artifact to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

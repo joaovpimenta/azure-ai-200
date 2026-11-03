@@ -1,0 +1,246 @@
+{
+  "$comment": "Ementa do exame AI-200 e das 9 trilhas do curso AI-200T00. Domínios/skills transcritos do Study Guide oficial (atualizado em 2026-10-30). As trilhas e os conceitos planejados guiam a cobertura editorial. status: 'planned' = ainda sem arquivo; o build detecta automaticamente quando o .md existe.",
+  "exam": {
+    "code": "AI-200",
+    "title": "Developing AI Cloud Solutions on Azure",
+    "certification": "Microsoft Certified: Azure AI Cloud Developer Associate",
+    "course": "AI-200T00",
+    "passingScore": 700,
+    "studyGuideUrl": "https://learn.microsoft.com/pt-br/credentials/certifications/resources/study-guides/ai-200",
+    "courseUrl": "https://learn.microsoft.com/pt-br/training/courses/ai-200t00",
+    "studyGuideUpdated": "2026-10-30"
+  },
+  "domains": [
+    {
+      "id": "containerized-solutions",
+      "title": "Desenvolver soluções em contêineres no Azure",
+      "titleEn": "Develop containerized solutions on Azure",
+      "weight": { "min": 20, "max": 25 },
+      "skills": [
+        {
+          "id": "container-hosting",
+          "title": "Implementar hospedagem de aplicações em contêiner",
+          "bullets": [
+            "Criar, armazenar, versionar e gerenciar imagens com Azure Container Registry",
+            "Criar e executar imagens com Azure Container Registry Tasks",
+            "Implantar contêineres no Azure App Service, configurando variáveis de ambiente e segredos"
+          ]
+        },
+        {
+          "id": "container-orchestration",
+          "title": "Implementar soluções orquestradas por contêiner",
+          "bullets": [
+            "Implantar aplicações no Azure Container Apps, incluindo configuração de ambiente e gerenciamento de revisões",
+            "Implementar escala orientada a eventos com KEDA no Container Apps",
+            "Implantar e gerenciar aplicações no AKS usando arquivos de manifesto",
+            "Monitorar e solucionar problemas no AKS e no Container Apps inspecionando logs, eventos e conectividade ponta a ponta"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-management",
+      "title": "Desenvolver soluções de IA com serviços de gerenciamento de dados do Azure",
+      "titleEn": "Develop AI solutions by using Azure data management services",
+      "weight": { "min": 25, "max": 30 },
+      "skills": [
+        {
+          "id": "cosmos-db",
+          "title": "Desenvolver soluções de IA com Azure Cosmos DB for NoSQL",
+          "bullets": [
+            "Conectar ao Cosmos DB for NoSQL com o SDK e executar consultas",
+            "Otimizar desempenho de consultas e consumo de RUs com políticas de indexação e níveis de consistência",
+            "Armazenar e recuperar embeddings e executar busca por similaridade vetorial",
+            "Implementar um change feed processor para detectar e tratar itens novos ou atualizados"
+          ]
+        },
+        {
+          "id": "postgresql",
+          "title": "Desenvolver soluções de IA com Azure Database for PostgreSQL",
+          "bullets": [
+            "Conectar e consultar o Azure Database for PostgreSQL usando SDKs",
+            "Modelar esquemas e escolher tipos de dados adequados",
+            "Implementar estratégias de indexação, otimizando latência e reduzindo o custo computacional do pgvector",
+            "Configurar computação, memória e armazenamento para cargas vetoriais",
+            "Executar busca vetorial, armazenar embeddings e implementar RAG com filtros de metadados",
+            "Otimizar conexões para melhorar throughput e reduzir latência"
+          ]
+        },
+        {
+          "id": "managed-redis",
+          "title": "Integrar Azure Managed Redis em soluções de IA",
+          "bullets": [
+            "Implementar operações de dados: cache, expiração e invalidação",
+            "Implementar indexação vetorial para busca por similaridade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "connect-and-consume",
+      "title": "Conectar e consumir serviços do Azure",
+      "titleEn": "Connect to and consume Azure services",
+      "weight": { "min": 20, "max": 25 },
+      "skills": [
+        {
+          "id": "messaging-eventing",
+          "title": "Desenvolver soluções de IA baseadas em eventos e mensagens",
+          "bullets": [
+            "Enfileirar e processar operações de back-end com Azure Service Bus: dead-letter, mensagens, tópicos e assinaturas",
+            "Implementar fluxos orientados a eventos com Azure Event Grid: filtros, eventos personalizados e retentativas"
+          ]
+        },
+        {
+          "id": "azure-functions",
+          "title": "Desenvolver e implementar Azure Functions",
+          "bullets": [
+            "Criar APIs serverless implementando triggers e bindings",
+            "Configurar e implantar function apps"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "secure-monitor-troubleshoot",
+      "title": "Proteger, monitorar e solucionar problemas de soluções do Azure",
+      "titleEn": "Secure, monitor, troubleshoot Azure solutions",
+      "weight": { "min": 20, "max": 25 },
+      "skills": [
+        {
+          "id": "secure-solutions",
+          "title": "Implementar soluções seguras no Azure",
+          "bullets": [
+            "Proteger segredos com Azure Key Vault, incluindo rotação e recuperação",
+            "Armazenar e recuperar configurações com Azure App Configuration"
+          ]
+        },
+        {
+          "id": "monitor-troubleshoot",
+          "title": "Monitorar e solucionar problemas de soluções do Azure",
+          "bullets": [
+            "Rastrear sistemas distribuídos com SDKs OpenTelemetry",
+            "Escrever consultas KQL para analisar logs e métricas"
+          ]
+        }
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "01-container-hosting",
+      "order": 1,
+      "title": "Hospedagem de aplicações em contêiner",
+      "summary": "Azure Container Registry, ACR Tasks e implantação de contêineres no Azure App Service com configurações e segredos.",
+      "domains": ["containerized-solutions"],
+      "concepts": [
+        { "slug": "acr-registro-imagens-versionamento", "title": "Azure Container Registry: registro, repositórios, tags e versionamento", "skills": ["container-hosting"] },
+        { "slug": "acr-tasks-build-na-nuvem", "title": "ACR Tasks: builds rápidos, multi-step e gatilhos", "skills": ["container-hosting"] },
+        { "slug": "app-service-conteineres-configuracao", "title": "Contêineres no App Service: porta, startup, app settings e Key Vault references", "skills": ["container-hosting", "secure-solutions"] }
+      ]
+    },
+    {
+      "id": "02-container-apps",
+      "order": 2,
+      "title": "Azure Container Apps",
+      "summary": "Ambientes, revisões, ingress, segredos, escala com KEDA e sessões dinâmicas no Azure Container Apps.",
+      "domains": ["containerized-solutions"],
+      "concepts": [
+        { "slug": "aca-ambientes-e-implantacao", "title": "Ambientes e implantação no Container Apps (CLI e YAML)", "skills": ["container-orchestration"] },
+        { "slug": "aca-revisoes-e-trafego", "title": "Revisões, modos de revisão e divisão de tráfego", "skills": ["container-orchestration"] },
+        { "slug": "aca-segredos-e-registro-privado", "title": "Segredos, variáveis de ambiente e autenticação em registro privado", "skills": ["container-orchestration", "secure-solutions"] },
+        { "slug": "aca-escala-keda", "title": "Regras de escala HTTP, TCP e KEDA (scale to zero)", "skills": ["container-orchestration"] },
+        { "slug": "aca-sessoes-dinamicas", "title": "Sessões dinâmicas para executar código gerado por IA", "skills": ["container-orchestration"] }
+      ]
+    },
+    {
+      "id": "03-aks",
+      "order": 3,
+      "title": "Azure Kubernetes Service (AKS)",
+      "summary": "Implantação via manifestos, Services e Ingress, e troubleshooting com logs, eventos e conectividade no AKS e no Container Apps.",
+      "domains": ["containerized-solutions"],
+      "concepts": [
+        { "slug": "aks-manifestos-deployments", "title": "Manifestos Kubernetes: Deployment, Service, ConfigMap e Secret", "skills": ["container-orchestration"] },
+        { "slug": "aks-rede-services-ingress", "title": "Services, Ingress e conectividade ponta a ponta", "skills": ["container-orchestration"] },
+        { "slug": "aks-aca-troubleshooting-logs-eventos", "title": "Troubleshooting: kubectl logs/describe/events e logs do Container Apps", "skills": ["container-orchestration", "monitor-troubleshoot"] }
+      ]
+    },
+    {
+      "id": "04-cosmos-db-nosql",
+      "order": 4,
+      "title": "Azure Cosmos DB for NoSQL",
+      "summary": "SDK e consultas, RUs, indexação e consistência, busca vetorial para RAG e change feed processor.",
+      "domains": ["data-management"],
+      "concepts": [
+        { "slug": "cosmos-db-modelo-de-recursos-e-particionamento", "title": "Modelo de recursos, partition key e Request Units", "skills": ["cosmos-db"] },
+        { "slug": "cosmos-db-sdk-conexao-e-consultas", "title": "SDK: CosmosClient, CRUD, consultas parametrizadas e paginação", "skills": ["cosmos-db"] },
+        { "slug": "cosmos-db-indexacao-consistencia-rus", "title": "Políticas de indexação, níveis de consistência e otimização de RUs", "skills": ["cosmos-db"] },
+        { "slug": "cosmos-db-busca-vetorial", "title": "Embeddings, políticas vetoriais e VectorDistance()", "skills": ["cosmos-db"] },
+        { "slug": "cosmos-db-change-feed-processor", "title": "Change feed processor: leases, delegates e reprocessamento", "skills": ["cosmos-db"] }
+      ]
+    },
+    {
+      "id": "05-postgresql-pgvector",
+      "order": 5,
+      "title": "Azure Database for PostgreSQL e pgvector",
+      "summary": "Conexão via SDK, modelagem e tipos, índices HNSW/IVFFlat, dimensionamento para vetores, RAG com filtros e otimização de conexões.",
+      "domains": ["data-management"],
+      "concepts": [
+        { "slug": "postgresql-conexao-sdk-e-autenticacao", "title": "Conexão com psycopg/Npgsql e autenticação Microsoft Entra", "skills": ["postgresql"] },
+        { "slug": "postgresql-modelagem-e-tipos", "title": "Modelagem de esquemas, tipos de dados e índices B-tree/GIN", "skills": ["postgresql"] },
+        { "slug": "pgvector-indices-hnsw-ivfflat", "title": "pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat", "skills": ["postgresql"] },
+        { "slug": "postgresql-recursos-para-cargas-vetoriais", "title": "Compute, memória (maintenance_work_mem) e storage para vetores", "skills": ["postgresql"] },
+        { "slug": "postgresql-rag-com-filtros", "title": "Busca vetorial e RAG com filtros de metadados", "skills": ["postgresql"] },
+        { "slug": "postgresql-pool-de-conexoes-pgbouncer", "title": "Pool de conexões, PgBouncer e otimização de throughput", "skills": ["postgresql"] }
+      ]
+    },
+    {
+      "id": "06-managed-redis",
+      "order": 6,
+      "title": "Azure Managed Redis",
+      "summary": "Cache-aside, expiração e invalidação, e indexação vetorial para busca por similaridade e cache semântico.",
+      "domains": ["data-management"],
+      "concepts": [
+        { "slug": "redis-cache-expiracao-invalidacao", "title": "Cache-aside, TTL, políticas de eviction e invalidação", "skills": ["managed-redis"] },
+        { "slug": "redis-indexacao-vetorial", "title": "Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico", "skills": ["managed-redis"] }
+      ]
+    },
+    {
+      "id": "07-backend-integration",
+      "order": 7,
+      "title": "Integração de back-end: mensagens, eventos e Functions",
+      "summary": "Service Bus (filas, tópicos, DLQ), Event Grid (filtros, eventos personalizados, retentativas) e Azure Functions (triggers, bindings, implantação).",
+      "domains": ["connect-and-consume"],
+      "concepts": [
+        { "slug": "service-bus-filas-topicos-assinaturas", "title": "Service Bus: filas, tópicos, assinaturas e filtros", "skills": ["messaging-eventing"] },
+        { "slug": "service-bus-dead-letter-e-processamento", "title": "Peek-lock, dead-letter queue, sessões e retentativas", "skills": ["messaging-eventing"] },
+        { "slug": "event-grid-eventos-filtros-retentativas", "title": "Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter", "skills": ["messaging-eventing"] },
+        { "slug": "functions-triggers-e-bindings", "title": "Functions: triggers, bindings e modelo de programação", "skills": ["azure-functions"] },
+        { "slug": "functions-configuracao-e-implantacao", "title": "Planos de hospedagem, configuração e implantação de function apps", "skills": ["azure-functions"] }
+      ]
+    },
+    {
+      "id": "08-secrets-and-config",
+      "order": 8,
+      "title": "Segredos e configuração",
+      "summary": "Key Vault (segredos, rotação, recuperação), App Configuration, managed identities e DefaultAzureCredential.",
+      "domains": ["secure-monitor-troubleshoot"],
+      "concepts": [
+        { "slug": "identidade-gerenciada-defaultazurecredential", "title": "Managed identities, RBAC e DefaultAzureCredential", "skills": ["secure-solutions"] },
+        { "slug": "key-vault-segredos-rotacao", "title": "Key Vault: segredos, versões, rotação e soft delete", "skills": ["secure-solutions"] },
+        { "slug": "app-configuration-chaves-rotulos-feature-flags", "title": "App Configuration: chaves, rótulos, refresh e feature flags", "skills": ["secure-solutions"] }
+      ]
+    },
+    {
+      "id": "09-observe-and-troubleshoot",
+      "order": 9,
+      "title": "Observabilidade e troubleshooting",
+      "summary": "OpenTelemetry com Azure Monitor/Application Insights, rastreamento distribuído e consultas KQL.",
+      "domains": ["secure-monitor-troubleshoot"],
+      "concepts": [
+        { "slug": "opentelemetry-azure-monitor", "title": "OpenTelemetry e Azure Monitor Distro: traces, métricas e logs", "skills": ["monitor-troubleshoot"] },
+        { "slug": "kql-consultas-logs-metricas", "title": "KQL: where, summarize, bin, join e render", "skills": ["monitor-troubleshoot"] },
+        { "slug": "troubleshooting-latencia-e-falhas-ia", "title": "Diagnóstico de latência, falhas e throttling em aplicações de IA", "skills": ["monitor-troubleshoot"] }
+      ]
+    }
+  ]
+}

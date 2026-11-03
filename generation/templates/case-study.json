@@ -1,0 +1,97 @@
+{
+  "$comment": "Template canônico para criação de Estudo de Caso de Exame (exams/case-studies/*.json). Requer obrigatoriamente 4 abas estruturadas (Visão Geral, Arquitetura Atual, Requisitos Técnicos, Requisitos de Segurança) e um array de questões filhas.",
+  "id": "case-study-template-enterprise",
+  "type": "case-study",
+  "title": "Estudo de Caso: Título da Organização Empresarial",
+  "chapter": "04-cosmos-db-nosql",
+  "exam_domain": "data-management",
+  "difficulty": "advanced",
+  "language": "agnostic",
+  "tags": [
+    "case-study",
+    "cosmos-db",
+    "container-apps",
+    "architecture"
+  ],
+  "stem": "Analise o cenário corporativo descrito nas abas informativas e responda às questões associadas a seguir.",
+  "tabs": [
+    {
+      "title": "Visão Geral",
+      "content": "<h3>Perfil da Empresa</h3><p>Descrição detalhada da empresa, mercado de atuação, base de usuários e objetivos de negócio da iniciativa de Inteligência Artificial.</p><h3>Desafio de Negócio</h3><p>Principais dores corporativas, metas de expansão e justificativa para modernização na nuvem Azure.</p>"
+    },
+    {
+      "title": "Arquitetura Atual",
+      "content": "<h3>Estado Atual da Infraestrutura</h3><ul><li>Topologia dos servidores locais ou legados em nuvem.</li><li>Gargalos de escalabilidade, limites de conexões simultâneas ou pontos únicos de falha.</li><li>Métodos atuais de armazenamento de credenciais, configurações e logs.</li></ul>"
+    },
+    {
+      "title": "Requisitos Técnicos",
+      "content": "<h3>SLA, Desempenho e Engenharia de IA</h3><ul><li>Volume de dados, dimensões de vetores e métricas de latência p95/p99 esperadas.</li><li>Necessidade de particionamento horizontal, escalonamento automático a zero e decoupling assíncrono.</li><li>Regras de negócio para atualização contínua de índices e sincronização de dados.</li></ul>"
+    },
+    {
+      "title": "Requisitos de Segurança",
+      "content": "<h3>Segurança, Governança e Conformidade</h3><ul><li>Diretrizes de Zero Trust, autenticação passwordless e eliminação de chaves estáticas.</li><li>Modelo de permissões baseado em funções (Entra ID RBAC) e isolamento de rede via VNets e Private Endpoints.</li><li>Políticas de proteção de segredos no Key Vault e retenção de auditoria.</li></ul>"
+    }
+  ],
+  "questions": [
+    {
+      "id": "cs-child-q1",
+      "type": "single-choice",
+      "title": "Primeira Decisão Arquitetural do Estudo de Caso",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "advanced",
+      "language": "agnostic",
+      "tags": ["cosmos-db", "vector-search", "architecture", "scenario"],
+      "stem": "Considerando os requisitos técnicos expressos no estudo de caso, qual tecnologia ou abordagem atende integralmente ao cenário?",
+      "options": [
+        {
+          "id": "opt-c1",
+          "text": "Alternativa arquitetural correta que cumpre todos os requisitos estipulados.",
+          "correct": true,
+          "rationale": "Justificativa cruzando as exigências descritas nas abas com as capacidades oficiais do recurso no Azure."
+        },
+        {
+          "id": "opt-c2",
+          "text": "Alternativa que falha em cumprir os requisitos de latência ou escala.",
+          "correct": false,
+          "rationale": "Análise demonstrando a limitação técnica deste distrator."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/"
+    },
+    {
+      "id": "cs-child-q2",
+      "type": "multiple-choice",
+      "select_count": 2,
+      "title": "Configurações de Segurança e Identidade",
+      "chapter": "02-container-apps",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "difficulty": "advanced",
+      "language": "agnostic",
+      "tags": ["key-vault", "managed-identity", "architecture", "scenario"],
+      "stem": "Quais DUAS configurações são exigidas para implementar os requisitos de segurança descritos?",
+      "options": [
+        {
+          "id": "opt-mc1",
+          "text": "Primeira configuração mandatória de identidade ou rede.",
+          "correct": true,
+          "rationale": "Justificativa baseada nas exigências da aba Requisitos de Segurança."
+        },
+        {
+          "id": "opt-mc2",
+          "text": "Segunda configuração mandatória de proteção de segredos.",
+          "correct": true,
+          "rationale": "Justificativa comprovando o atendimento ao princípio de menor privilégio."
+        },
+        {
+          "id": "opt-mc3",
+          "text": "Opção com privilégios administrativos excessivos.",
+          "correct": false,
+          "rationale": "Refutação demonstrando a violação de segurança."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/key-vault/"
+    }
+  ],
+  "learn_url": "https://learn.microsoft.com/azure/architecture/"
+}

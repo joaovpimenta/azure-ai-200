@@ -1,0 +1,22 @@
+{
+  "name": "azure-ai-200",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hub de estudo ativo para o exame Microsoft AI-200 (Developing AI Cloud Solutions on Azure), publicado como GitHub Page.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "build": "node scripts/build-site.mjs",
+    "validate": "node scripts/validate-site.mjs",
+    "test": "node --test",
+    "brief": "node scripts/compose-study-brief.mjs",
+    "preview": "node scripts/preview.mjs"
+  },
+  "dependencies": {
+    "marked": "^15.0.0",
+    "yaml": "^2.6.0"
+  }
+}

@@ -1,0 +1,93 @@
+name: Generate Kokoro Narration Audio (pf_dora)
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Slug do conceito ou 'all' para sintetizar todos os conceitos publicados"
+        required: true
+        default: "all"
+      voice:
+        description: "Voz Kokoro ONNX (padrão: pf_dora)"
+        required: false
+        default: "pf_dora"
+      speed:
+        description: "Velocidade da fala (padrão: 1.0)"
+        required: false
+        default: "1.0"
+      publish_release:
+        description: "Publicar MP3 e chapters.json em GitHub Release tts-<slug>"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kokoro-audio-${{ inputs.slug }}
+  cancel-in-progress: false
+
+jobs:
+  synthesize:
+    name: Synthesize PT-BR/EN-US narration with Kokoro (pf_dora)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Install Node dependencies and build catalog
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare narration segments and sentence chapters
+        run: |
+          python tools/tts/kokoro_release.py prepare \
+            --catalog dist/data/catalog.json \
+            --slug "${{ inputs.slug }}" \
+            --voice "${{ inputs.voice }}" \
+            --speed "${{ inputs.speed }}" \
+            --output-dir tools/tts/output
+
+      - name: Upload narration plan & chapters artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kokoro-narration-${{ inputs.slug }}
+          path: tools/tts/output/
+          retention-days: 14
+
+      - name: Publish MP3 assets to GitHub Releases (when synthesized)
+        if: inputs.publish_release == true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for dir in tools/tts/output/*/; do
+            [ -d "$dir" ] || continue
+            slug="$(basename "$dir")"
+            mp3_file="$dir/${slug}.mp3"
+            chapters_file="$dir/chapters.json"
+            if [ -f "$mp3_file" ] && [ -f "$chapters_file" ]; then
+              tag="tts-${slug}"
+              if gh release view "$tag" >/dev/null 2>&1; then
+                gh release upload "$tag" "$mp3_file" "$chapters_file" --clobber
+              else
+                gh release create "$tag" "$mp3_file" "$chapters_file" \
+                  --title "Narração Kokoro (pf_dora): ${slug}" \
+                  --notes "Áudio sintetizado automaticamente para revisão mobile/PWA."
+              fi
+            fi
+          done

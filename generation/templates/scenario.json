@@ -1,0 +1,168 @@
+{
+  "$comment": "Template canônico para criação de questões no formato Cenário (exams/scenarios/*.json). Pode conter um único objeto de questão ou um array de objetos. Todos os 4 formatos avulsos são ilustrados abaixo.",
+  "schemas": {
+    "single-choice": {
+      "id": "scenario-single-choice-template",
+      "type": "single-choice",
+      "title": "Título Descritivo da Questão",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "intermediate",
+      "language": "agnostic",
+      "tags": ["cosmos-db", "architecture", "scenario"],
+      "stem": "Enunciado situacional do problema corporativo ou arquitetural no Azure...",
+      "options": [
+        {
+          "id": "opt-1",
+          "text": "Alternativa correta com a melhor prática arquitetural recomendada pela Microsoft.",
+          "correct": true,
+          "rationale": "Justificativa detalhada explicando por que esta alternativa é correta segundo a documentação oficial."
+        },
+        {
+          "id": "opt-2",
+          "text": "Distrator plausível porém incorreto ou subótimo para o cenário descrito.",
+          "correct": false,
+          "rationale": "Justificativa detalhada demonstrando a razão pela qual este distrator está errado ou falha em atender os requisitos."
+        },
+        {
+          "id": "opt-3",
+          "text": "Distrator comum em provas que confunde configurações ou portas de rede.",
+          "correct": false,
+          "rationale": "Explicação técnica refutando o distrator com referências conceituais."
+        },
+        {
+          "id": "opt-4",
+          "text": "Distrator que sugere serviço ou recurso incompatível.",
+          "correct": false,
+          "rationale": "Explicação de por que o serviço não atende ao cenário."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/"
+    },
+    "multiple-choice": {
+      "id": "scenario-multiple-choice-template",
+      "type": "multiple-choice",
+      "select_count": 2,
+      "title": "Título Descritivo da Questão Multi-Seleção",
+      "chapter": "02-container-apps",
+      "exam_domain": "containerized-solutions",
+      "difficulty": "advanced",
+      "language": "agnostic",
+      "tags": ["container-apps", "key-vault", "managed-identity", "scenario"],
+      "stem": "Enunciado detalhado exigindo a seleção de múltiplas etapas complementares. Quais DUAS ações devem ser executadas? (Cada resposta correta apresenta parte da solução).",
+      "options": [
+        {
+          "id": "opt-mc-1",
+          "text": "Primeira ação mandatória para compor a solução integrada.",
+          "correct": true,
+          "rationale": "Justificativa técnica da primeira parte indispensável da solução."
+        },
+        {
+          "id": "opt-mc-2",
+          "text": "Segunda ação mandatória complementar para concluir a configuração.",
+          "correct": true,
+          "rationale": "Justificativa técnica da segunda parte indispensável da solução."
+        },
+        {
+          "id": "opt-mc-3",
+          "text": "Ação incorreta ou papel de permissão com excesso de privilégios.",
+          "correct": false,
+          "rationale": "Refutação explicando a violação de segurança ou ineficácia técnica."
+        },
+        {
+          "id": "opt-mc-4",
+          "text": "Configuração legada desaconselhada no Azure moderno.",
+          "correct": false,
+          "rationale": "Explicação de por que esta configuração não é adotada em arquiteturas atuais."
+        },
+        {
+          "id": "opt-mc-5",
+          "text": "Abordagem incorreta que expõe credenciais em texto claro.",
+          "correct": false,
+          "rationale": "Refutação demonstrando a vulnerabilidade gerada."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/container-apps/"
+    },
+    "code-completion": {
+      "id": "scenario-code-completion-template",
+      "type": "code-completion",
+      "title": "Título do Exercício de Completar Código SDK",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "intermediate",
+      "language": "python",
+      "tags": ["cosmos-db", "cosmosclient", "sdk", "python", "scenario"],
+      "stem": "Instruções do que o desenvolvedor deve implementar no snippet de código a seguir, destacando a classe ou método que preenche as lacunas:",
+      "code_template": "client = CosmosClient(url=endpoint, credential={{slot_1}})\ncontainer = client.get_database_client(db_name).get_container_client(cont_name)\nitems = container.{{slot_2}}(query=query_sql, parameters=params)",
+      "slots": [
+        {
+          "id": "slot_1",
+          "options": [
+            {
+              "text": "DefaultAzureCredential()",
+              "correct": true,
+              "rationale": "Implementação padrão de autenticação sem senha (passwordless) com Entra ID."
+            },
+            {
+              "text": "AzureKeyCredential(\"secret\")",
+              "correct": false,
+              "rationale": "Credencial usada em outros SDKs de IA, incompatível ou insegura no Cosmos DB."
+            }
+          ]
+        },
+        {
+          "id": "slot_2",
+          "options": [
+            {
+              "text": "query_items",
+              "correct": true,
+              "rationale": "Método oficial do SDK Python para executar consultas parametrizadas."
+            },
+            {
+              "text": "execute_sql_query",
+              "correct": false,
+              "rationale": "Método inexistente na interface do ContainerProxy."
+            }
+          ]
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
+    },
+    "ordering": {
+      "id": "scenario-ordering-template",
+      "type": "ordering",
+      "title": "Título da Questão de Ordenação Sequencial",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "intermediate",
+      "language": "agnostic",
+      "tags": ["cosmos-db", "change-feed", "change-feed-processor", "architecture", "scenario"],
+      "stem": "Ordene as seguintes etapas na sequência cronológica e de dependência técnica correta para implementar o recurso:",
+      "items": [
+        {
+          "id": "step_1",
+          "text": "Primeira etapa: Provisionar os recursos de suporte e pré-requisitos fundamentais.",
+          "order": 1
+        },
+        {
+          "id": "step_2",
+          "text": "Segunda etapa: Estabelecer as permissões de identidade e conexões de cliente.",
+          "order": 2
+        },
+        {
+          "id": "step_3",
+          "text": "Terceira etapa: Configurar o builder com os manipuladores e listeners.",
+          "order": 3
+        },
+        {
+          "id": "step_4",
+          "text": "Quarta etapa: Inicializar a execução concorrente do componente assíncrono.",
+          "order": 4
+        }
+      ],
+      "rationale": "Explicação completa e fundamentada da lógica de ordenação e encadeamento de dependências entre as etapas.",
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+    }
+  }
+}

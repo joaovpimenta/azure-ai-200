@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.tmp/
+.agents/
+*.log
+__pycache__/
+.venv/
+tools/tts/models/
+tools/tts/output/
+.DS_Store
+Thumbs.db

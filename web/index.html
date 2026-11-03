@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="site-base" content="./">
+  <meta name="description" content="Plataforma de estudos ativos e simulados para a certificação Microsoft Azure AI-200">
+  <title>Azure AI-200 Study Hub</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <template id="page-metadata">{}</template>
+  <script type="module" src="./app.js"></script>
+</head>
+<body data-route="home" data-active-recall="true">
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <button id="drawer-toggle" class="drawer-toggle" aria-label="Abrir Ementa" aria-expanded="false">
+          ☰
+        </button>
+        <a href="#/" class="brand-link">
+          <span class="brand-badge">AI-200</span>
+          <span class="brand-title">Study Hub</span>
+        </a>
+      </div>
+      
+      <nav class="main-nav" aria-label="Navegação Principal">
+        <a href="#/" class="nav-link active" data-route="home">Trilhas</a>
+        <a href="#cram" class="nav-link" data-route="cram">Cram Sheet</a>
+        <a href="#simulator" class="nav-link" data-route="simulator">Simulador</a>
+        <a href="#mastery" class="nav-link" data-route="mastery">Prontidão</a>
+      </nav>
+      
+      <div class="header-controls">
+        <button id="search-trigger" class="search-trigger-btn" aria-label="Buscar conceitos">
+          <span>🔍 Buscar</span>
+          <kbd class="kbd-shortcut">Ctrl+K</kbd>
+        </button>
+        <button id="theme-toggle" class="btn-icon" aria-label="Alternar Tema" title="Alternar Tema (Alt+T)">🌓</button>
+        <button id="shortcuts-toggle" class="btn-icon" aria-label="Atalhos do Teclado" title="Atalhos (?)">⌨️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar Drawer Navigation -->
+  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <aside id="sidebar-drawer" class="sidebar-drawer" aria-label="Ementa do Exame" aria-hidden="true">
+    <div class="drawer-header">
+      <span class="drawer-title">Ementa AI-200</span>
+      <button id="drawer-close" class="modal-close-btn" aria-label="Fechar Ementa">✕</button>
+    </div>
+    <div id="drawer-content" class="drawer-content">
+      <div style="padding: 16px; color: var(--text-muted); font-size: 13px;">Carregando ementa oficial...</div>
+    </div>
+  </aside>
+
+  <!-- Main Viewport Router Container -->
+  <main id="app-viewport" class="app-main" role="main">
+    <div id="home-view">
+      <header class="concept-header">
+        <h1>Trilhas de Estudo e Preparação</h1>
+        <p style="color: var(--text-secondary); margin-top: 6px;">
+          Preparatório oficial para o Exame Microsoft AI-200: Developing AI Cloud Solutions on Azure.
+        </p>
+      </header>
+      <div id="blueprint-domains-container" class="mastery-grid">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Search Modal -->
+  <div id="search-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+      <div class="modal-header">
+        <h3 id="search-modal-title">Buscar no Hub de Estudos</h3>
+        <button id="search-modal-close" class="modal-close-btn" aria-label="Fechar busca">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="search" id="global-search-input" class="search-input" placeholder="Digite comandos, tags, conceitos ou serviços Azure..." autocomplete="off">
+        <div id="search-results-list" class="search-results-list" role="listbox"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="shortcuts-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title">
+      <div class="modal-header">
+        <h3 id="shortcuts-modal-title">Atalhos do Teclado</h3>
+        <button id="shortcuts-modal-close" class="modal-close-btn" aria-label="Fechar atalhos">✕</button>
+      </div>
+      <div class="modal-body">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
+          <tbody>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Ctrl+K</kbd> / <kbd class="kbd-shortcut">Cmd+K</kbd></td><td>Abrir busca global</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Alt+T</kbd></td><td>Alternar Modo Claro / Escuro</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Alt+R</kbd></td><td>Ligar / Desligar Active Recall (lacunas mascaradas)</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">1</kbd> .. <kbd class="kbd-shortcut">5</kbd></td><td>Selecionar alternativas no Simulado</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Space</kbd> / <kbd class="kbd-shortcut">Enter</kbd></td><td>Revelar lacuna selecionada</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">?</kbd></td><td>Exibir esta ajuda de atalhos</td></tr>
+            <tr><td style="padding: 8px 0;"><kbd class="kbd-shortcut">Esc</kbd></td><td>Fechar menus e janelas modais</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12.5px; border-top: 1px solid var(--border);">
+    <p>Azure AI-200: Developing AI Cloud Solutions on Azure — Preparatório Oficial com Engenharia Determinística</p>
+  </footer>
+</body>
+</html>

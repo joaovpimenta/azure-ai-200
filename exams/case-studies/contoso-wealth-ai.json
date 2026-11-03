@@ -1,0 +1,188 @@
+{
+  "id": "case-study-contoso-wealth-ai",
+  "type": "case-study",
+  "title": "Estudo de Caso: Plataforma Contoso Wealth AI",
+  "chapter": "04-cosmos-db-nosql",
+  "exam_domain": "data-management",
+  "difficulty": "advanced",
+  "language": "agnostic",
+  "tags": ["case-study", "cosmos-db", "container-apps", "key-vault", "service-bus", "vector-search", "managed-identity", "architecture"],
+  "stem": "Analise o cenário da Contoso Wealth Management nas abas 'Visão Geral', 'Arquitetura Atual', 'Requisitos Técnicos' e 'Requisitos de Segurança' e responda às questões associadas a seguir.",
+  "tabs": [
+    {
+      "title": "Visão Geral",
+      "content": "<h3>Perfil da Empresa</h3><p>A Contoso Wealth Management é uma instituição financeira global que atende mais de 600.000 clientes de alta renda com consultoria de investimentos personalizada. A empresa está lançando o <strong>Contoso Wealth AI</strong>, um assistente inteligente baseado em Large Language Models (LLM) que sintetiza relatórios de análise de mercado, recomenda balanceamento de carteiras e responde dúvidas fiscais em linguagem natural.</p><h3>Objetivo de Negócio</h3><p>Migrar a solução piloto para uma arquitetura em nuvem escalável no Microsoft Azure, com resiliência regional, isolamento estrito de dados entre clientes (multi-tenant) e conformidade rigorosa com normas de auditoria bancária internacional (SOC2 Type II e PCI-DSS).</p>"
+    },
+    {
+      "title": "Arquitetura Atual",
+      "content": "<h3>Infraestrutura Legada</h3><ul><li>A aplicação monolítica atual roda em máquinas virtuais IaaS Windows Server com SQL Server on-premises.</li><li>As credenciais de banco e chaves de serviços externos estão gravadas em arquivos de configuração locais (<code>web.config</code>).</li><li>Durante a abertura e fechamento das bolsas de valores (09:30 e 16:00 EST), picos repentinos de acessos provocam esgotamento do pool de conexões e falhas de timeout.</li><li>O processamento de relatórios diários de mercado bloqueia tabelas transacionais, impactando negativamente as consultas de clientes.</li></ul>"
+    },
+    {
+      "title": "Requisitos Técnicos",
+      "content": "<h3>Desempenho e Armazenamento Vetorial</h3><ul><li>A solução deve executar buscas semânticas vetoriais sobre 2,5 milhões de relatórios de análise e artigos macroeconômicos com embeddings de 1.536 dimensões.</li><li>A latência de consulta vetorial combinada com filtros de metadados (como perfil de risco e data de publicação) não pode ultrapassar 15 ms no percentil 95 (p95).</li><li>O banco de dados deve utilizar o modelo NoSQL com particionamento automático para absorver aumentos de escala globais sem reindexação manual.</li><li>A camada de computação web e APIs deve ser conteinerizada, suportando redução a zero réplicas (scale-to-zero) fora do horário de pregão e escalonamento elástico ultra-rápido via KEDA acionado por mensagens de fila.</li><li>Sempre que novos relatórios são inseridos ou atualizados no repositório de documentos, os embeddings vetoriais devem ser recalculados e sincronizados assincronamente através de um pipeline background sem onerar as leituras interativas dos clientes.</li></ul>"
+    },
+    {
+      "title": "Requisitos de Segurança",
+      "content": "<h3>Segurança, Governança e Rede</h3><ul><li>Princípio de Zero Trust: proibido o uso de senhas mestras, chaves estáticas ou connection strings em arquivos de código, configurações ou variáveis de ambiente de contêineres.</li><li>Todos os componentes de computação (Container Apps) devem autenticar-se nos serviços gerenciados (Cosmos DB, Azure OpenAI, Key Vault e Service Bus) exclusivamente através de Identidades Gerenciadas Atribuídas pelo Usuário (User-Assigned Managed Identities) com controle de acesso baseado em função (Microsoft Entra ID RBAC).</li><li>Segredos de APIs de parceiros e certificados criptográficos devem ser armazenados no Azure Key Vault com proteção de limpeza (Purge Protection) e exclusão reversível (Soft Delete) ativadas.</li><li>Acesso à camada de dados deve ocorrer unicamente através de Private Endpoints dentro da VNet corporativa, bloqueando qualquer acesso público originado da Internet.</li></ul>"
+    }
+  ],
+  "questions": [
+    {
+      "id": "cs-contoso-q1",
+      "type": "single-choice",
+      "title": "Seleção de Repositório de Dados e Indexação Vetorial",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "advanced",
+      "language": "agnostic",
+      "tags": ["cosmos-db", "vector-search", "diskann", "scenario"],
+      "stem": "Considerando os requisitos técnicos de busca vetorial sobre 2,5 milhões de documentos com 1.536 dimensões, SLA de latência p95 < 15 ms com filtros de metadados e modelo de documentos JSON particionado automaticamente, qual serviço e política de índice você deve recomendar?",
+      "options": [
+        {
+          "id": "opt-cs1-cosmos-diskann",
+          "text": "Azure Cosmos DB for NoSQL configurando a política vetorial com índice DiskANN (vectorIndexType: 'diskANN') e particionamento por tenantId.",
+          "correct": true,
+          "rationale": "O Azure Cosmos DB for NoSQL com índice DiskANN é projetado especificamente para busca vetorial de alta dimensionalidade (1.536 dimensões) em coleções de milhões de itens com particionamento horizontal nativo e baixa latência garantida em SSD."
+        },
+        {
+          "id": "opt-cs1-pg-ivfflat",
+          "text": "Azure Database for PostgreSQL Flexible Server configurando índice IVFFlat com listas padrão e sem particionamento.",
+          "correct": false,
+          "rationale": "IVFFlat exige retreinamento quando novos dados são inseridos e sofre perda substancial de recall ou latência sem tunagem intensiva de listas para 2,5 milhões de vetores de 1.536 dimensões, além de não ser NoSQL nativo."
+        },
+        {
+          "id": "opt-cs1-blob-batch",
+          "text": "Azure Blob Storage com índice hierárquico em lote de inferência.",
+          "correct": false,
+          "rationale": "Blob Storage é um repositório de objetos não indexado para consultas sub-15ms em tempo real."
+        },
+        {
+          "id": "opt-cs1-cosmos-flat",
+          "text": "Azure Cosmos DB for NoSQL utilizando índice vetorial flat com kNN de força bruta.",
+          "correct": false,
+          "rationale": "O índice flat executa comparação por força bruta em todos os itens da partição, tornando inviável atingir o SLA de p95 < 15 ms sobre 2,5 milhões de vetores."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+    },
+    {
+      "id": "cs-contoso-q2",
+      "type": "multiple-choice",
+      "select_count": 2,
+      "title": "Arquitetura de Segurança Passwordless e Resolução de Segredos",
+      "chapter": "02-container-apps",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "difficulty": "advanced",
+      "language": "agnostic",
+      "tags": ["container-apps", "key-vault", "managed-identity", "user-assigned", "rbac", "scenario"],
+      "stem": "A equipe de desenvolvimento precisa configurar o Azure Container Apps para consumir segredos de parceiros armazenados no Azure Key Vault respeitando estritamente o princípio de privilégio mínimo e a exigência de Zero Trust. Quais DUAS ações devem ser executadas?",
+      "options": [
+        {
+          "id": "opt-cs2-identity-rbac",
+          "text": "Criar uma Identidade Gerenciada Atribuída pelo Usuário, associá-la ao Container App e atribuir a ela a função RBAC 'Key Vault Secrets User' no Key Vault.",
+          "correct": true,
+          "rationale": "A função 'Key Vault Secrets User' concede apenas permissão de leitura no plano de dados para recuperar o segredo sem direitos administrativos, cumprindo o princípio de privilégio mínimo."
+        },
+        {
+          "id": "opt-cs2-kv-ref",
+          "text": "Configurar a seção de segredos do Container App utilizando referências do Key Vault ('keyVaultUrl') vinculadas ao Resource ID da Identidade Gerenciada Atribuída pelo Usuário.",
+          "correct": true,
+          "rationale": "Configurar a referência nativa do Key Vault com a identidade vinculada permite que a infraestrutura do ACA resolva o segredo dinamicamente sem gravá-lo no contêiner ou no código."
+        },
+        {
+          "id": "opt-cs2-admin-role",
+          "text": "Atribuir a função 'Key Vault Administrator' à identidade no nível da assinatura para simplificar permissões futuras.",
+          "correct": false,
+          "rationale": "Key Vault Administrator viola flagrantemente o princípio de menor privilégio ao conceder controle total de gerenciamento e dados."
+        },
+        {
+          "id": "opt-cs2-access-policies",
+          "text": "Habilitar políticas de acesso legadas do Key Vault com permissões universais de leitura para o pool da VNet.",
+          "correct": false,
+          "rationale": "Políticas de acesso legadas (vault access policies) não devem ser utilizadas quando a diretriz corporativa exige o modelo de permissões RBAC do Microsoft Entra ID."
+        },
+        {
+          "id": "opt-cs2-dockerfile-env",
+          "text": "Adicionar o valor do segredo em texto puro como instrução ENV no Dockerfile.",
+          "correct": false,
+          "rationale": "Inserir segredos em camadas de imagem Docker expõe credenciais a qualquer usuário com acesso ao repositório de imagens."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
+    },
+    {
+      "id": "cs-contoso-q3",
+      "type": "single-choice",
+      "title": "Pipeline Reativo de Atualização de Embeddings com Change Feed",
+      "chapter": "04-cosmos-db-nosql",
+      "exam_domain": "data-management",
+      "difficulty": "intermediate",
+      "language": "agnostic",
+      "tags": ["cosmos-db", "change-feed", "change-feed-processor", "leases", "scenario"],
+      "stem": "Para atender ao requisito de recalcular embeddings assincronamente assim que novos relatórios forem inseridos no Cosmos DB sem concorrer pelas Request Units (RU/s) das leituras interativas dos consultores, qual arquitetura deve ser adotada?",
+      "options": [
+        {
+          "id": "opt-cs3-cfp-dedicated",
+          "text": "Implementar um microsserviço de background utilizando o Change Feed Processor do Cosmos DB apontando para um container de leases dedicado, configurando uma instância desacoplada para processar inserções/atualizações e gerar os vetores.",
+          "correct": true,
+          "rationale": "O Change Feed Processor fornece uma arquitetura escalável e orientada a eventos para escutar mutações de forma confiável e assíncrona, desacoplando o processo computacional pesado de geração de embeddings do fluxo transacional primário."
+        },
+        {
+          "id": "opt-cs3-polling",
+          "text": "Configurar uma consulta SQL periódica 'SELECT * FROM c WHERE c._ts > @lastCheck' executada a cada 5 segundos diretamente pela API web principal.",
+          "correct": false,
+          "rationale": "Polling periódico via consultas SQL gera desperdício contínuo de RUs, não escala eficientemente em múltiplas partições físicas e pode perder atualizações intermediárias."
+        },
+        {
+          "id": "opt-cs3-stored-procedure",
+          "text": "Criar uma Stored Procedure no Cosmos DB que chama a API do Azure OpenAI em modo síncrono durante cada operação de inserção.",
+          "correct": false,
+          "rationale": "Stored Procedures no Cosmos DB são atômicas e executadas em JavaScript dentro do motor transacional; elas não podem realizar chamadas HTTP de saída externas (como invocar o Azure OpenAI)."
+        },
+        {
+          "id": "opt-cs3-pre-trigger",
+          "text": "Utilizar triggers pré-inserção (pre-triggers) em JavaScript no Cosmos DB para calcular o embedding de 1.536 dimensões antes de persistir o documento.",
+          "correct": false,
+          "rationale": "Triggers no Cosmos DB rodam no contexto da transação NoSQL sem acesso à rede externa para contactar modelos de IA."
+        }
+      ],
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+    },
+    {
+      "id": "cs-contoso-q4",
+      "type": "ordering",
+      "title": "Sequência de Processamento Assíncrono e Resiliência contra Poison Messages",
+      "chapter": "07-backend-integration",
+      "exam_domain": "connect-and-consume",
+      "difficulty": "intermediate",
+      "language": "agnostic",
+      "tags": ["service-bus", "queues", "dead-letter-queue", "peek-lock", "architecture", "scenario"],
+      "stem": "Ordene as etapas pelas quais uma requisição de rebalanceamento de carteira é processada na nova arquitetura, desde o disparo pela API até a garantia de tratamento de falhas em lote com Service Bus:",
+      "items": [
+        {
+          "id": "step_publish_message",
+          "text": "A API em Container Apps valida os parâmetros do cliente e publica uma mensagem de rebalanceamento com Correlation ID na fila do Azure Service Bus.",
+          "order": 1
+        },
+        {
+          "id": "step_keda_scale",
+          "text": "O KEDA monitora o número de mensagens ativas na fila e escala instâncias de workers a partir de zero réplicas.",
+          "order": 2
+        },
+        {
+          "id": "step_peeklock_process",
+          "text": "O worker recebe a mensagem no modo PeekLock, realiza a análise de otimização de portfólio e conclui a mensagem chamando CompleteAsync().",
+          "order": 3
+        },
+        {
+          "id": "step_deadletter",
+          "text": "Em caso de exceções repetidas que atinjam o limite maxDeliveryCount, o Service Bus move a mensagem para a Dead-Letter Queue (DLQ) para análise de causa-raiz.",
+          "order": 4
+        }
+      ],
+      "rationale": "O fluxo arquitetural correto parte do envio da mensagem na fila, detecção e escalonamento pelo KEDA, processamento seguro via PeekLock com finalização explícita, e encaminhamento automático para a DLQ em caso de exaustão de retentativas.",
+      "learn_url": "https://learn.microsoft.com/azure/service-bus-messaging/service-bus-dead-letter-queues"
+    }
+  ],
+  "learn_url": "https://learn.microsoft.com/azure/architecture/guide/ai/rag-enrichment-cosmosdb"
+}

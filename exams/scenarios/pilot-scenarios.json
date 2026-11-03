@@ -1,0 +1,368 @@
+[
+  {
+    "id": "scenario-cosmos-connection-mode",
+    "type": "single-choice",
+    "title": "Cosmos DB SDK: Modo de Conexão Direct vs Gateway em Arquiteturas Seguras",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "intermediate",
+    "language": "agnostic",
+    "tags": ["cosmos-db", "cosmosclient", "sdk", "architecture", "scenario"],
+    "stem": "Uma instituição financeira está migrando microsserviços de scoring de risco em tempo real para o Azure. A aplicação de IA consome o Azure Cosmos DB for NoSQL através do SDK mais recente e processa mais de 45.000 requisições por segundo com SLA rigoroso de latência p99 < 8 ms. Toda a infraestrutura de computação reside em uma Virtual Network que se comunica com o Cosmos DB via Private Endpoint. No entanto, o time de segurança de rede da empresa impôs restrições bloqueando a faixa de portas TCP de saída 10000 a 20000 no firewall corporativo, permitindo estritamente conexões de saída na porta HTTPS 443. Qual configuração do SDK do Cosmos DB você deve implementar para permitir a conectividade da aplicação e qual é o impacto arquitetural dessa decisão?",
+    "options": [
+      {
+        "id": "opt-gateway",
+        "text": "Configurar o cliente para utilizar o Gateway Mode (ConnectionMode.Gateway). A comunicação é tunelada exclusivamente pela porta HTTPS 443 através dos nós de gateway do Cosmos DB, eliminando a dependência da faixa TCP 10000-20000, ao custo de um salto adicional de rede (hop) e leve aumento de latência média.",
+        "correct": true,
+        "rationale": "O Gateway Mode utiliza requisições HTTPS padrão pela porta 443, passando pelos nós de gateway stateless do Cosmos DB antes de atingir as partições backend. Isso é indispensável quando firewalls corporativos restringem a faixa TCP de portas dinâmicas (10000-20000), embora adicione um salto de rede adicional em comparação ao Direct Mode."
+      },
+      {
+        "id": "opt-direct-remap",
+        "text": "Manter o Direct Mode (ConnectionMode.Direct) e alterar a porta padrão no SDK para 8443 através da classe CosmosClientOptions.",
+        "correct": false,
+        "rationale": "No Direct Mode, os clientes estabelecem conexões TCP diretas com as réplicas backend do Cosmos DB em portas dinâmicas no intervalo 10000 a 20000. O SDK não permite remapear essas portas do backend para a porta 8443."
+      },
+      {
+        "id": "opt-direct-http2",
+        "text": "Configurar o cliente com Direct Mode habilitando o protocolo HTTP/2 sobre a porta 443.",
+        "correct": false,
+        "rationale": "Direct Mode opera nativamente sobre TCP duplex direto com as partições de dados nas portas 10000-20000; ele não suporta encapsulamento em HTTP/2 na porta 443."
+      },
+      {
+        "id": "opt-service-endpoint",
+        "text": "Configurar Service Endpoints em vez de Private Endpoints para forçar o Direct Mode a utilizar a porta 443.",
+        "correct": false,
+        "rationale": "A escolha entre Service Endpoints e Private Endpoints diz respeito à rota de rede na VNet e não altera as portas de transporte do Direct Mode (TCP 10000-20000)."
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/sdk-connection-modes"
+  },
+  {
+    "id": "scenario-vector-indexing-selection",
+    "type": "single-choice",
+    "title": "Seleção de Algoritmo de Índice Vetorial no Azure Cosmos DB for NoSQL",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "advanced",
+    "language": "agnostic",
+    "tags": ["cosmos-db", "vector-search", "diskann", "quantized-flat", "flat-index", "embeddings", "scenario"],
+    "stem": "Uma empresa de comércio eletrônico está construindo um mecanismo de recomendação semântica e busca vetorial de produtos utilizando o Azure Cosmos DB for NoSQL. O catálogo contém mais de 15 milhões de itens e os embeddings gerados pelo modelo text-embedding-3-large possuem 1.536 dimensões. A aplicação exige alta taxa de transferência (throughput) de consultas vetoriais com latência p95 < 20 ms e suporte a filtros de metadados como categoria e faixa de preço. Qual tipo de índice vetorial (vectorIndexType) deve ser configurado na política de indexação do container para melhor balancear consumo de RUs, alta dimensionalidade e desempenho em larga escala?",
+    "options": [
+      {
+        "id": "opt-diskann",
+        "text": "diskANN: algoritmo de grafo vetorial desenvolvido pela Microsoft Research, otimizado para coleções com milhões de vetores de alta dimensão (> 512 dimensões), armazenando o grafo em SSD e minimizando o uso de memória RAM com altíssimo recall e baixa latência de consulta.",
+        "correct": true,
+        "rationale": "O índice DiskANN no Cosmos DB for NoSQL é especificamente projetado para vetores em larga escala (milhões de documentos) e alta dimensionalidade (até centenas/milhares de dimensões, incluindo 1.536), oferecendo excelente recall e baixa latência utilizando SSD eficientemente."
+      },
+      {
+        "id": "opt-flat",
+        "text": "flat: executa cálculo exato de k-nearest neighbors (kNN) por força bruta comparando o vetor com todos os itens do container.",
+        "correct": false,
+        "rationale": "O índice flat realiza busca exata por força bruta (kNN) e é recomendado apenas para pequenos conjuntos de dados (< 50.000 itens) ou até 505 dimensões. Para 15 milhões de documentos com 1.536 dimensões, causaria altíssimo consumo de RUs e estouraria timeouts de consulta."
+      },
+      {
+        "id": "opt-quantized-flat",
+        "text": "quantizedFlat: reduz os vetores de 1.536 dimensões aplicando quantização vetorial em memória, sendo recomendado para coleções com mais de 50 milhões de itens.",
+        "correct": false,
+        "rationale": "O quantizedFlat comprime os vetores e é adequado para tamanhos médios (geralmente até algumas centenas de milhares de itens), mas para milhões de itens de alta dimensionalidade em produção o DiskANN é a recomendação oficial superior da Microsoft para escalabilidade e desempenho em disco."
+      },
+      {
+        "id": "opt-ivfflat",
+        "text": "ivfflat: agrupa vetores em clusters voronoi invertidos dentro do motor NoSQL do Cosmos DB.",
+        "correct": false,
+        "rationale": "IVFFlat é um tipo de índice disponível na extensão pgvector do Azure Database for PostgreSQL, não sendo uma opção de índice nativa do Azure Cosmos DB for NoSQL (que suporta flat, quantizedFlat e diskANN)."
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+  },
+  {
+    "id": "scenario-aca-keyvault-managed-identity",
+    "type": "multiple-choice",
+    "select_count": 2,
+    "title": "Configuração de Referências do Key Vault com Identidade Gerenciada no Azure Container Apps",
+    "chapter": "02-container-apps",
+    "exam_domain": "containerized-solutions",
+    "difficulty": "intermediate",
+    "language": "agnostic",
+    "tags": ["container-apps", "aca", "key-vault", "key-vault-references", "managed-identity", "user-assigned", "rbac", "scenario"],
+    "stem": "Você está implantando um microsserviço de geração de texto no Azure Container Apps (ACA). O microsserviço precisa obter a chave de API de um serviço externo armazenada como segredo no Azure Key Vault (https://kv-contoso-ai.vault.azure.net/secrets/ApiKey). Para manter a conformidade com a arquitetura Zero Trust, nenhuma credencial estática deve ser embutida no contêiner ou nas variáveis de ambiente. Você criou uma Identidade Gerenciada Atribuída pelo Usuário (user-assigned managed identity) para o Container App. Quais DUAS configurações são estritamente necessárias para que o Container App consiga resolver a referência do Key Vault em tempo de execução? (Cada resposta correta apresenta parte da solução).",
+    "options": [
+      {
+        "id": "opt-rbac-role",
+        "text": "Atribuir o papel RBAC 'Key Vault Secrets User' (Usuário de Segredos do Key Vault) à Identidade Gerenciada no escopo do Azure Key Vault.",
+        "correct": true,
+        "rationale": "Para leitura de valores de segredos através do modelo de permissões RBAC do Key Vault, a identidade gerenciada da aplicação necessita da função 'Key Vault Secrets User' (Key Vault Secret Officer concede permissões desnecessárias de escrita/gerenciamento)."
+      },
+      {
+        "id": "opt-secret-ref",
+        "text": "Na seção de segredos do Container App, configurar a propriedade 'keyVaultUrl' apontando para o identificador do segredo e vincular o 'identity' com o Resource ID da identidade gerenciada atribuída pelo usuário.",
+        "correct": true,
+        "rationale": "No Azure Container Apps, segredos do tipo Key Vault Reference exigem a especificação da URL do segredo e a associação explícita da identidade gerenciada (identity) responsável por autenticar contra o Key Vault para resolver o valor."
+      },
+      {
+        "id": "opt-contributor",
+        "text": "Atribuir o papel RBAC 'Key Vault Contributor' (Colaborador do Key Vault) à Identidade Gerenciada no escopo do Key Vault.",
+        "correct": false,
+        "rationale": "A função 'Key Vault Contributor' opera no plano de gerenciamento (gerenciar o recurso de cofre) e NÃO concede permissão no plano de dados para ler o conteúdo de segredos."
+      },
+      {
+        "id": "opt-cert-mount",
+        "text": "Exportar a chave pública do certificado TLS do Key Vault e montar como volume do tipo SecretVolume no template de réplica do Container App.",
+        "correct": false,
+        "rationale": "O mecanismo de Key Vault reference do ACA resolve segredos diretamente via API de plano de dados através da identidade gerenciada; não há montagem manual de certificados TLS de cofre."
+      },
+      {
+        "id": "opt-client-secret-env",
+        "text": "Configurar a variável de ambiente pública 'AZURE_CLIENT_SECRET' com o client secret do aplicativo registrado no Microsoft Entra ID.",
+        "correct": false,
+        "rationale": "Identidades gerenciadas atribuídas pelo usuário não utilizam client secret, operando sem credenciais armazenadas na aplicação (passwordless)."
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
+  },
+  {
+    "id": "scenario-cosmos-hybrid-search-indexing",
+    "type": "multiple-choice",
+    "select_count": 2,
+    "title": "Otimização de Índices para RAG Híbrido no Azure Cosmos DB for NoSQL",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "advanced",
+    "language": "agnostic",
+    "tags": ["cosmos-db", "vector-search", "indexing-policies", "sql-queries", "embeddings", "scenario"],
+    "stem": "Uma solução de RAG no Azure Cosmos DB for NoSQL executa a seguinte consulta com alta frequência: 'SELECT c.id, c.title, VectorDistance(c.embedding, @userVector) AS score FROM c WHERE c.tenantId = @tenant AND c.isActive = true ORDER BY VectorDistance(c.embedding, @userVector)'. A equipe relata que a consulta está consumindo uma quantidade excessiva de Request Units (RU/s) e apresentando latência elevada. Quais DUAS alterações na definição do container e na política de indexação devem ser aplicadas para resolver o problema? (Cada resposta correta apresenta parte da solução).",
+    "options": [
+      {
+        "id": "opt-vector-index-def",
+        "text": "Definir um índice vetorial na propriedade '/embedding' dentro da seção 'vectorIndexes' da política de indexação e definir a política de embeddings correspondente em 'vectorEmbeddings'.",
+        "correct": true,
+        "rationale": "Para que o Cosmos DB utilize índices especializados (como DiskANN ou Flat) na ordenação por VectorDistance, o caminho do vetor deve ser declarado na política de embeddings do container e no array 'vectorIndexes' da política de indexação. Caso contrário, a busca opera em scan sequencial com alto custo de RUs."
+      },
+      {
+        "id": "opt-included-paths",
+        "text": "Assegurar que os caminhos '/tenantId/?' e '/isActive/?' estejam incluídos em 'includedPaths' para que a filtragem no WHERE ocorra via índice invertido antes do cálculo de similaridade.",
+        "correct": true,
+        "rationale": "A indexação dos campos de filtro no WHERE garante que a pré-filtragem seja executada pelo motor de índice sem varredura completa da partição, reduzindo drasticamente o consumo de RUs."
+      },
+      {
+        "id": "opt-composite-vector",
+        "text": "Criar um índice composto combinando '/tenantId' ASC, '/isActive' ASC e 'VectorDistance(c.embedding, @userVector)' ASC na seção compositeIndexes.",
+        "correct": false,
+        "rationale": "Funções de sistema dinâmicas como VectorDistance() não podem compor índices compostos estáticos no Cosmos DB."
+      },
+      {
+        "id": "opt-strong-consistency",
+        "text": "Mudar o nível de consistência da conta do Cosmos DB de Session para Strong para acelerar o cálculo do vetor.",
+        "correct": false,
+        "rationale": "O nível Strong consistency dobra o consumo de RUs em leituras e adiciona latência entre regiões; ele não acelera consultas vetoriais."
+      },
+      {
+        "id": "opt-exclude-embedding",
+        "text": "Adicionar o caminho '/embedding/*' na seção 'excludedPaths' para economizar armazenamento de índice.",
+        "correct": false,
+        "rationale": "Excluir o caminho do vetor do índice inviabiliza a busca vetorial acelerada, forçando avaliações lentas ou gerando erros de execução."
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search#indexing-policy"
+  },
+  {
+    "id": "scenario-python-cosmos-direct-parameterized",
+    "type": "code-completion",
+    "title": "Python SDK: Instanciação do CosmosClient com Direct Mode e Consulta Parametrizada",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "intermediate",
+    "language": "python",
+    "tags": ["cosmos-db", "cosmosclient", "sdk", "python", "parameterized-queries", "scenario"],
+    "stem": "Você está desenvolvendo um serviço em Python (FastAPI) hospedado em Azure Container Apps para consultar um banco de dados de conhecimento vetorial no Azure Cosmos DB for NoSQL. Para maximizar o desempenho e mitigar ataques de injeção SQL, você deve instanciar o cliente utilizando DefaultAzureCredential e configurar o modo de conexão direta ('direct'), além de executar a busca utilizando parâmetros tipados no método correto do SDK. Complete as lacunas do código Python a seguir:",
+    "code_template": "from azure.cosmos import CosmosClient, PartitionKey\nfrom azure.identity import DefaultAzureCredential\n\n# Instanciar cliente autenticado com Entra ID\nclient = CosmosClient(\n    url=\"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    credential={{slot_1}},\n    connection_mode=\"direct\"\n)\n\ndatabase = client.get_database_client(\"knowledge-repo\")\ncontainer = database.get_container_client(\"embeddings\")\n\n# Executar consulta parametrizada\nquery_text = \"SELECT c.id, c.title FROM c WHERE c.category = @cat\"\nparams = [{\"name\": \"@cat\", \"value\": \"generative-ai\"}]\n\nresults = list(container.{{slot_2}}(\n    query=query_text,\n    parameters=params,\n    enable_cross_partition_query=False\n))",
+    "slots": [
+      {
+        "id": "slot_1",
+        "options": [
+          {
+            "text": "DefaultAzureCredential()",
+            "correct": true,
+            "rationale": "DefaultAzureCredential da biblioteca azure.identity fornece autenticação segura sem credenciais estáticas no código (Managed Identity / Entra ID)."
+          },
+          {
+            "text": "AzureKeyCredential(\"master-key-secret\")",
+            "correct": false,
+            "rationale": "AzureKeyCredential é utilizado em SDKs do Azure AI Search / Cognitive Services, não no SDK Python do Cosmos DB (que recebe instâncias TokenCredential ou chaves string), além de violar a diretriz passwordless."
+          },
+          {
+            "text": "{\"client_id\": \"app-id\", \"client_secret\": \"pass\"}",
+            "correct": false,
+            "rationale": "O parâmetro credential não aceita um dicionário com credenciais em texto plano."
+          }
+        ]
+      },
+      {
+        "id": "slot_2",
+        "options": [
+          {
+            "text": "query_items",
+            "correct": true,
+            "rationale": "No SDK Python (azure.cosmos.ContainerProxy), o método oficial para executar consultas SQL parametrizadas retornando um ItemPaged iterator é query_items()."
+          },
+          {
+            "text": "execute_query",
+            "correct": false,
+            "rationale": "execute_query não é um método existente no objeto ContainerProxy do SDK Python do Cosmos DB."
+          },
+          {
+            "text": "read_all_items",
+            "correct": false,
+            "rationale": "read_all_items() lê todos os itens sem aplicar filtro SQL nem aceitar parâmetros de consulta."
+          },
+          {
+            "text": "find_items",
+            "correct": false,
+            "rationale": "find_items() não existe na API do Azure Cosmos DB for NoSQL."
+          }
+        ]
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
+  },
+  {
+    "id": "scenario-csharp-cosmos-cfp-setup",
+    "type": "code-completion",
+    "title": "C# SDK: Instanciação do CosmosClient e Configuração do Change Feed Processor",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "advanced",
+    "language": "csharp",
+    "tags": ["cosmos-db", "cosmosclient", "change-feed", "change-feed-processor", "sdk", "csharp", "leases", "scenario"],
+    "stem": "Você está desenvolvendo um worker de background em .NET 8 (C#) para escutar novos documentos inseridos no Cosmos DB e gerar embeddings assincronamente com o Azure OpenAI. A aplicação precisa configurar o modo de conexão de alta performance no CosmosClientOptions e construir o Change Feed Processor vinculando o delegate processador e o container de leases. Complete as lacunas do código C# a seguir:",
+    "code_template": "using System;\nusing System.Threading.Tasks;\nusing Microsoft.Azure.Cosmos;\nusing Azure.Identity;\n\nCosmosClient client = new CosmosClient(\n    accountEndpoint: \"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    tokenCredential: new DefaultAzureCredential(),\n    clientOptions: new CosmosClientOptions\n    {\n        ConnectionMode = {{slot_1}}\n    }\n);\n\nContainer sourceContainer = client.GetContainer(\"AIEngineDb\", \"RawArticles\");\nContainer leaseContainer = client.GetContainer(\"AIEngineDb\", \"leases\");\n\nChangeFeedProcessor processor = sourceContainer\n    .{{slot_2}}(\"EmbeddingWorker\", HandleChangesAsync)\n    .WithInstanceName(Environment.MachineName)\n    .WithLeaseContainer(leaseContainer)\n    .Build();\n\nawait processor.StartAsync();",
+    "slots": [
+      {
+        "id": "slot_1",
+        "options": [
+          {
+            "text": "ConnectionMode.Direct",
+            "correct": true,
+            "rationale": "ConnectionMode.Direct é o modo de conexão recomendado para máxima performance e baixa latência no SDK .NET v3, comunicando-se diretamente via TCP com as réplicas."
+          },
+          {
+            "text": "ConnectionMode.Gateway",
+            "correct": false,
+            "rationale": "ConnectionMode.Gateway utiliza HTTPS porta 443 através de nós intermediários, apresentando maior latência que o Direct Mode e não sendo a escolha padrão de alto desempenho."
+          },
+          {
+            "text": "ConnectionMode.Rest",
+            "correct": false,
+            "rationale": "ConnectionMode.Rest não existe no enum ConnectionMode do SDK Microsoft.Azure.Cosmos v3."
+          }
+        ]
+      },
+      {
+        "id": "slot_2",
+        "options": [
+          {
+            "text": "GetChangeFeedProcessorBuilder<ArticleDocument>",
+            "correct": true,
+            "rationale": "No SDK .NET v3, o método chamado no container de origem para inicializar a criação do Change Feed Processor é GetChangeFeedProcessorBuilder<T>(string processorName, ChangesDelegate<T> onChangesDelegate)."
+          },
+          {
+            "text": "CreateChangeFeedObserver<ArticleDocument>",
+            "correct": false,
+            "rationale": "ChangeFeedObserver fazia parte do SDK legado v2 e não é o método builder do SDK .NET v3."
+          },
+          {
+            "text": "GetFeedIterator<ArticleDocument>",
+            "correct": false,
+            "rationale": "GetFeedIterator é utilizado para iterar resultados de consultas ou pull model do change feed, não para criar o Change Feed Processor distribuído push-based."
+          },
+          {
+            "text": "BuildChangeFeedStream",
+            "correct": false,
+            "rationale": "BuildChangeFeedStream não é um método do objeto Container do SDK."
+          }
+        ]
+      }
+    ],
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+  },
+  {
+    "id": "scenario-ordering-change-feed-processor",
+    "type": "ordering",
+    "title": "Sequência de Configuração e Inicialização do Change Feed Processor",
+    "chapter": "04-cosmos-db-nosql",
+    "exam_domain": "data-management",
+    "difficulty": "intermediate",
+    "language": "agnostic",
+    "tags": ["cosmos-db", "change-feed", "change-feed-processor", "leases", "delegates", "architecture", "scenario"],
+    "stem": "Você precisa implementar o Change Feed Processor do Azure Cosmos DB for NoSQL para processar alterações em uma coleção de documentos e atualizar um índice semântico. Ordene as etapas abaixo na sequência cronológica e lógica correta de implementação segundo o SDK:",
+    "items": [
+      {
+        "id": "step_lease_container",
+        "text": "Criar ou assegurar a existência do container de leases (leasestore) com a chave de partição obrigatória definida como '/id'.",
+        "order": 1
+      },
+      {
+        "id": "step_client_refs",
+        "text": "Instanciar o CosmosClient com DefaultAzureCredential e obter as referências dos containers monitorado e de leases.",
+        "order": 2
+      },
+      {
+        "id": "step_builder_delegate",
+        "text": "Invocar GetChangeFeedProcessorBuilder no container monitorado, informando o nome do processador e a função delegate que processará o lote de itens.",
+        "order": 3
+      },
+      {
+        "id": "step_configure_leases",
+        "text": "Configurar a instância chamando .WithInstanceName(...) e .WithLeaseContainer(leaseContainer) no builder.",
+        "order": 4
+      },
+      {
+        "id": "step_build_start",
+        "text": "Construir o objeto invocando .Build() e iniciar a escuta concorrente de partições chamando .StartAsync().",
+        "order": 5
+      }
+    ],
+    "rationale": "A sequência correta inicia com a existência do container de leases particionado por /id, seguido da obtenção das referências aos containers, configuração do builder com delegate e container de leases, construção do processador e inicialização assíncrona.",
+    "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+  },
+  {
+    "id": "scenario-ordering-aca-keda-servicebus",
+    "type": "ordering",
+    "title": "Sequência de Implantação de Container App Orientado a Eventos com KEDA",
+    "chapter": "02-container-apps",
+    "exam_domain": "containerized-solutions",
+    "difficulty": "intermediate",
+    "language": "agnostic",
+    "tags": ["container-apps", "aca", "keda", "service-bus", "queues", "autoscaling", "architecture", "scenario"],
+    "stem": "Você precisa implantar um microsserviço de transcrição de áudio em contêiner no Azure Container Apps com capacidade de 'scale-to-zero' e escalonamento automático baseado no tamanho de uma fila do Azure Service Bus. Ordene as etapas necessárias na sequência correta de provisionamento:",
+    "items": [
+      {
+        "id": "step_sb_queue",
+        "text": "Criar o namespace do Azure Service Bus e a fila de processamento de transcrições.",
+        "order": 1
+      },
+      {
+        "id": "step_managed_id_rbac",
+        "text": "Criar uma Identidade Gerenciada Atribuída pelo Usuário e conceder o papel 'Azure Service Bus Data Receiver' no escopo da fila.",
+        "order": 2
+      },
+      {
+        "id": "step_aca_env",
+        "text": "Criar o Azure Container Apps Environment vinculado a um workspace do Log Analytics.",
+        "order": 3
+      },
+      {
+        "id": "step_deploy_app",
+        "text": "Implantar o Azure Container App associando a Identidade Gerenciada para autenticação passwordless.",
+        "order": 4
+      },
+      {
+        "id": "step_keda_rule",
+        "text": "Adicionar a regra de escala personalizada KEDA do tipo 'azure-servicebus' definindo 'messageCount', minReplicas=0 e maxReplicas=10.",
+        "order": 5
+      }
+    ],
+    "rationale": "A infraestrutura de mensageria e controle de acesso (fila e identidade gerenciada com permissão RBAC) deve ser provisionada antes do ambiente Container Apps, seguida da criação do app com a identidade e da configuração do scaler KEDA para a fila.",
+    "learn_url": "https://learn.microsoft.com/azure/container-apps/scale-app?pivots=azure-resource-manager#azure-service-bus"
+  }
+]
