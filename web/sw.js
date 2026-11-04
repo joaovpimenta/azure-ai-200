@@ -3,7 +3,7 @@
  * Versioned Offline Cache with Stale-While-Revalidate and Network-First routing.
  */
 
-const CACHE_NAME = 'azure-ai-200-cache-v1';
+const CACHE_NAME = 'azure-ai-200-cache-v2';
 
 // Core assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -27,7 +27,12 @@ const PRECACHE_ASSETS = [
   './cram/index.html',
   './simulator/index.html',
   './mastery/index.html',
-  './favicon.ico'
+  './favicon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png',
+  './apple-touch-icon.png'
 ];
 
 // 1. Install Event: Pre-cache core shell and data
