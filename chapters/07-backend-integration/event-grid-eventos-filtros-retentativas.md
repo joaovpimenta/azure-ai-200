@@ -10,8 +10,9 @@ tags:
   - event-retries
   - dead-lettering
 difficulty: intermediate
-tldr: Event Grid distribui notificações de fatos ocorridos, com filtros e entrega pelo menos uma
-  vez. Trate duplicados, valide o endpoint e configure dead-letter para eventos não entregues.
+tldr: Event Grid notifica acontecimentos e filtra eventos por assinatura. Pode
+  entregar duplicados e fora de ordem. Configure retentativas e armazenamento de
+  eventos não entregues; o consumidor deve tolerar repetição.
 related_links:
   - label: Conceitos do Event Grid
     url: https://learn.microsoft.com/en-us/azure/event-grid/concepts
@@ -27,8 +28,8 @@ questions:
     type: single-choice
     title: "Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter"
     exam_domain: connect-and-consume
-    stem: O assinante recebe um evento repetido e depois um evento de versão anterior. Como deve
-      processá-los?
+    stem: O assinante recebe um evento repetido e depois um evento de versão
+      anterior. Como deve processá-los?
     options:
       - id: opt-2
         text: Aplicar sempre a última mensagem recebida como estado mais recente.
@@ -56,11 +57,12 @@ questions:
       - event-filters
       - event-retries
       - dead-lettering
+    learn_url: https://learn.microsoft.com/en-us/azure/event-grid/concepts
 ---
 
 # Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter
 
-Quando um arquivo chega ao armazenamento, Event Grid pode notificar a função que inicia a ingestão. O evento comunica um fato, como documento criado; uma fila de trabalho pode ser adicionada para controlar processamento demorado e backlog.
+Event Grid distribui notificações de acontecimentos, como a criação de um arquivo. Uma assinatura escolhe quais eventos receber e para onde enviá-los. Para trabalho demorado, a notificação pode iniciar um processamento em fila.
 
 ## Publicação, assinatura e filtro
 
@@ -105,9 +107,9 @@ O corpo deve conter identificadores e informações suficientes para buscar o re
 
 ## Entrega, validação e recuperação
 
-Event Grid oferece entrega ==at-least-once==; duplicação e ordem diferente são possíveis. O handler deve reconhecer eventos já tratados e tolerar a chegada de uma versão antiga. Um evento aceito pelo publicador não comprova conclusão do trabalho no assinante.
+Event Grid oferece entrega ==at-least-once== (pelo menos uma vez); duplicação e ordem diferente são possíveis. O handler deve reconhecer eventos já tratados e tolerar a chegada de uma versão antiga. Um evento aceito pelo publicador não comprova conclusão do trabalho no assinante.
 
-Para webhooks, implemente o handshake de validação do esquema/protocolo utilizado. Configure política de retry e ==dead-letter== em Blob Storage, com autorização para gravar no destino. Retentativas dependem do erro retornado e dos limites de tentativas/TTL; nem todo HTTP 4xx recebe o mesmo tratamento.
+Para webhooks, implemente o handshake de validação do esquema/protocolo utilizado. Configure retentativas e ==dead-letter== (armazenamento de eventos não entregues) em Blob Storage, com autorização para gravar no destino. Retentativas dependem do erro retornado e dos limites de tentativas/TTL; nem todo HTTP 4xx recebe o mesmo tratamento.
 
 <details>
 <summary>Checagem Rápida: Event Grid entrega todos os eventos em ordem de publicação?</summary>
@@ -120,6 +122,6 @@ Para trabalho longo, grave ou enfileire de forma durável antes de reconhecer a 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Evento é comando com conclusão garantida**: A notificação desacopla produtor e consumidor; conclusão requer rastreamento próprio.
-- **Pegadinha 2: Retry é infinito**: Tentativas e TTL limitam a entrega; prepare recuperação.
-- **Pegadinha 3: Dead-letter existe sem configurar**: É necessário definir e autorizar o armazenamento de destino.
+- **Evento é comando com conclusão garantida**: A notificação desacopla produtor e consumidor; conclusão requer rastreamento próprio.
+- **Retry é infinito**: Tentativas e TTL limitam a entrega; prepare recuperação.
+- **Dead-letter existe sem configurar**: É necessário definir e autorizar o armazenamento de destino.

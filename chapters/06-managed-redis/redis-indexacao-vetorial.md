@@ -11,9 +11,9 @@ tags:
   - flat-redis
   - semantic-cache
 difficulty: intermediate
-tldr: FT.CREATE define campos vetoriais, dimensão, tipo e distância; FT.SEARCH consulta vetores
-  binários compatíveis. Cache semântico exige limiar validado e isolamento por tenant, modelo e
-  versão.
+tldr: Redis pode buscar vetores com FLAT ou HNSW. Confira tipo binário e
+  dimensão. No cache semântico, aplique autorização, limite de distância e
+  validade antes de reutilizar uma resposta.
 related_links:
   - label: Busca vetorial no Azure Managed Redis
     url: https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity
@@ -23,8 +23,8 @@ questions:
     type: single-choice
     title: Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico
     exam_domain: data-management
-    stem: FT.CREATE define vetor FLOAT32 com dimensão 3 em hashes. Qual representação deve ser enviada
-      no campo vetorial?
+    stem: FT.CREATE define vetor FLOAT32 com dimensão 3 em hashes. Qual
+      representação deve ser enviada no campo vetorial?
     options:
       - id: opt-3
         text: Um vetor de outra dimensão porque KNN ajusta automaticamente.
@@ -37,7 +37,8 @@ questions:
         rationale: Metadados de tenant e vetor têm funções e campos distintos.
         learn_url: https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity
       - id: opt-1
-        text: Um blob binário de três componentes FLOAT32 com representação compatível.
+        text: Um bloco de 12 bytes com três componentes FLOAT32 com representação
+          compatível.
         correct: true
         rationale: Tipo, dimensão e codificação precisam coincidir com o índice.
         learn_url: https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity
@@ -53,17 +54,18 @@ questions:
       - hnsw-redis
       - flat-redis
       - semantic-cache
+    learn_url: https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity
 ---
 
 # Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico
 
-Cache semântico reutiliza uma resposta para uma pergunta próxima em significado. A decisão não é a igualdade de strings: a aplicação gera um embedding, busca vizinhos e aceita um candidato somente quando passa por filtros e por um limiar avaliado.
+Cache semântico busca perguntas com significado parecido para reutilizar uma resposta. A aplicação compara embeddings, mas só aceita um resultado se ele estiver autorizado, atualizado e próximo o suficiente. O vizinho mais próximo pode não ser uma boa resposta.
 
 ## Índice e contrato binário
 
 O índice associa metadados e vetores armazenados em hashes ou JSON, conforme a capacidade habilitada no serviço. Para hashes, ==FLOAT32== exige quatro bytes por componente. Dimensão, representação e ordem de bytes devem corresponder ao índice e à arquitetura do cliente.
 
-`FLAT` faz comparação exaustiva; ==HNSW== usa grafo aproximado, normalmente com melhor escala e maior custo de memória. Meça recall e latência antes de escolher.
+`FLAT` faz comparação exaustiva; ==HNSW== usa grafo aproximado, normalmente com melhor escala e maior custo de memória. Compare a cobertura dos resultados (recall) e a latência antes de escolher.
 
 Com suporte a busca habilitado, crie o índice uma vez, por migração, não a cada requisição. No console Redis:
 
@@ -130,6 +132,6 @@ Não. Ele pode estar distante, desatualizado ou corresponder a outro contexto. A
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Lista textual é FLOAT32 binário**: O índice de hash exige bytes com dimensão e tipo compatíveis.
-- **Pegadinha 2: Distância maior é melhor**: Com distância cosseno, valores menores indicam maior proximidade.
-- **Pegadinha 3: Similaridade autoriza acesso**: Filtre tenant e escopo antes de reutilizar a resposta; mantenha TTL e versão da fonte.
+- **Lista textual é FLOAT32 binário**: O índice de hash exige bytes com dimensão e tipo compatíveis.
+- **Distância maior é melhor**: Com distância cosseno, valores menores indicam maior proximidade.
+- **Similaridade autoriza acesso**: Filtre tenant e escopo antes de reutilizar a resposta; mantenha TTL e versão da fonte.

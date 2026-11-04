@@ -1,5 +1,6 @@
 ---
-title: "Contêineres no App Service: porta, startup, app settings e Key Vault references"
+title: "Contêineres no App Service: porta, startup, app settings e Key Vault
+  references"
 slug: app-service-conteineres-configuracao
 chapter: 01-container-hosting
 exam_domain: containerized-solutions
@@ -11,9 +12,9 @@ tags:
   - app-settings
   - key-vault-references
 difficulty: intermediate
-tldr: No App Service Linux, alinhe a porta configurada com a porta real do processo, use identidade
-  gerenciada para o ACR e injete segredos por Key Vault references. Diferencie o modelo clássico do
-  modelo com sidecars.
+tldr: O servidor deve escutar em 0.0.0.0 na porta configurada. Use WEBSITES_PORT
+  no modelo clássico e targetPort com sidecars. Acesso ao ACR e ao Key Vault
+  exige permissões próprias.
 related_links:
   - label: Contêiner personalizado no App Service
     url: https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container
@@ -24,26 +25,27 @@ related_links:
 questions:
   - id: q-app-service-conteineres-configuracao-01
     type: single-choice
-    title: "Contêineres no App Service: porta, startup, app settings e Key Vault references"
+    title: "Contêineres no App Service: porta, startup, app settings e Key Vault
+      references"
     exam_domain: containerized-solutions
-    stem: Um App Service Linux no modelo clássico roteia para 8000, mas o servidor escuta apenas em
-      localhost:8000. O que deve ser corrigido?
+    stem: Um App Service Linux no modelo clássico roteia para 8000, mas o servidor
+      escuta apenas em localhost:8000. O que deve ser corrigido?
     options:
       - id: opt-3
         text: Dar Key Vault Contributor à aplicação.
         correct: false
-        rationale: A permissão no cofre não corrige o socket HTTP.
+        rationale: A permissão no cofre não corrige o endereço de escuta HTTP.
         learn_url: https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container
       - id: opt-4
         text: Trocar a tag da imagem para latest.
         correct: false
-        rationale: O nome da tag não modifica o binding de rede do servidor.
+        rationale: O nome da tag não modifica o endereço de escuta do servidor.
         learn_url: https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container
       - id: opt-1
         text: Iniciar o servidor em 0.0.0.0:8000.
         correct: true
-        rationale: A plataforma precisa alcançar o processo pela interface do contêiner, além da porta
-          correta.
+        rationale: A plataforma precisa alcançar o processo pela interface do contêiner,
+          além da porta correta.
         learn_url: https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container
       - id: opt-2
         text: Adicionar somente EXPOSE 8000 ao Dockerfile.
@@ -57,11 +59,12 @@ questions:
       - startup-command
       - app-settings
       - key-vault-references
+    learn_url: https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container
 ---
 
 # Contêineres no App Service: porta, startup, app settings e Key Vault references
 
-O App Service hospeda uma API de IA em contêiner quando a equipe quer recursos de plataforma web, como domínio, TLS e slots, sem administrar Kubernetes. A imagem deve conter o runtime e iniciar um servidor HTTP acessível pela plataforma.
+O App Service executa aplicações web em contêiner sem exigir administração de Kubernetes. A imagem precisa iniciar um servidor HTTP que a plataforma consiga alcançar. Os primeiros pontos a conferir são endereço de escuta, porta e comando de inicialização.
 
 ## Porta, processo e modelo de configuração
 
@@ -106,6 +109,6 @@ Use slots, quando disponíveis no plano, para validar a nova imagem antes do swa
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: EXPOSE configura o servidor**: A instrução documenta a porta; não inicia processo nem corrige o endereço de escuta.
-- **Pegadinha 2: Contributor lê segredos**: Acesso ao plano de gerenciamento não concede leitura do valor no Key Vault.
-- **Pegadinha 3: Mesmo ajuste para sidecars**: `WEBSITES_PORT` pertence ao fluxo clássico; no modelo com sidecars confira `targetPort`.
+- **EXPOSE configura o servidor**: A instrução documenta a porta; não inicia processo nem corrige o endereço de escuta.
+- **Contributor lê segredos**: Acesso ao plano de gerenciamento não concede leitura do valor no Key Vault.
+- **Mesmo ajuste para sidecars**: `WEBSITES_PORT` pertence ao fluxo clássico; no modelo com sidecars confira `targetPort`.

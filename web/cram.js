@@ -3,6 +3,13 @@
  * High-density Cram Sheet view: TL;DRs, aggregated "Pegadinhas de Prova", and comparative decision matrices.
  */
 
+const domainLabels = {
+  'containerized-solutions': 'Contêineres',
+  'data-management': 'Dados e IA',
+  'connect-and-consume': 'Conexão e eventos',
+  'secure-monitor-troubleshoot': 'Segurança e monitoramento',
+};
+
 export function renderCramView(container, { cramIndex, catalog }) {
   const metaBase = typeof document !== 'undefined' ? document.querySelector('meta[name="site-base"]')?.getAttribute('content') : './';
   const basePrefix = metaBase ? (metaBase.endsWith('/') ? metaBase : `${metaBase}/`) : './';
@@ -10,9 +17,9 @@ export function renderCramView(container, { cramIndex, catalog }) {
     <header class="concept-header">
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h1>Cram Sheet de Alta Densidade (Véspera de Prova)</h1>
+          <h1>Revisão rápida (Cram)</h1>
           <p style="color: var(--text-secondary); margin-top: 4px;">
-            Síntese executiva dos tópicos mais cobrados, matrizes comparativas e armadilhas recorrentes do AI-200.
+            Leia o resumo, tente explicar o conceito sem olhar e confira os erros comuns. Use o filtro para revisar um domínio por vez.
           </p>
         </div>
         <button id="print-cram-btn" class="recall-toggle-btn">🖨️ Imprimir / Salvar PDF</button>
@@ -29,38 +36,38 @@ export function renderCramView(container, { cramIndex, catalog }) {
     </header>
 
     <div id="cram-content-area">
-      <!-- Section 1: Aggregated Pegadinhas de Prova -->
-      <section style="margin-bottom: 36px;">
-        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-          ⚠️ Pegadinhas de Prova & Armadilhas Recorrentes
-        </h2>
-        <div id="cram-pegadinhas-container" style="display: flex; flex-direction: column; gap: 16px;">
-          ${renderPegadinhasItems(cramIndex || [])}
-        </div>
-      </section>
-
-      <!-- Section 2: Executive TL;DRs -->
+      <!-- Resumos -->
       <section style="margin-bottom: 36px;">
         <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">
-          📌 Resumos Executivos (TL;DR por Conceito)
+          📌 O essencial de cada conceito
         </h2>
         <div id="cram-tldr-container" class="mastery-grid">
           ${renderTldrItems(cramIndex || [])}
         </div>
       </section>
 
-      <!-- Section 3: Comparative Matrices -->
+      <!-- Pegadinhas -->
+      <section style="margin-bottom: 36px;">
+        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          ⚠️ Erros comuns e pegadinhas
+        </h2>
+        <div id="cram-pegadinhas-container" style="display: flex; flex-direction: column; gap: 16px;">
+          ${renderPegadinhasItems(cramIndex || [])}
+        </div>
+      </section>
+
+      <!-- Comparação -->
       <section>
         <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">
-          ⚖️ Matrizes Comparativas de Decisão
+          ⚖️ Comparar serviços
         </h2>
         <div class="domain-readiness-card">
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <h3 style="font-size: 16px;">Vector Stores no Azure: Cosmos DB vs PostgreSQL vs Redis</h3>
-            <a href="${basePrefix}comparisons/vector-stores-azure/index.html" class="nav-link" style="font-weight: 600;">Ver Matriz Completa →</a>
+            <h3 style="font-size: 16px;">Bancos vetoriais: Cosmos DB, PostgreSQL e Redis</h3>
+            <a href="${basePrefix}comparisons/vector-stores-azure/index.html" class="nav-link" style="font-weight: 600;">Ver comparação →</a>
           </div>
           <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 8px;">
-            Regra de Ouro da Prova: Use <strong>Azure Cosmos DB NoSQL</strong> para cargas multi-modelo globais com documentos JSON; use <strong>PostgreSQL pgvector</strong> para queries híbridas relacionais complexas (ACID + SQL); use <strong>Azure Managed Redis</strong> para cache de baixa latência em memória e sessões vetoriais ultrarrápidas.
+            Considere <strong>Cosmos DB</strong> para documentos JSON distribuídos, <strong>PostgreSQL com pgvector</strong> para vetores com relações SQL e <strong>Redis</strong> para cache em memória. Valide latência, qualidade dos resultados e custo com os dados reais.
           </p>
         </div>
       </section>
@@ -94,10 +101,10 @@ function renderPegadinhasItems(items, filterDomain = 'all') {
     <div class="pegadinhas-box" data-domain="${item.exam_domain || ''}">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
         <span style="font-size: 13px; font-weight: 700; color: #92400e;">${item.title}</span>
-        <span class="badge badge-domain">${item.exam_domain || 'Geral'}</span>
+        <span class="badge badge-domain">${domainLabels[item.exam_domain] || 'Geral'}</span>
       </div>
       <div>
-        ${item.pegadinhasHtml || item.pegadinhas || 'Revise a consistência de dados e consumo de RUs.'}
+        ${item.pegadinhasHtml || item.pegadinhas || 'Consulte o artigo para revisar este conceito.'}
       </div>
     </div>
   `).join('');
@@ -111,7 +118,7 @@ function renderTldrItems(items, filterDomain = 'all') {
 
   return filtered.map(item => `
     <div class="domain-readiness-card" data-domain="${item.exam_domain || ''}">
-      <span class="badge badge-domain">${item.exam_domain || 'Geral'}</span>
+      <span class="badge badge-domain">${domainLabels[item.exam_domain] || 'Geral'}</span>
       <h3 style="font-size: 15px; margin: 8px 0 4px 0;">${item.title}</h3>
       <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
         ${item.tldr || 'Resumo em consolidação.'}

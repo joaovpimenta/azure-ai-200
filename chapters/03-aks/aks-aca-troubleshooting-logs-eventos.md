@@ -11,9 +11,9 @@ tags:
   - container-apps
   - troubleshooting
 difficulty: intermediate
-tldr: Logs explicam o processo; eventos e estado explicam scheduling, pull, probes e reinícios.
-  Compare a revisão ou rollout com a última versão saudável e teste conectividade de dentro da
-  carga.
+tldr: Comece pelo estado e pelos eventos. Use logs --previous para investigar um
+  contêiner reiniciado. Confira imagem, permissões, portas e rede antes de
+  aumentar réplicas.
 related_links:
   - label: Diagnóstico básico de AKS
     url: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes
@@ -26,8 +26,8 @@ questions:
     type: single-choice
     title: "Troubleshooting: kubectl logs/describe/events e logs do Container Apps"
     exam_domain: containerized-solutions
-    stem: Um Pod reinicia continuamente e os logs atuais não mostram a falha anterior. Qual comando
-      ajuda a recuperar essa evidência?
+    stem: Um Pod reinicia continuamente e os logs atuais não mostram a falha
+      anterior. Qual comando ajuda a recuperar essa evidência?
     options:
       - id: opt-3
         text: Excluir o Deployment antes de coletar dados.
@@ -37,12 +37,13 @@ questions:
       - id: opt-4
         text: Aumentar réplicas imediatamente.
         correct: false
-        rationale: Todas podem repetir o mesmo defeito de inicialização.
+        rationale: Todas podem repetir o mesma falha ao iniciar.
         learn_url: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes
       - id: opt-1
         text: kubectl logs POD -c CONTAINER --previous no namespace correto.
         correct: true
-        rationale: O comando consulta logs da instância anterior do contêiner, quando disponíveis.
+        rationale: O comando consulta logs da instância anterior do contêiner, quando
+          disponíveis.
         learn_url: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes
       - id: opt-2
         text: kubectl get namespaces como única investigação.
@@ -56,11 +57,12 @@ questions:
       - k8s-events
       - container-apps
       - troubleshooting
+    learn_url: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes
 ---
 
 # Troubleshooting: kubectl logs/describe/events e logs do Container Apps
 
-Após publicar uma imagem, a API deixa de responder. Antes de aumentar réplicas, determine se a falha ocorre no provisionamento, no processo ou no caminho da requisição. Logs de aplicação sozinhos não mostram todos os problemas da plataforma.
+Após uma implantação, a API deixa de responder. Primeiro descubra se a imagem não foi baixada, se o processo encerrou ou se o tráfego não chega até ele. Logs mostram o que a aplicação registrou; eventos mostram ações e falhas da plataforma.
 
 ## Sequência de investigação no AKS
 
@@ -105,7 +107,7 @@ Logs de sistema ajudam a explicar provisionamento, pull e escala; logs de consol
 
 ## Conectividade e mitigação
 
-Teste DNS, porta e TLS a partir da workload. Diferencie timeout de rede, 401 de autenticação, 403 de autorização e 429 de throttling. Um endpoint acessível do notebook não comprova acesso pela rede do cluster.
+Teste DNS, porta e TLS a partir da aplicação. Diferencie timeout de rede, 401 de autenticação, 403 de autorização e 429 de throttling. Um endpoint acessível do notebook não comprova acesso pela rede do cluster.
 
 <details>
 <summary>Checagem Rápida: CrashLoopBackOff identifica a causa raiz?</summary>
@@ -114,10 +116,10 @@ Não. É o recuo entre reinícios repetidos. Logs, estado de término e eventos 
 
 </details>
 
-Se a regressão coincide com um deploy, mitigue com rollback ou redirecionamento de tráfego enquanto preserva as evidências. Depois valide pelo caminho real do usuário e acompanhe erros e latência.
+Se a rsaída de redeão coincide com um deploy, mitigue com rollback ou redirecionamento de tráfego enquanto preserva as evidências. Depois valide pelo caminho real do usuário e acompanhe erros e latência.
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Mais réplicas corrigem imagem inválida**: Todas falharão ao baixar ou iniciar a mesma imagem.
-- **Pegadinha 2: Só há um contêiner por Pod**: Selecione `-c` para examinar o processo correto.
-- **Pegadinha 3: Logs de console mostram tudo**: Falhas anteriores à inicialização aparecem principalmente nos eventos e logs de plataforma.
+- **Mais réplicas corrigem imagem inválida**: Todas falharão ao baixar ou iniciar a mesma imagem.
+- **Só há um contêiner por Pod**: Selecione `-c` para examinar o processo correto.
+- **Logs de console mostram tudo**: Falhas anteriores à inicialização aparecem principalmente nos eventos e logs de plataforma.

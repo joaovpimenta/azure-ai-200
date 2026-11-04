@@ -10,9 +10,9 @@ tags:
   - scale-to-zero
   - service-bus
 difficulty: intermediate
-tldr: Escaladores HTTP/TCP respondem à carga de entrada; regras KEDA respondem a métricas como
-  mensagens pendentes. Scale to zero requer um gatilho capaz de reativar a aplicação e não elimina
-  limites do serviço dependente.
+tldr: HTTP/TCP escalam por carga de entrada; KEDA pode escalar por mensagens na
+  fila. Para voltar de zero réplicas, use um sinal externo com autorização
+  válida. Respeite a capacidade das dependências.
 related_links:
   - label: Escala no Container Apps
     url: https://learn.microsoft.com/en-us/azure/container-apps/scale-app
@@ -22,8 +22,8 @@ questions:
     type: single-choice
     title: Regras de escala HTTP, TCP e KEDA (scale to zero)
     exam_domain: containerized-solutions
-    stem: Um worker deve escalar a zero quando ocioso e acordar quando chegam mensagens. Qual sinal é
-      adequado?
+    stem: Um worker deve escalar a zero quando ocioso e acordar quando chegam
+      mensagens. Qual sinal é adequado?
     options:
       - id: opt-3
         text: Somente maxReplicas maior que zero.
@@ -33,7 +33,8 @@ questions:
       - id: opt-4
         text: Um endpoint HTTP desabilitado sem regra externa.
         correct: false
-        rationale: Sem um sinal capaz de ativar a aplicação, novas mensagens não determinam escala.
+        rationale: Sem um sinal capaz de ativar a aplicação, novas mensagens não
+          determinam escala.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/scale-app
       - id: opt-1
         text: Uma regra KEDA de fila com autenticação e permissões válidas.
@@ -51,11 +52,12 @@ questions:
       - autoscaling
       - scale-to-zero
       - service-bus
+    learn_url: https://learn.microsoft.com/en-us/azure/container-apps/scale-app
 ---
 
 # Regras de escala HTTP, TCP e KEDA (scale to zero)
 
-No processamento de embeddings, escalar por CPU pode reagir tarde: workers passam boa parte do tempo aguardando rede. O Container Apps usa ==KEDA== para ajustar réplicas a sinais como profundidade de fila e permite regras HTTP e TCP para serviços de entrada.
+Escalar significa aumentar ou reduzir o número de cópias da aplicação, chamadas réplicas. O Container Apps usa ==KEDA== para reagir a sinais externos, como mensagens pendentes. Para um worker que espera chamadas de IA, o tamanho da fila costuma ser mais útil que o uso de CPU.
 
 ## Escolher o sinal
 
@@ -97,9 +99,9 @@ az containerapp update --name api-ai200 --resource-group rg-ai200 \
 
 ## Dimensionar sem transferir o gargalo
 
-Relacione duração por mensagem, concorrência por worker e quota do modelo. Aumentar réplicas pode saturar o banco, o pool de conexões ou o limite de tokens do provedor de IA. Defina timeouts, idempotência e tratamento de 429 antes de elevar o teto.
+Relacione duração por mensagem, concorrência por worker e quota do modelo. Aumentar réplicas pode saturar o banco, o pool de conexões ou o limite de tokens do provedor de IA. Defina limites de espera, operações que tolerem repetição (idempotência) e tratamento de 429 antes de elevar o teto.
 
-Cold start inclui alocação, pull e inicialização do modelo. Use piso maior que zero quando a primeira resposta tem requisito de latência; isso mantém consumo mesmo sem requisições. O piso também não elimina indisponibilidade durante falhas.
+Cold start é o tempo para iniciar uma réplica: alocar recursos, baixar a imagem e carregar o modelo. Use piso maior que zero quando a primeira resposta tem requisito de latência; isso mantém consumo mesmo sem requisições. O piso também não elimina indisponibilidade durante falhas.
 
 <details>
 <summary>Checagem Rápida: Uma regra correta com credencial expirada consegue acordar um worker?</summary>
@@ -110,6 +112,6 @@ Não. O escalador precisa consultar a origem da métrica. Valide autorização e
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: CPU acorda réplicas inexistentes**: Use um sinal externo para reativação a partir de zero.
-- **Pegadinha 2: Dez réplicas garantem dez vezes mais throughput**: Dependências e quotas podem impedir o ganho.
-- **Pegadinha 3: Escala é configuração global sem revisão**: As regras estão no template; alterá-las gera revisão.
+- **CPU acorda réplicas inexistentes**: Use um sinal externo para reativação a partir de zero.
+- **Dez réplicas garantem dez vezes mais throughput**: Dependências e quotas podem impedir o ganho.
+- **Escala é configuração global sem revisão**: As regras estão no template; alterá-las gera revisão.

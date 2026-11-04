@@ -9,9 +9,9 @@ tags:
   - cloud-build
   - image-versioning
 difficulty: intermediate
-tldr: ACR Tasks constrói imagens sem Docker local e automatiza etapas por commit, agenda ou
-  atualização de imagem base. Separe o build da promoção para produção e preserve a identidade do
-  artefato.
+tldr: Use az acr build para construir e publicar sem Docker local. Tarefas
+  persistentes podem reagir a código, agenda ou imagem base. Teste antes de
+  implantar.
 related_links:
   - label: ACR Tasks
     url: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview
@@ -24,8 +24,8 @@ questions:
     type: single-choice
     title: "ACR Tasks: builds rápidos, multi-step e gatilhos"
     exam_domain: containerized-solutions
-    stem: Uma equipe tem Dockerfile e código local, mas não pode instalar Docker na estação. Qual
-      comando permite construir e publicar a imagem no ACR?
+    stem: Uma equipe tem Dockerfile e código local, mas não pode instalar Docker na
+      estação. Qual comando permite construir e publicar a imagem no ACR?
     options:
       - id: opt-2
         text: Executar docker build sem daemon local.
@@ -52,11 +52,12 @@ questions:
       - acr-tasks
       - cloud-build
       - image-versioning
+    learn_url: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview
 ---
 
 # ACR Tasks: builds rápidos, multi-step e gatilhos
 
-O pipeline de uma aplicação RAG precisa atualizar bibliotecas e imagens base sem depender da estação do desenvolvedor. ACR Tasks executa builds e workflows no Azure, mantendo o Dockerfile e a definição da tarefa versionados junto à aplicação.
+ACR Tasks constrói imagens no Azure a partir do Dockerfile, o arquivo que descreve como montar o contêiner. Você pode iniciar uma execução manual ou configurar gatilhos, como uma alteração de código. Construir e publicar a imagem não atualiza a aplicação automaticamente.
 
 ## Build rápido e tarefa persistente
 
@@ -112,6 +113,6 @@ A identidade que dispara a tarefa precisa das permissões de execução; acesso 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Build remoto exige Docker local**: A execução ocorre no ACR; o contexto e o Dockerfile são suficientes para o quick build.
-- **Pegadinha 2: Novo build significa aplicação atualizada**: Registro de imagem e implantação são operações distintas.
-- **Pegadinha 3: Gatilho substitui validação**: Uma imagem base corrigida pode introduzir incompatibilidades. Teste antes de promover.
+- **Build remoto exige Docker local**: A execução ocorre no ACR; o contexto e o Dockerfile são suficientes para o quick build.
+- **Novo build significa aplicação atualizada**: Registro de imagem e implantação são operações distintas.
+- **Gatilho substitui validação**: Uma imagem base corrigida pode introduzir incompatibilidades. Teste antes de promover.

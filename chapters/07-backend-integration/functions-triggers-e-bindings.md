@@ -12,8 +12,9 @@ tags:
   - python
   - csharp
 difficulty: intermediate
-tldr: Cada função tem um trigger; bindings opcionais conectam entradas e saídas. Use Python v2 ou
-  .NET isolated e mantenha idempotência e autorização mesmo quando o binding abstrai o SDK.
+tldr: Cada função tem um trigger e pode ter vários bindings. Trigger inicia a
+  execução; bindings leem ou enviam dados. Permissões, validação e tratamento de
+  falhas continuam necessários.
 related_links:
   - label: Triggers e bindings
     url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings
@@ -32,8 +33,8 @@ questions:
     type: single-choice
     title: "Functions: triggers, bindings e modelo de programação"
     exam_domain: connect-and-consume
-    stem: Uma função deve responder a HTTP e a Service Bus usando a mesma lógica. Como estruturar os
-      acionadores?
+    stem: Uma função deve responder a HTTP e a Service Bus usando a mesma lógica.
+      Como estruturar os acionadores?
     options:
       - id: opt-3
         text: Transformar o trigger HTTP em um ConfigMap.
@@ -48,7 +49,8 @@ questions:
       - id: opt-1
         text: Criar duas funções com um trigger cada e compartilhar a lógica de negócio.
         correct: true
-        rationale: Cada função tem um trigger, e a lógica pode ser reutilizada em um módulo comum.
+        rationale: Cada função tem um trigger, e a lógica pode ser reutilizada em um
+          módulo comum.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings
       - id: opt-2
         text: Adicionar dois triggers à mesma função.
@@ -63,11 +65,12 @@ questions:
       - serverless
       - python
       - csharp
+    learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings
 ---
 
 # Functions: triggers, bindings e modelo de programação
 
-Azure Functions executa handlers acionados por HTTP, mensagens, temporizadores e outras fontes. Triggers definem o início da execução; bindings reduzem código de integração com serviços, mas não eliminam contratos de dados, permissões ou falhas.
+Azure Functions executa código em resposta a um evento. O trigger é o gatilho, como uma chamada HTTP ou mensagem na fila. Bindings são integrações de entrada ou saída que reduzem o código necessário para ler ou gravar dados.
 
 ## Modelo de execução
 
@@ -189,6 +192,6 @@ Não. Uma function key é um segredo compartilhado de acesso ao endpoint, não a
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Dois triggers na mesma função**: Divida em funções distintas e compartilhe a lógica de negócio.
-- **Pegadinha 2: Binding concede acesso**: A conexão e sua identidade precisam de autorização no recurso.
-- **Pegadinha 3: Entrega sem duplicados**: Triggers de mensagens podem reexecutar; preserve idempotência.
+- **Dois triggers na mesma função**: Divida em funções distintas e compartilhe a lógica de negócio.
+- **Binding concede acesso**: A conexão e sua identidade precisam de autorização no recurso.
+- **Entrega sem duplicados**: Triggers de mensagens podem reexecutar; preserve idempotência.

@@ -11,9 +11,9 @@ tags:
   - retries
   - poison-messages
 difficulty: intermediate
-tldr: PeekLock permite confirmar somente após persistir o resultado. Falha, expiração do lock e
-  retentativas podem causar reentrega; processe de forma idempotente e encaminhe mensagens
-  irrecuperáveis à DLQ.
+tldr: PeekLock reserva a mensagem até a confirmação. Grave o resultado antes de
+  Complete e tolere reentregas. A DLQ guarda mensagens com falha para análise e
+  recuperação; não as reprocessa sozinha.
 related_links:
   - label: Locks e confirmação
     url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement
@@ -29,13 +29,14 @@ questions:
     type: single-choice
     title: Peek-lock, dead-letter queue, sessões e retentativas
     exam_domain: connect-and-consume
-    stem: Um worker grava o resultado, perde o lock antes de Complete e recebe a mesma mensagem
-      novamente. Como evitar efeitos duplicados?
+    stem: Um worker grava o resultado, perde o lock antes de Complete e recebe a
+      mesma mensagem novamente. Como evitar efeitos duplicados?
     options:
       - id: opt-1
         text: Persistir de forma idempotente usando identificador estável da operação.
         correct: true
-        rationale: Reentregas podem ocorrer após perda de lock; o efeito precisa tolerar repetição.
+        rationale: Reentregas podem ocorrer após perda de lock; o efeito precisa tolerar
+          repetição.
         learn_url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement
       - id: opt-2
         text: Executar Complete antes de persistir qualquer resultado.
@@ -59,11 +60,12 @@ questions:
       - message-sessions
       - retries
       - poison-messages
+    learn_url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement
 ---
 
 # Peek-lock, dead-letter queue, sessões e retentativas
 
-Um worker gera embeddings e grava no banco. Se ele cair depois de gravar, mas antes de confirmar a mensagem, o broker poderá entregá-la novamente. O protocolo precisa admitir esse intervalo sem duplicar os efeitos de negócio.
+Um worker, processo em segundo plano, grava o resultado e depois confirma a mensagem. Se cair entre essas etapas, Service Bus pode entregar a mensagem novamente. O processamento deve ser idempotente: repetir a operação não pode duplicar seu efeito.
 
 ## Settlement e lock
 
@@ -132,7 +134,7 @@ if (message is not null) {
 }
 ```
 
-Falhas transitórias de rede/banco devem ser tratadas separadamente de payload inválido. Os exemplos são de uma operação curta, sem renovação automática de lock.
+Falhas transitórias de rede/banco devem ser tratadas separadamente de conteúdo inválido da mensagem. Os exemplos são de uma operação curta, sem renovação automática de lock.
 
 ## DLQ, sessões e recuperação
 
@@ -149,6 +151,6 @@ Não. Ela reduz duplicação de envios dentro de uma janela. Reentrega após per
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Complete no início melhora confiabilidade**: Isso pode perder trabalho se o processo falhar antes de persistir.
-- **Pegadinha 2: DLQ exclui definitivamente**: A mensagem continua disponível para inspeção e recuperação.
-- **Pegadinha 3: Sessões ordenam a fila inteira**: A garantia é por sessão, com processamento e concorrência adequados.
+- **Complete no início melhora confiabilidade**: Isso pode perder trabalho se o processo falhar antes de persistir.
+- **DLQ exclui definitivamente**: A mensagem continua disponível para inspeção e recuperação.
+- **Sessões ordenam a fila inteira**: A garantia é por sessão, com processamento e concorrência adequados.

@@ -12,8 +12,9 @@ tags:
   - halfvec
   - ann
 difficulty: intermediate
-tldr: Pgvector oferece busca exata e índices aproximados HNSW/IVFFlat. Alinhe tipo, dimensão,
-  métrica e operator class; ajuste recall e latência com dados representativos.
+tldr: pgvector adiciona vetores ao PostgreSQL. HNSW usa um grafo; IVFFlat agrupa
+  vetores e deve ser criado com dados representativos. Compare velocidade,
+  memória e recall com uma busca exata.
 related_links:
   - label: Habilitar pgvector
     url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
@@ -23,8 +24,8 @@ questions:
     type: single-choice
     title: "pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat"
     exam_domain: data-management
-    stem: Uma consulta usa distância cosseno com <=>. Qual classe de índice vetorial corresponde a essa
-      métrica?
+    stem: Uma consulta usa distância cosseno com <=>. Qual classe de índice vetorial
+      corresponde a essa métrica?
     options:
       - id: opt-2
         text: vector_l2_ops.
@@ -44,7 +45,8 @@ questions:
       - id: opt-1
         text: vector_cosine_ops.
         correct: true
-        rationale: Essa operator class corresponde à distância cosseno para o tipo vector.
+        rationale: Essa classe de operadores corresponde à distância cosseno para o tipo
+          vector.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
     tags:
       - postgresql
@@ -54,11 +56,12 @@ questions:
       - vector-type
       - halfvec
       - ann
+    learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
 ---
 
 # pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat
 
-Embeddings representam documentos em um espaço vetorial. A busca encontra vetores próximos da pergunta, mas o índice correto depende da métrica, volume e necessidade de recall. Vetores de modelos diferentes não devem ser misturados apenas porque têm a mesma dimensão.
+Um embedding é uma lista de números que representa conteúdo. O pgvector permite guardar essas listas no PostgreSQL e procurar vetores próximos. Índices aproximados aceleram a busca, mas podem deixar de encontrar alguns resultados relevantes: essa cobertura é medida pelo recall.
 
 ## Habilitar e escolher o tipo
 
@@ -108,6 +111,6 @@ Não. Índices aproximados trocam recall por velocidade. Compare resultados com 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Dimensão resolve compatibilidade**: Mesmo tamanho não torna embeddings de modelos distintos comparáveis.
-- **Pegadinha 2: Qualquer ORDER BY usa o índice**: Operador, direção e limite devem permitir o plano vetorial esperado.
-- **Pegadinha 3: HNSW é gratuito em memória**: Construção e manutenção podem exigir RAM significativa; meça antes de dimensionar.
+- **Dimensão resolve compatibilidade**: Mesmo tamanho não torna embeddings de modelos distintos comparáveis.
+- **Qualquer ORDER BY usa o índice**: Operador, direção e limite devem permitir o plano vetorial esperado.
+- **HNSW é gratuito em memória**: Construção e manutenção podem exigir RAM significativa; meça antes de dimensionar.

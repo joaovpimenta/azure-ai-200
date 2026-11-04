@@ -12,9 +12,9 @@ tags:
   - metrics
   - telemetry
 difficulty: intermediate
-tldr: OpenTelemetry correlaciona spans de uma operação distribuída. Azure Monitor Distro exporta
-  telemetria para Application Insights; configure instrumentação, propagação e sampling sem expor
-  prompts ou segredos.
+tldr: Traces mostram o caminho de uma operação; spans, suas etapas. Métricas
+  resumem comportamento e logs registram eventos. Propague o contexto e
+  configure instrumentação e exportação para Azure Monitor.
 related_links:
   - label: Azure Monitor OpenTelemetry
     url: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
@@ -27,8 +27,8 @@ questions:
     type: single-choice
     title: "OpenTelemetry e Azure Monitor Distro: traces, métricas e logs"
     exam_domain: secure-monitor-troubleshoot
-    stem: Um ActivitySource personalizado não produz spans exportados no .NET. Qual configuração deve
-      ser verificada?
+    stem: Um ActivitySource personalizado não produz spans exportados no .NET. Qual
+      configuração deve ser verificada?
     options:
       - id: opt-4
         text: Adicionar outro exporter idêntico sem revisar a configuração.
@@ -36,7 +36,8 @@ questions:
         rationale: Isso pode duplicar dados e não garante captura da origem.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
       - id: opt-1
-        text: Registrar a origem correspondente com AddSource na configuração de tracing.
+        text: Registrar a origem correspondente com AddSource na configuração de
+          tracing.
         correct: true
         rationale: O provider precisa escutar a origem para capturar as activities.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
@@ -58,11 +59,12 @@ questions:
       - traces
       - metrics
       - telemetry
+    learn_url: https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable
 ---
 
 # OpenTelemetry e Azure Monitor Distro: traces, métricas e logs
 
-Uma chamada de chat atravessa API, broker, worker, banco e modelo. Registrar apenas o tempo total não mostra qual dependência consumiu a latência. OpenTelemetry organiza o caminho por trace e spans, permitindo correlacionar os componentes.
+OpenTelemetry ajuda a acompanhar uma operação entre serviços. Um trace representa o caminho completo; spans representam etapas, como buscar documentos e chamar o modelo. Isso mostra onde a aplicação gastou tempo ou falhou.
 
 ## Sinais e propagação
 
@@ -74,7 +76,7 @@ Uma chamada de chat atravessa API, broker, worker, banco e modelo. Registrar ape
 | Métrica | Qual o comportamento agregado ao longo do tempo? |
 | Log | Qual evento e contexto específico ocorreu? |
 
-Instrumentação automática cobre bibliotecas suportadas, não toda função da aplicação. Spans personalizados ajudam a separar recuperação, reranking e geração. Evite criar spans por token ou atributos de alta cardinalidade sem necessidade.
+Instrumentação automática cobre bibliotecas suportadas, não toda função da aplicação. Spans personalizados ajudam a separar recuperação, reranking e geração. Evite criar spans por token ou atributos com muitos valores distintos (alta cardinalidade) sem necessidade.
 
 ## Exportar para Application Insights
 
@@ -118,7 +120,7 @@ O worker Python do exemplo é pontual; um serviço persistente deve deixar o pro
 
 ## Qualidade e privacidade dos dados
 
-==Sampling== reduz volume e custo, mas altera a interpretação de contagens. Confira pesos de amostragem e preserve correlação entre serviços. Logs sem contexto ativo podem não aparecer ligados ao trace esperado.
+==Sampling== (amostragem) reduz volume e custo, mas altera a interpretação de contagens. Confira pesos de amostragem e preserve correlação entre serviços. Logs sem contexto ativo podem não aparecer ligados ao trace esperado.
 
 Não grave credenciais, tokens, documentos ou prompts completos como atributos por padrão. Use nomes estáveis para operações e tags de baixa cardinalidade, como versão de deploy e tipo de operação. A telemetria também precisa de política de acesso e retenção.
 
@@ -131,6 +133,6 @@ Não. A origem precisa ser ouvida pela configuração OpenTelemetry. Sem listene
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Exporter instrumenta toda lógica**: Configure bibliotecas e spans que representam as etapas relevantes.
-- **Pegadinha 2: Mesmo nome de operação cria correlação**: A relação depende de contexto propagado.
-- **Pegadinha 3: Mais atributos sempre ajudam**: Dados sensíveis e alta cardinalidade aumentam risco, volume e custo.
+- **Exporter instrumenta toda lógica**: Configure bibliotecas e spans que representam as etapas relevantes.
+- **Mesmo nome de operação cria correlação**: A relação depende de contexto propagado.
+- **Mais atributos sempre ajudam**: Dados sensíveis e alta cardinalidade aumentam risco, volume e custo.

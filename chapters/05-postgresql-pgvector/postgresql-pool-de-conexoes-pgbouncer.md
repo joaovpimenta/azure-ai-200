@@ -9,9 +9,9 @@ tags:
   - pgbouncer
   - throughput
 difficulty: intermediate
-tldr: Reutilize pools por processo e abra conexões lógicas por operação. PgBouncer reduz conexões
-  físicas ao servidor, mas pooling transacional exige cuidado com estado de sessão e limites de
-  concorrência.
+tldr: O pool do cliente reutiliza conexões por processo; PgBouncer compartilha
+  conexões do servidor. Some os limites de todas as réplicas. No modo transação,
+  não dependa de estado entre transações.
 related_links:
   - label: PgBouncer no Azure Database for PostgreSQL
     url: https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer
@@ -21,13 +21,14 @@ questions:
     type: single-choice
     title: Pool de conexões, PgBouncer e otimização de throughput
     exam_domain: data-management
-    stem: Um serviço usa PgBouncer em modo transaction. Pode depender de SET de sessão para operações
-      futuras após o commit?
+    stem: Um serviço usa PgBouncer em modo transaction. Pode depender de SET de
+      sessão para operações futuras após o commit?
     options:
       - id: opt-1
         text: Não; outra transação pode usar outro backend.
         correct: true
-        rationale: Pooling transacional não garante afinidade de sessão após concluir a transação.
+        rationale: Pooling transacional não garante afinidade de sessão após concluir a
+          transação.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer
       - id: opt-2
         text: Sim, todas as transações do cliente ficam no mesmo backend.
@@ -49,11 +50,12 @@ questions:
       - connection-pooling
       - pgbouncer
       - throughput
+    learn_url: https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer
 ---
 
 # Pool de conexões, PgBouncer e otimização de throughput
 
-Cada nova conexão PostgreSQL exige autenticação, TLS e recursos no servidor. Em APIs e workers com muitas réplicas, criar uma conexão física por requisição aumenta a latência e pode esgotar o limite antes de CPU ou disco saturarem.
+Um pool mantém conexões abertas para reutilização. Assim, cada requisição evita repetir conexão, TLS e autenticação. Isso importa quando várias réplicas da API acessam PostgreSQL: cada processo tem seu próprio pool, e a soma pode exceder o limite do banco.
 
 ## Dois níveis de pool
 
@@ -113,6 +115,6 @@ Não. Concorrência excessiva aumenta contenção e pressão de memória. Um poo
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Dispose destrói sempre o socket**: Com pooling, a conexão lógica normalmente devolve o recurso ao pool.
-- **Pegadinha 2: Pool global entre réplicas**: Cada processo mantém seu próprio pool de cliente.
-- **Pegadinha 3: Transação preserva toda sessão**: Após o commit, o próximo trabalho pode usar outro backend.
+- **Dispose destrói sempre o socket**: Com pooling, a conexão lógica normalmente devolve o recurso ao pool.
+- **Pool global entre réplicas**: Cada processo mantém seu próprio pool de cliente.
+- **Transação preserva toda sessão**: Após o commit, o próximo trabalho pode usar outro backend.

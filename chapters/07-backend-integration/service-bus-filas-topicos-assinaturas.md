@@ -12,9 +12,9 @@ tags:
   - sql-filters
   - messaging
 difficulty: intermediate
-tldr: Filas distribuem trabalho entre consumidores; tópicos entregam cópias a assinaturas
-  independentes. Filtros de assinatura avaliam propriedades da mensagem, não fazem consultas
-  arbitrárias ao corpo.
+tldr: Fila divide trabalho entre consumidores. Tópico envia cópias para
+  assinaturas independentes. Filtros avaliam propriedades da mensagem, não o
+  JSON do corpo.
 related_links:
   - label: Filas, tópicos e assinaturas
     url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions
@@ -27,19 +27,20 @@ questions:
     type: single-choice
     title: "Service Bus: filas, tópicos, assinaturas e filtros"
     exam_domain: connect-and-consume
-    stem: Auditoria e vetorização precisam receber cada uma todos os documentos. Qual topologia é
-      adequada?
+    stem: Auditoria e vetorização precisam receber cada uma todos os documentos.
+      Qual organização é adequada?
     options:
       - id: opt-4
         text: Um filtro SQL que consulta livremente o corpo do documento.
         correct: false
-        rationale: Filtros do Service Bus avaliam propriedades suportadas da mensagem, não consultas
-          arbitrárias ao corpo.
+        rationale: Filtros do Service Bus avaliam propriedades suportadas da mensagem,
+          não consultas arbitrárias ao corpo.
         learn_url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions
       - id: opt-1
         text: Um tópico com assinaturas independentes para os dois fluxos.
         correct: true
-        rationale: Cada assinatura mantém sua cópia elegível e pode processar em ritmo próprio.
+        rationale: Cada assinatura mantém sua cópia elegível e pode processar em ritmo
+          próprio.
         learn_url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions
       - id: opt-2
         text: Uma fila com os dois consumidores concorrentes.
@@ -59,11 +60,12 @@ questions:
       - correlation-filters
       - sql-filters
       - messaging
+    learn_url: https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions
 ---
 
 # Service Bus: filas, tópicos, assinaturas e filtros
 
-Um documento recebido pode precisar de vetorização e auditoria. Use uma fila quando consumidores competem pelo mesmo trabalho; use tópico com assinaturas quando cada fluxo precisa de sua própria cópia e ritmo de processamento.
+Service Bus transporta mensagens entre aplicações. Uma fila distribui trabalho entre consumidores; um tópico com assinaturas entrega cópias a fluxos independentes. Por exemplo: vetorização e auditoria precisam de assinaturas distintas para receber o mesmo documento.
 
 ## Roteamento e contrato
 
@@ -119,7 +121,7 @@ Uma assinatura com filtro de correlação `tipo = manual` pode receber essa mens
 
 ## Entrega e idempotência
 
-Use `MessageId` estável para rastrear o trabalho. Detecção de duplicados, quando habilitada, atua dentro da janela configurada e não substitui idempotência do consumidor. Dimensione retenção, tamanho de mensagem e backlog conforme o serviço; envie referência ao documento em Blob Storage em vez de conteúdo grande quando apropriado.
+Use `MessageId` estável para rastrear o trabalho. Detecção de duplicados, quando habilitada, atua dentro da janela configurada e não substitui idempotência do consumidor. Dimensione retenção, tamanho de mensagem e acúmulo de mensagens conforme o serviço; envie referência ao documento em Blob Storage em vez de conteúdo grande quando apropriado.
 
 <details>
 <summary>Checagem Rápida: Dois consumidores na mesma assinatura recebem ambos uma cópia de cada mensagem?</summary>
@@ -130,6 +132,6 @@ Não. Eles competem pelas mensagens da assinatura. Para cópias independentes, c
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: SQL filter consulta o corpo JSON**: Ele opera sobre propriedades suportadas da mensagem.
-- **Pegadinha 2: Nova regra remove a padrão**: Confira a regra que aceita tudo para não invalidar a restrição esperada.
-- **Pegadinha 3: Sender também pode receber**: Os papéis de dados de envio e recebimento são distintos.
+- **SQL filter consulta o corpo JSON**: Ele opera sobre propriedades suportadas da mensagem.
+- **Nova regra remove a padrão**: Confira a regra que aceita tudo para não invalidar a restrição esperada.
+- **Sender também pode receber**: Os papéis de dados de envio e recebimento são distintos.

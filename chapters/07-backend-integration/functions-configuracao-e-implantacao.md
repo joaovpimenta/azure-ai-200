@@ -10,8 +10,9 @@ tags:
   - function-apps
   - deployment
 difficulty: intermediate
-tldr: O plano de hospedagem determina escala, rede, latência e limites. Implante dependências e
-  configuração junto ao código e valide bindings, identidade, storage e logs no ambiente Azure.
+tldr: Escolha o plano conforme escala, rede e duração. Configure o ambiente
+  Azure separadamente do local. Após publicar, execute uma chamada ou mensagem
+  real para validar o trigger e suas dependências.
 related_links:
   - label: Planos de hospedagem
     url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale
@@ -27,7 +28,8 @@ questions:
     type: single-choice
     title: Planos de hospedagem, configuração e implantação de function apps
     exam_domain: connect-and-consume
-    stem: O deploy terminou, mas uma função de fila não executa no Azure. Qual verificação é necessária?
+    stem: O deploy terminou, mas uma função de fila não executa no Azure. Qual
+      verificação é necessária?
     options:
       - id: opt-4
         text: Trocar de plano sem coletar evidência.
@@ -35,9 +37,11 @@ questions:
         rationale: O problema pode estar no binding ou autorização, e não no plano.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale
       - id: opt-1
-        text: Conferir descoberta da função, configurações de conexão, identidade e logs do host.
+        text: Conferir descoberta da função, configurações de conexão, identidade e logs
+          do host.
         correct: true
-        rationale: Publicar arquivos não comprova que o trigger inicializou e está autorizado.
+        rationale: Publicar arquivos não comprova que o trigger inicializou e está
+          autorizado.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale
       - id: opt-2
         text: Assumir que local.settings.json foi publicado com todos os segredos.
@@ -47,7 +51,8 @@ questions:
       - id: opt-3
         text: Aumentar apenas o timeout HTTP.
         correct: false
-        rationale: Uma função de fila pode estar falhando antes de executar, sem relação com HTTP.
+        rationale: Uma função de fila pode estar falhando antes de executar, sem relação
+          com HTTP.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale
     tags:
       - azure-functions
@@ -55,11 +60,12 @@ questions:
       - flex-consumption
       - function-apps
       - deployment
+    learn_url: https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale
 ---
 
 # Planos de hospedagem, configuração e implantação de function apps
 
-Escolher Functions não define sozinho o comportamento operacional. Uma API com primeira resposta rápida, um worker de mensagens e uma tarefa longa podem precisar de planos diferentes, mesmo quando compartilham a mesma linguagem.
+O plano de hospedagem define como a Function App recebe recursos, escala e é cobrada. Escolha-o conforme tempo de resposta, duração das tarefas e rede necessária. A Function App reúne funções, configurações e identidade.
 
 ## Comparar planos
 
@@ -70,7 +76,7 @@ Escolher Functions não define sozinho o comportamento operacional. Uma API com 
 | Dedicated/App Service | Capacidade provisionada em plano App Service | Configurar Always On quando aplicável |
 | Consumption clássico | Modelo serverless tradicional | Limites e disponibilidade variam por plataforma |
 
-==Cold start== depende do plano, linguagem e inicialização. Always ready ou instâncias preparadas reduzem esse impacto, mas não tornam uma chamada externa instantânea. Tempo máximo de execução, timeout HTTP e período de desligamento são limites diferentes; consulte a tabela vigente para o plano.
+==Cold start== é o atraso para iniciar uma instância; depende do plano, linguagem e inicialização. Always ready ou instâncias preparadas reduzem esse impacto, mas não tornam uma chamada externa instantânea. Tempo máximo de execução, timeout HTTP e período de desligamento são limites diferentes; consulte a tabela vigente para o plano.
 
 ## Projeto e configuração
 
@@ -89,7 +95,7 @@ Exemplo mínimo de `host.json`:
 }
 ```
 
-Habilitar sampling pode alterar quantidades observadas em consultas de telemetria; não compare contagens amostradas como se fossem toda a carga.
+Sampling guarda uma amostra da telemetria e pode alterar quantidades observadas em consultas de telemetria; não compare contagens amostradas como se fossem toda a carga.
 
 ## Publicar uma aplicação existente
 
@@ -120,6 +126,6 @@ Não. Há limites do caminho HTTP e da infraestrutura, além dos limites do plan
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: local.settings.json é configuração publicada**: O ambiente Azure precisa de suas próprias configurações e identidades.
-- **Pegadinha 2: Todo plano suporta os mesmos recursos**: Confira rede, slots, runtime e método de deploy por plano.
-- **Pegadinha 3: Deploy verde significa trigger funcionando**: Verifique inicialização e execução ponta a ponta.
+- **local.settings.json é configuração publicada**: O ambiente Azure precisa de suas próprias configurações e identidades.
+- **Todo plano suporta os mesmos recursos**: Confira rede, slots, runtime e método de deploy por plano.
+- **Deploy verde significa trigger funcionando**: Verifique inicialização e execução ponta a ponta.

@@ -10,9 +10,9 @@ tags:
   - btree-index
   - gin-index
 difficulty: intermediate
-tldr: Modele identificadores, tenants e relações com tipos e constraints explícitos. Use B-tree para
-  igualdade, intervalos e ordenação; GIN para estruturas como JSONB e busca textual conforme o
-  operador.
+tldr: Use colunas e restrições para dados essenciais; jsonb para metadados
+  flexíveis. B-tree atende igualdade, intervalos e ordenação; GIN atende
+  operadores de JSON e texto. Índices também encarecem escritas.
 related_links:
   - label: Tipos de dados PostgreSQL
     url: https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/
@@ -25,13 +25,14 @@ questions:
     type: single-choice
     title: Modelagem de esquemas, tipos de dados e índices B-tree/GIN
     exam_domain: data-management
-    stem: A consulta filtra por tenant e ordena por updated_at. Qual índice é um candidato inicial
-      coerente?
+    stem: A consulta filtra por tenant e ordena por updated_at. Qual índice é um
+      candidato inicial coerente?
     options:
       - id: opt-1
         text: B-tree em (tenant_id, updated_at).
         correct: true
-        rationale: O prefixo por tenant e a segunda coluna podem atender filtro e ordenação desse padrão.
+        rationale: O prefixo por tenant e a segunda coluna podem atender filtro e
+          ordenação desse padrão.
         learn_url: https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/
       - id: opt-2
         text: Somente GIN em um campo JSONB não consultado.
@@ -54,17 +55,18 @@ questions:
       - data-types
       - btree-index
       - gin-index
+    learn_url: https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/
 ---
 
 # Modelagem de esquemas, tipos de dados e índices B-tree/GIN
 
-Um repositório RAG precisa guardar texto, metadados, versões de modelo e relações entre documentos. Um esquema explícito evita que embeddings percam vínculo com a origem ou sejam reutilizados após mudança de versão.
+No PostgreSQL, o esquema define tabelas, tipos e regras dos dados. Para uma aplicação de IA, guarde o texto, seu documento de origem e a versão do modelo que gerou o vetor. Isso permite atualizar dados sem perder a relação entre conteúdo e embedding.
 
 ## Escolher tipos e invariantes
 
-Use `uuid` ou outro identificador estável para documentos; `text` para conteúdo variável; `timestamptz` para instantes e `jsonb` para metadados flexíveis consultáveis. Não transforme todos os campos em JSON: tenant, chave externa e versão de modelo normalmente merecem colunas explícitas.
+Use `uuid` ou outro identificador estável para documentos; `text` para conteúdo variável; `timestamptz` para instantes e `jsonb` para metadados flexíveis consultáveis. Não transforme todos os campos em JSON: identificador do cliente (tenant), chave externa e versão de modelo normalmente merecem colunas explícitas.
 
-==Constraints== garantem invariantes independentemente da aplicação. `NOT NULL`, `CHECK`, chaves primárias e estrangeiras evitam estados inválidos durante importações e concorrência.
+==Constraints== são restrições que impedem dados inválidos mesmo fora da aplicação. `NOT NULL`, `CHECK`, chaves primárias e estrangeiras evitam estados inválidos durante importações e concorrência.
 
 ```sql
 CREATE TABLE documents (
@@ -87,7 +89,7 @@ O esquema permite consultar por tenant e data, além de usar contenção JSONB c
 
 | Índice | Operações típicas | Compromisso |
 |---|---|---|
-| B-tree | Igualdade, range, ordenação | Ordem das colunas importa |
+| B-tree | Igualdade, intervalos, ordenação | Ordem das colunas importa |
 | GIN em JSONB | Contenção e operadores suportados | Maior custo de escrita e armazenamento |
 | GIN em `tsvector` | Busca textual | Exige configuração linguística apropriada |
 | Índice de expressão | Campo extraído do JSON | Consulta deve corresponder à expressão |
@@ -101,7 +103,7 @@ Use `EXPLAIN (ANALYZE, BUFFERS)` em ambiente controlado para observar linhas est
 <details>
 <summary>Checagem Rápida: Um índice sempre reduz o custo total da aplicação?</summary>
 
-Não. Ele acelera certos acessos, mas ocupa armazenamento e precisa ser atualizado em escritas. Avalie o workload e o plano real.
+Não. Ele acelera certos acessos, mas ocupa armazenamento e precisa ser atualizado em escritas. Avalie a carga de trabalho e o plano real.
 
 </details>
 
@@ -109,6 +111,6 @@ Para evolução do esquema, use migrações compatíveis com versões anterior e
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: JSONB elimina modelagem**: Flexibilidade não substitui integridade, autorização nem seleção de índices.
-- **Pegadinha 2: B-tree resolve todo operador JSON**: Escolha a classe de índice compatível com os operadores usados.
-- **Pegadinha 3: Mais índices sempre é melhor**: Escritas, manutenção e espaço também têm custo.
+- **JSONB elimina modelagem**: Flexibilidade não substitui integridade, autorização nem seleção de índices.
+- **B-tree resolve todo operador JSON**: Escolha a classe de índice compatível com os operadores usados.
+- **Mais índices sempre é melhor**: Escritas, manutenção e espaço também têm custo.

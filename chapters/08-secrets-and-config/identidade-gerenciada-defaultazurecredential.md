@@ -11,9 +11,9 @@ tags:
   - azure-identity
   - rbac
 difficulty: intermediate
-tldr: Managed identity remove segredos estáticos da aplicação, mas não concede permissões
-  automaticamente. DefaultAzureCredential seleciona uma credencial disponível; confirme a identidade
-  usada e os papéis de dados.
+tldr: "Identidade gerenciada evita senhas no código. DefaultAzureCredential
+  tenta as credenciais disponíveis. Conceda papéis de dados ao principal
+  correto: identidade habilitada não significa acesso autorizado."
 related_links:
   - label: Managed identities
     url: https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview
@@ -26,13 +26,15 @@ questions:
     type: single-choice
     title: Managed identities, RBAC e DefaultAzureCredential
     exam_domain: secure-monitor-troubleshoot
-    stem: A leitura de Blob funciona com az login local e falha no Azure com a managed identity. O que
-      deve ser comparado?
+    stem: A leitura de Blob funciona com az login local e falha no Azure com a
+      identidade gerenciada. O que deve ser comparado?
     options:
       - id: opt-1
-        text: A identidade efetivamente usada e seus papéis de dados no escopo do Storage.
+        text: A identidade efetivamente usada e seus papéis de dados no escopo do
+          Storage.
         correct: true
-        rationale: O desenvolvedor local e a identidade da aplicação podem ter autorizações diferentes.
+        rationale: O desenvolvedor local e a identidade da aplicação podem ter
+          autorizações diferentes.
         learn_url: https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview
       - id: opt-2
         text: Somente o nome do arquivo de código.
@@ -56,11 +58,12 @@ questions:
       - defaultazurecredential
       - azure-identity
       - rbac
+    learn_url: https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview
 ---
 
 # Managed identities, RBAC e DefaultAzureCredential
 
-Uma aplicação que acessa Storage, Key Vault e Service Bus não precisa guardar uma chave para cada serviço. Managed identities permitem obter tokens pelo ambiente Azure e atribuir permissões à identidade da workload.
+Identidade gerenciada permite que uma aplicação no Azure obtenha tokens sem guardar uma senha. Autenticação responde “quem é a aplicação?”; autorização responde “o que ela pode fazer?”. RBAC é o controle de acesso por papéis e escopos.
 
 ## Ciclo de vida e autorização
 
@@ -116,6 +119,6 @@ Não. A CLI pode autenticar o desenvolvedor, que tem permissões diferentes da m
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Identidade habilitada já tem acesso**: É necessário autorizar cada recurso de destino.
-- **Pegadinha 2: Contributor lê todos os dados**: Papéis de gerenciamento e dados têm capacidades distintas.
-- **Pegadinha 3: RBAC corrige DNS**: Autenticação, autorização e conectividade são camadas separadas.
+- **Identidade habilitada já tem acesso**: É necessário autorizar cada recurso de destino.
+- **Contributor lê todos os dados**: Papéis de gerenciamento e dados têm capacidades distintas.
+- **RBAC corrige DNS**: Autenticação, autorização e conectividade são camadas separadas.

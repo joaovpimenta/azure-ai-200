@@ -10,9 +10,9 @@ tags:
   - azure-cli
   - yaml
 difficulty: intermediate
-tldr: O ambiente do Container Apps fornece a fronteira compartilhada de rede e operação; cada
-  aplicação define imagem, recursos, ingress e escala. Configure explicitamente exposição externa e
-  targetPort.
+tldr: O ambiente reúne aplicações e compartilha rede. Cada app define imagem,
+  recursos e escala. Ingress controla conexões recebidas; workers de fila podem
+  operar sem ele.
 related_links:
   - label: Ambientes do Container Apps
     url: https://learn.microsoft.com/en-us/azure/container-apps/environment
@@ -25,8 +25,8 @@ questions:
     type: single-choice
     title: Ambientes e implantação no Container Apps (CLI e YAML)
     exam_domain: containerized-solutions
-    stem: Um worker do Container Apps consome Service Bus e não recebe chamadas HTTP. Qual configuração
-      é adequada?
+    stem: Um worker do Container Apps consome Service Bus e não recebe chamadas
+      HTTP. Qual configuração é adequada?
     options:
       - id: opt-4
         text: Remover as permissões do Service Bus porque o app está no Azure.
@@ -34,9 +34,11 @@ questions:
         rationale: Acesso ao broker continua exigindo autorização.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/environment
       - id: opt-1
-        text: Operar sem ingress, com saída de rede, identidade e regra de escala apropriadas.
+        text: Operar sem ingress, com saída de rede, identidade e regra de escala
+          apropriadas.
         correct: true
-        rationale: Workers podem consumir recursos externos sem expor um endpoint de entrada.
+        rationale: Workers podem consumir recursos externos sem expor um endpoint de
+          entrada.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/environment
       - id: opt-2
         text: Habilitar ingress público obrigatoriamente.
@@ -54,11 +56,12 @@ questions:
       - ingress
       - azure-cli
       - yaml
+    learn_url: https://learn.microsoft.com/en-us/azure/container-apps/environment
 ---
 
 # Ambientes e implantação no Container Apps (CLI e YAML)
 
-Uma solução de IA pode ter uma API pública e workers internos no mesmo ambiente do Container Apps. O ==managed environment== agrupa aplicações e integra rede, observabilidade e perfis de carga; ele não é uma imagem nem uma revisão.
+O Azure Container Apps executa APIs e workers, processos que trabalham em segundo plano. Um ==managed environment== é o ambiente que reúne aplicações e compartilha rede e recursos de operação. Cada aplicação mantém sua própria imagem, configuração e escala.
 
 ## Fronteiras e conectividade
 
@@ -121,6 +124,6 @@ Confira estado de provisionamento, readiness, FQDN e logs antes de considerar o 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Ambiente é a aplicação**: O ambiente fornece infraestrutura compartilhada; cada app mantém configuração e ciclo de revisões próprios.
-- **Pegadinha 2: TargetPort corrige o processo**: O roteamento não altera a porta real de escuta da aplicação.
-- **Pegadinha 3: Sem ingress significa sem rede**: Um worker pode acessar recursos externos, conforme DNS, rotas e políticas de saída.
+- **Ambiente é a aplicação**: O ambiente fornece infraestrutura compartilhada; cada app mantém configuração e ciclo de revisões próprios.
+- **TargetPort corrige o processo**: O roteamento não altera a porta real de escuta da aplicação.
+- **Sem ingress significa sem rede**: Um worker pode acessar recursos externos, conforme DNS, rotas e políticas de saída.

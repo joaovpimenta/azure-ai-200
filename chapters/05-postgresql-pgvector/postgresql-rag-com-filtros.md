@@ -10,9 +10,9 @@ tags:
   - rag
   - hybrid-search
 difficulty: intermediate
-tldr: Filtre por tenant, versão de modelo e permissões antes de fornecer contexto ao LLM. Em ANN,
-  filtros seletivos podem reduzir resultados; avalie planos, recall e mecanismos de varredura
-  suportados.
+tldr: No RAG, filtre os documentos autorizados e busque vetores compatíveis com
+  o modelo da pergunta. Busca aproximada com filtros pode retornar menos que o
+  limite pedido. Avalie relevância e isolamento.
 related_links:
   - label: Busca vetorial com pgvector
     url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
@@ -22,7 +22,8 @@ questions:
     type: single-choice
     title: Busca vetorial e RAG com filtros de metadados
     exam_domain: data-management
-    stem: Uma solução multi-tenant recupera chunks por ANN. Como proteger o contexto enviado ao LLM?
+    stem: Uma solução multi-tenant recupera chunks por ANN. Como proteger o contexto
+      enviado ao LLM?
     options:
       - id: opt-4
         text: Aceitar qualquer modelo de embedding com a mesma dimensão.
@@ -30,10 +31,11 @@ questions:
         rationale: A dimensão sozinha não torna espaços vetoriais compatíveis.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
       - id: opt-1
-        text: Aplicar filtros de autorização e versão na recuperação e avaliar recall sob esses filtros.
+        text: Aplicar filtros de autorização e versão na recuperação e avaliar recall
+          sob esses filtros.
         correct: true
-        rationale: O controle deve ocorrer antes de o conteúdo chegar ao modelo; ANN e filtros exigem
-          avaliação conjunta.
+        rationale: O controle deve ocorrer antes de o conteúdo chegar ao modelo; ANN e
+          filtros exigem avaliação conjunta.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
       - id: opt-2
         text: Recuperar todos os tenants e pedir ao prompt que ignore os demais.
@@ -51,15 +53,16 @@ questions:
       - metadata-filtering
       - rag
       - hybrid-search
+    learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector
 ---
 
 # Busca vetorial e RAG com filtros de metadados
 
-Um pipeline RAG gera o embedding da pergunta, recupera chunks autorizados e fornece o texto ao modelo com suas fontes. Um vetor próximo não significa documento autorizado nem resposta correta; recuperação e geração precisam de avaliação separada.
+RAG é a técnica de buscar informação antes de pedir ao modelo que responda. A aplicação transforma a pergunta em embedding, recupera trechos de documentos (chunks) e os envia como contexto. Só envie conteúdo que o usuário tenha permissão para acessar.
 
 ## Contrato da recuperação
 
-Armazene texto, tenant, documento de origem, versão do embedding e vetor. Gere a pergunta com o mesmo modelo e dimensão usados no corpus. O tenant vem da identidade autenticada, não de uma escolha livre do cliente. Considere Row Level Security como defesa adicional, com papéis que não contornem as políticas.
+Armazene texto, identificador do cliente (tenant), documento de origem, versão do embedding e vetor. Gere a pergunta com o mesmo modelo e dimensão usados no corpus. O tenant vem da identidade autenticada, não de uma escolha livre do cliente. Considere Row Level Security (regras de acesso por linha) como defesa adicional, com papéis que não contornem as políticas.
 
 A consulta deve combinar ==metadata filtering== e distância. Em índices aproximados, a aplicação de filtros pode reduzir a quantidade retornada depois da busca de candidatos. Versões recentes de pgvector oferecem varreduras iterativas; confirme disponibilidade e configuração antes de depender delas. Para conjuntos muito seletivos, busca exata após filtro pode ser competitiva.
 
@@ -113,7 +116,7 @@ O literal vetorial continua sendo um parâmetro, não parte interpolada do SQL. 
 
 ## Qualidade e isolamento
 
-Avalie recall@k com filtros reais e confira se o contexto contém evidência suficiente. Busca híbrida combina sinais textuais e vetoriais; não some scores de escalas diferentes sem normalização ou método de fusão. Nunca recupere todo o corpus e espere que o prompt faça o controle de acesso.
+Avalie recall@k (proporção dos vizinhos esperados encontrada nos k resultados) com filtros reais e confira se o contexto contém evidência suficiente. Busca híbrida combina sinais textuais e vetoriais; não some scores de escalas diferentes sem normalização ou método de fusão. Nunca recupere todo o corpus e espere que o prompt faça o controle de acesso.
 
 <details>
 <summary>Checagem Rápida: LIMIT 5 garante cinco chunks depois de um filtro seletivo com ANN?</summary>
@@ -124,6 +127,6 @@ Não. A busca aproximada pode encontrar poucos candidatos elegíveis. Meça o re
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Prompt protege tenants**: Autorização precisa ocorrer antes de enviar conteúdo ao modelo.
-- **Pegadinha 2: Embeddings são universais**: Modelo, versão e dimensão devem ser compatíveis.
-- **Pegadinha 3: Índice ANN preserva recall perfeito**: Valide resultados e latência sob os filtros reais.
+- **Prompt protege tenants**: Autorização precisa ocorrer antes de enviar conteúdo ao modelo.
+- **Embeddings são universais**: Modelo, versão e dimensão devem ser compatíveis.
+- **Índice ANN preserva recall perfeito**: Valide resultados e latência sob os filtros reais.

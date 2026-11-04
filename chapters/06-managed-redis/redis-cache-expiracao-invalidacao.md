@@ -11,9 +11,9 @@ tags:
   - eviction-policies
   - cache-invalidation
 difficulty: intermediate
-tldr: Cache-aside consulta o Redis antes da fonte autoritativa e grava resultados com TTL.
-  Expiração, eviction e invalidação têm causas distintas; nenhuma delas garante consistência
-  imediata sozinha.
+tldr: Cache-aside consulta o cache antes da fonte. TTL limita a validade;
+  eviction remove por pressão de memória; invalidação acompanha mudanças na
+  origem. Inclua cliente e versões na chave.
 related_links:
   - label: Padrão Cache-Aside
     url: https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside
@@ -26,8 +26,8 @@ questions:
     type: single-choice
     title: Cache-aside, TTL, políticas de eviction e invalidação
     exam_domain: data-management
-    stem: Uma chave com TTL de cinco minutos desaparece antes desse prazo durante pressão de memória.
-      Qual explicação é possível?
+    stem: Uma chave com TTL de cinco minutos desaparece antes desse prazo durante
+      pressão de memória. Qual explicação é possível?
     options:
       - id: opt-2
         text: TTL garante permanência até o último segundo.
@@ -56,15 +56,16 @@ questions:
       - ttl
       - eviction-policies
       - cache-invalidation
+    learn_url: https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside
 ---
 
 # Cache-aside, TTL, políticas de eviction e invalidação
 
-Uma API pode reduzir latência e chamadas caras ao modelo reutilizando resultados. O cache deve acelerar a resposta sem se tornar a única fonte de dados que o sistema precisa preservar.
+Cache guarda resultados para evitar repetir consultas ou chamadas caras ao modelo. No padrão cache-aside, a aplicação consulta Redis primeiro e busca a fonte original se não encontrar a chave. Mantenha uma fonte durável para os dados que não podem ser perdidos.
 
 ## Fluxo cache-aside
 
-A aplicação procura a chave no Redis. Em cache miss, lê a fonte, calcula a resposta e grava com ==TTL==. Em uma atualização, confirma primeiro a gravação na fonte autoritativa e então invalida ou atualiza o cache conforme a estratégia de consistência.
+A aplicação procura a chave no Redis. Se a chave não existe (cache miss), lê a fonte, calcula a resposta e grava com ==TTL==, o prazo de validade. Em uma atualização, confirma primeiro a gravação na fonte original e então invalida ou atualiza o cache conforme a estratégia de consistência.
 
 | Mecanismo | Causa | Efeito |
 |---|---|---|
@@ -119,7 +120,7 @@ Reutilize cliente e multiplexer durante a vida do processo. O exemplo representa
 
 ## Concorrência e recuperação
 
-Vários misses simultâneos podem causar ==cache stampede==. Use coordenação, jitter no TTL e limites de concorrência. Uma leitura concorrente pode repopular um valor antigo após a invalidação; use versões, eventos confiáveis ou estratégia mais forte quando necessário. Em indisponibilidade do cache, o fallback precisa proteger a fonte de uma avalanche.
+Várias consultas sem resultado em cache podem sobrecarregar a fonte: é o ==cache stampede==. Coordene o recálculo, varie um pouco o TTL e limite a concorrência. Uma leitura concorrente pode repopular um valor antigo após a invalidação; use versões, eventos confiáveis ou estratégia mais forte quando necessário. Em indisponibilidade do cache, o fallback precisa proteger a fonte de uma avalanche.
 
 <details>
 <summary>Checagem Rápida: Um TTL de cinco minutos garante cinco minutos de presença?</summary>
@@ -130,6 +131,6 @@ Não. Eviction, invalidação ou falha podem remover a chave antes. TTL é limit
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Cache é fonte durável automática**: Projete a fonte autoritativa e a recuperação explicitamente.
-- **Pegadinha 2: Só a pergunta compõe a chave**: Inclua tenant, modelo, versão dos dados e contexto relevante.
-- **Pegadinha 3: TTL resolve atualização imediata**: Ele limita obsolescência; invalidação e concorrência precisam de tratamento próprio.
+- **Cache é fonte durável automática**: Projete a fonte original e a recuperação explicitamente.
+- **Só a pergunta compõe a chave**: Inclua tenant, modelo, versão dos dados e contexto relevante.
+- **TTL resolve atualização imediata**: Ele limita obsolescência; invalidação e concorrência precisam de tratamento próprio.

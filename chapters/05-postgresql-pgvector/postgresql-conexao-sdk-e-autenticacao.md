@@ -11,9 +11,9 @@ tags:
   - passwordless
   - sdk
 difficulty: intermediate
-tldr: Psycopg e Npgsql usam o protocolo PostgreSQL; um token Entra pode ocupar o campo de senha.
-  Habilite a autenticação no servidor, provisione o principal no banco e renove tokens em conexões
-  novas.
+tldr: Entra fornece o token; PostgreSQL exige usuário e permissões SQL. Use TLS
+  com verificação, consultas parametrizadas e renovação de tokens ao abrir novas
+  conexões.
 related_links:
   - label: Autenticação Entra no PostgreSQL
     url: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts
@@ -26,8 +26,8 @@ questions:
     type: single-choice
     title: Conexão com psycopg/Npgsql e autenticação Microsoft Entra
     exam_domain: data-management
-    stem: Uma aplicação obtém token Entra para PostgreSQL, mas não tem permissão de SELECT. Qual etapa
-      está faltando?
+    stem: Uma aplicação obtém token Entra para PostgreSQL, mas não tem permissão de
+      SELECT. Qual etapa está faltando?
     options:
       - id: opt-4
         text: Desabilitar a validação TLS.
@@ -35,14 +35,14 @@ questions:
         rationale: Isso enfraquece a conexão sem conceder permissão SQL.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts
       - id: opt-1
-        text: Provisionar o principal no banco e conceder os grants SQL necessários.
+        text: Provisionar o principal no banco e conceder as permissões SQL necessárias.
         correct: true
         rationale: Autenticação do token não substitui autorização nas tabelas.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts
       - id: opt-2
         text: Conceder apenas Contributor no servidor Azure.
         correct: false
-        rationale: Gerenciamento do recurso não equivale a grants SQL.
+        rationale: Gerenciamento do recurso não equivale a permissões SQL.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts
       - id: opt-3
         text: Usar o token como nome de banco.
@@ -56,11 +56,12 @@ questions:
       - entra-id-auth
       - passwordless
       - sdk
+    learn_url: https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts
 ---
 
 # Conexão com psycopg/Npgsql e autenticação Microsoft Entra
 
-Uma API de IA pode consultar dados relacionais sem armazenar senha de banco. A autenticação Microsoft Entra permite usar a identidade da aplicação, mas exige configuração tanto no serviço Azure quanto no PostgreSQL.
+Uma aplicação pode acessar PostgreSQL usando sua identidade do Microsoft Entra, sem guardar senha fixa. O token comprova quem ela é. O usuário precisa existir no banco e receber permissões SQL; a rede também precisa permitir a conexão.
 
 ## Preparar servidor, principal e rede
 
@@ -128,6 +129,6 @@ Não. O principal deve existir no banco e ter os grants SQL necessários, além 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: RBAC Azure substitui GRANT**: Autorização SQL é outra camada.
-- **Pegadinha 2: Token nunca expira**: Conexões novas precisam de credencial válida; planeje renovação no pool.
-- **Pegadinha 3: Criptografia sem validar host**: Use cadeia CA confiável e validação de nome; não desabilite verificação para corrigir certificados.
+- **RBAC Azure substitui GRANT**: Autorização SQL é outra camada.
+- **Token nunca expira**: Conexões novas precisam de credencial válida; planeje renovação no pool.
+- **Criptografia sem validar host**: Use cadeia CA confiável e validação de nome; não desabilite verificação para corrigir certificados.

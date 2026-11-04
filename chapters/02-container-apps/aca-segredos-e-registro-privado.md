@@ -10,9 +10,9 @@ tags:
   - managed-identity
   - key-vault
 difficulty: intermediate
-tldr: Use identidade gerenciada para pull do ACR e referências a secrets para variáveis sensíveis. A
-  identidade precisa de permissões específicas em cada recurso, e alterar um secret não cria nova
-  revisão.
+tldr: Use identidade gerenciada para baixar imagens privadas e ler segredos.
+  Autorize cada serviço separadamente. Referencie o segredo no contêiner;
+  atualizá-lo não cria revisão.
 related_links:
   - label: Identidade gerenciada com ACR
     url: https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull
@@ -25,8 +25,8 @@ questions:
     type: single-choice
     title: Segredos, variáveis de ambiente e autenticação em registro privado
     exam_domain: containerized-solutions
-    stem: Uma identidade baixa a imagem do ACR, mas a referência ao Key Vault falha com acesso negado. O
-      que deve ser verificado?
+    stem: Uma identidade baixa a imagem do ACR, mas a referência ao Key Vault falha
+      com acesso negado. O que deve ser verificado?
     options:
       - id: opt-2
         text: Somente o papel AcrPull.
@@ -41,7 +41,8 @@ questions:
       - id: opt-4
         text: A presença do segredo em texto no Dockerfile.
         correct: false
-        rationale: Incluir o segredo na imagem expõe credenciais e não corrige a autorização da referência.
+        rationale: Incluir o segredo na imagem expõe credenciais e não corrige a
+          autorização da referência.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull
       - id: opt-1
         text: Permissão de leitura de secrets no cofre para a identidade da referência.
@@ -54,11 +55,12 @@ questions:
       - private-registry
       - managed-identity
       - key-vault
+    learn_url: https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull
 ---
 
 # Segredos, variáveis de ambiente e autenticação em registro privado
 
-Uma aplicação pode precisar baixar uma imagem privada e ler um segredo no Key Vault antes de atender. Esses acessos usam identidades e permissões independentes; sucesso no ACR não comprova autorização no cofre.
+Uma aplicação pode precisar baixar uma imagem privada do ACR e ler um segredo no Key Vault. São dois acessos separados. Identidade gerenciada identifica a aplicação sem uma senha no código, mas cada serviço ainda precisa conceder permissão.
 
 ## Identidade, registro e segredo
 
@@ -95,7 +97,7 @@ O trecho é parte de um contêiner, não um manifesto completo. Configurações 
 
 ## Rotação e diagnóstico
 
-Secrets pertencem à aplicação, não a uma revisão específica. Atualizar um secret não produz automaticamente nova revisão. Para secrets inseridos diretamente, reinicie revisões consumidoras ou publique nova revisão. Referências ao Key Vault sem versão têm comportamento de atualização gerenciado; valide o prazo documentado e a renovação das réplicas antes de revogar a versão anterior.
+Segredos pertencem à aplicação, não a uma revisão específica. Atualizar um secret não produz automaticamente nova revisão. Para secrets inseridos diretamente, reinicie revisões consumidoras ou publique nova revisão. Referências ao Key Vault sem versão têm comportamento de atualização gerenciado; valide o prazo documentado e a renovação das réplicas antes de revogar a versão anterior.
 
 <details>
 <summary>Checagem Rápida: A mesma identidade pode acessar ACR e Key Vault?</summary>
@@ -106,6 +108,6 @@ Sim, mas precisa de duas atribuições apropriadas. A existência da identidade 
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Secret é variável de ambiente automática**: É necessário referenciá-lo no template do contêiner.
-- **Pegadinha 2: Alteração cria revisão**: Atualizar secrets é uma mudança no escopo da aplicação.
-- **Pegadinha 3: Identidade resolve firewall**: Autorização não abre conectividade de rede nem corrige DNS privado.
+- **Secret é variável de ambiente automática**: É necessário referenciá-lo no template do contêiner.
+- **Alteração cria revisão**: Atualizar secrets é uma mudança no escopo da aplicação.
+- **Identidade resolve firewall**: Autorização não abre conectividade de rede nem corrige DNS privado.

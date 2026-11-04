@@ -9,8 +9,9 @@ tags:
   - traffic-splitting
   - blue-green
 difficulty: intermediate
-tldr: Revisões são snapshots imutáveis do template. O modo multiple permite distribuir tráfego entre
-  versões; o modo single mantém a versão anterior atendendo até a nova ficar pronta.
+tldr: Revisão é uma versão imutável do template da aplicação. O modo multiple
+  divide tráfego entre versões; single troca quando a nova está pronta. Alterar
+  um segredo não cria revisão.
 related_links:
   - label: Revisões
     url: https://learn.microsoft.com/en-us/azure/container-apps/revisions
@@ -23,8 +24,8 @@ questions:
     type: single-choice
     title: Revisões, modos de revisão e divisão de tráfego
     exam_domain: containerized-solutions
-    stem: A equipe quer enviar 10% do tráfego à candidata e 90% à versão estável. Qual preparação é
-      necessária?
+    stem: A equipe quer enviar 10% do tráfego à candidata e 90% à versão estável.
+      Qual preparação é necessária?
     options:
       - id: opt-1
         text: Usar modo multiple e pesos explícitos para as revisões prontas.
@@ -39,7 +40,8 @@ questions:
       - id: opt-3
         text: Alterar um secret para gerar automaticamente a revisão canary.
         correct: false
-        rationale: Secrets pertencem ao escopo da aplicação e sua alteração não cria revisão por si só.
+        rationale: Secrets pertencem ao escopo da aplicação e sua alteração não cria
+          revisão por si só.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/revisions
       - id: opt-4
         text: Desativar a revisão estável antes de testar a candidata.
@@ -51,11 +53,12 @@ questions:
       - revisions
       - traffic-splitting
       - blue-green
+    learn_url: https://learn.microsoft.com/en-us/azure/container-apps/revisions
 ---
 
 # Revisões, modos de revisão e divisão de tráfego
 
-Uma atualização de modelo pode aumentar erros mesmo quando o contêiner inicia corretamente. Revisões permitem validar uma candidata, direcionar uma fração do tráfego e voltar à versão estável sem reconstruir a imagem.
+Uma revisão guarda uma versão executável da aplicação. Você pode testar uma nova versão com parte do tráfego e voltar à anterior se surgirem erros. Essa volta é o rollback; ela não desfaz alterações feitas no banco.
 
 ## Revisão e configuração da aplicação
 
@@ -64,7 +67,7 @@ Uma ==revision== registra o template, incluindo imagem, recursos, variáveis de 
 | Modo | Uso | Comportamento |
 |---|---|---|
 | `single` | Atualização simples | A revisão anterior atende até a candidata ficar pronta |
-| `multiple` | Canary, blue-green e rollback controlado | Várias revisões podem permanecer ativas |
+| `multiple` | Teste parcial (canary), troca entre versões e rollback | Várias revisões podem permanecer ativas |
 
 No modo single, uma candidata com falha de readiness não deve substituir imediatamente uma revisão saudável. No modo multiple, estar ativa e receber tráfego pelo endpoint principal são estados diferentes.
 
@@ -86,7 +89,7 @@ As porcentagens devem somar ==100==. Uma regra que aponta para `latestRevision` 
 
 ## Critérios de decisão
 
-Compare taxa de falhas, p95, custo por operação e qualidade das respostas. Um retorno HTTP 200 não comprova qualidade do modelo. Se houver regressão, direcione 100% à revisão estável e confirme a recuperação antes de desativar a candidata. Retenha imagens e configurações necessárias ao rollback.
+Compare taxa de falhas, p95 (tempo abaixo do qual ficam 95% das respostas), custo por operação e qualidade das respostas. Um retorno HTTP 200 não comprova qualidade do modelo. Se houver rsaída de redeão, direcione 100% à revisão estável e confirme a recuperação antes de desativar a candidata. Retenha imagens e configurações necessárias ao rollback.
 
 <details>
 <summary>Checagem Rápida: Atualizar o valor de um secret reinicia todas as revisões?</summary>
@@ -97,6 +100,6 @@ Não. A alteração fica no escopo da aplicação. Reinicie ou implante uma revi
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Single troca imediatamente**: A plataforma verifica a prontidão da nova revisão antes da troca de tráfego.
-- **Pegadinha 2: Ativa significa tráfego principal**: Uma revisão pode estar ativa com peso zero e continuar acessível para validação específica.
-- **Pegadinha 3: Rollback de código desfaz dados**: Migrações e alterações externas exigem compatibilidade e recuperação próprias.
+- **Single troca imediatamente**: A plataforma verifica a prontidão da nova revisão antes da troca de tráfego.
+- **Ativa significa tráfego principal**: Uma revisão pode estar ativa com peso zero e continuar acessível para validação específica.
+- **Rollback de código desfaz dados**: Migrações e alterações externas exigem compatibilidade e recuperação próprias.

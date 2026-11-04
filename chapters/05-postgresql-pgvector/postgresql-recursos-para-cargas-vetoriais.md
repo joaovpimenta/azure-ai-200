@@ -10,8 +10,9 @@ tags:
   - maintenance-work-mem
   - storage-iops
 difficulty: intermediate
-tldr: Dimensione vetores considerando dados, índices, memória de construção e concorrência.
-  maintenance_work_mem afeta manutenção; não é o orçamento universal de consultas vetoriais.
+tldr: Dimensione vetores, índices e concorrência. maintenance_work_mem ajuda na
+  construção de índices; não acelera todo SELECT. Meça plano de consulta,
+  memória, disco, latência e recall antes de aumentar recursos.
 related_links:
   - label: Ajustar desempenho de pgvector
     url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector
@@ -24,8 +25,8 @@ questions:
     type: single-choice
     title: Compute, memória (maintenance_work_mem) e storage para vetores
     exam_domain: data-management
-    stem: A equipe quer ajustar memória de construção do índice HNSW. Qual parâmetro é diretamente
-      relevante?
+    stem: A equipe quer ajustar memória de construção do índice HNSW. Qual parâmetro
+      é diretamente relevante?
     options:
       - id: opt-3
         text: O TTL de uma chave Redis.
@@ -40,12 +41,14 @@ questions:
       - id: opt-1
         text: maintenance_work_mem, respeitando o orçamento do servidor.
         correct: true
-        rationale: Esse parâmetro participa de operações de manutenção, incluindo construção do índice.
+        rationale: Esse parâmetro participa de operações de manutenção, incluindo
+          construção do índice.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector
       - id: opt-2
         text: Somente max_connections sem considerar memória.
         correct: false
-        rationale: Mais conexões podem aumentar pressão e não definem memória de construção.
+        rationale: Mais conexões podem aumentar pressão e não definem memória de
+          construção.
         learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector
     tags:
       - postgresql
@@ -53,11 +56,12 @@ questions:
       - memory-tuning
       - maintenance-work-mem
       - storage-iops
+    learn_url: https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector
 ---
 
 # Compute, memória (maintenance_work_mem) e storage para vetores
 
-Uma base vetorial pode ter consultas rápidas em um notebook e sofrer com latência no servidor compartilhado. O custo real combina armazenamento dos vetores, estrutura ANN, filtros relacionais, cache de páginas e consultas simultâneas.
+Uma busca vetorial usa CPU, memória e armazenamento. Para dimensionar o servidor, considere vetores, índices, texto e consultas simultâneas. Um teste rápido no notebook não mostra como o sistema se comportará com muitos usuários.
 
 ## Estimar e observar
 
@@ -95,7 +99,7 @@ A dimensão do vetor deve corresponder à tabela do laboratório. `SET` afeta a 
 
 ## Benchmark útil
 
-Carregue dados representativos e compare latência p50/p95, recall, CPU e I/O com diferentes concorrências. Teste cache aquecido e cenário de leituras frias. Separe ingestão, construção de índice e consulta: otimizar uma fase pode piorar outra.
+Carregue dados representativos e compare mediana (p50), p95 (tempo de 95% das respostas), recall (cobertura dos resultados), CPU e acesso a disco com diferentes concorrências. Teste cache aquecido e cenário de leituras frias. Separe ingestão, construção de índice e consulta: otimizar uma fase pode piorar outra.
 
 <details>
 <summary>Checagem Rápida: Aumentar maintenance_work_mem acelera toda consulta SELECT?</summary>
@@ -108,6 +112,6 @@ Aumentos de capacidade precisam respeitar orçamento e limites de serviço. Para
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Mais memória sem limite**: Parâmetros elevados em sessões concorrentes podem esgotar o servidor.
-- **Pegadinha 2: Storage é só capacidade**: IOPS e throughput também limitam o workload.
-- **Pegadinha 3: Benchmark de uma consulta basta**: Teste concorrência, recall e distribuição real dos filtros.
+- **Mais memória sem limite**: Parâmetros elevados em sessões concorrentes podem esgotar o servidor.
+- **Storage é só capacidade**: IOPS e throughput também limitam a carga de trabalho.
+- **Benchmark de uma consulta basta**: Teste concorrência, recall e distribuição real dos filtros.

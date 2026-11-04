@@ -9,8 +9,9 @@ tags:
   - image-versioning
   - managed-identity
 difficulty: intermediate
-tldr: Um repositório agrupa imagens; tags são referências mutáveis e digests identificam o conteúdo.
-  Publique versões rastreáveis e conceda somente as permissões necessárias para push e pull.
+tldr: ACR guarda imagens. A tag é um nome que pode mudar; o digest identifica o
+  conteúdo. Implante pelo digest aprovado e separe permissões de publicar e
+  baixar.
 related_links:
   - label: Imagens, tags e manifests
     url: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts
@@ -23,14 +24,14 @@ questions:
     type: single-choice
     title: "Azure Container Registry: registro, repositórios, tags e versionamento"
     exam_domain: containerized-solutions
-    stem: O pipeline aprovou uma imagem, mas uma tag foi sobrescrita antes do deploy. Como garantir a
-      implantação do artefato aprovado?
+    stem: O pipeline aprovou uma imagem, mas uma tag foi sobrescrita antes do
+      deploy. Como garantir a implantação da imagem aprovada?
     options:
       - id: opt-1
         text: Implantar pela referência com digest.
         correct: true
-        rationale: O digest identifica o conteúdo do manifest aprovado, independentemente de uma tag ser
-          movida.
+        rationale: O digest identifica o conteúdo da imagem aprovada, independentemente
+          de uma tag ser movida.
         learn_url: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts
       - id: opt-2
         text: Reutilizar latest em todos os ambientes.
@@ -52,11 +53,12 @@ questions:
       - container-registry
       - image-versioning
       - managed-identity
+    learn_url: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts
 ---
 
 # Azure Container Registry: registro, repositórios, tags e versionamento
 
-Uma API de inferência deve executar exatamente a imagem aprovada no pipeline. O Azure Container Registry (ACR) armazena artefatos OCI privados e permite separar quem publica imagens de quem apenas as executa.
+O Azure Container Registry (ACR) guarda imagens de contêiner: pacotes com a aplicação e suas dependências. O pipeline publica a imagem; a aplicação a baixa para executar. Para repetir uma implantação, identifique o conteúdo aprovado, não apenas seu nome.
 
 ## Identidade da imagem e rastreabilidade
 
@@ -101,6 +103,6 @@ Registre tag, digest e commit no release. Confirme o digest em execução, teste
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Tag imutável**: Um nome de versão não bloqueia sobrescrita por si só. Use controles de escrita e fixe o digest.
-- **Pegadinha 2: Contributor concede pull**: Gerenciar o recurso não substitui permissões de dados para baixar imagens.
-- **Pegadinha 3: Excluir todas as tags antigas**: Retenção agressiva pode apagar o artefato necessário ao rollback; avalie referências e política antes da limpeza.
+- **Tag imutável**: Um nome de versão não bloqueia sobrescrita por si só. Use controles de escrita e fixe o digest.
+- **Contributor concede pull**: Gerenciar o recurso não substitui permissões de dados para baixar imagens.
+- **Excluir todas as tags antigas**: Retenção agressiva pode apagar o artefato necessário ao rollback; avalie referências e política antes da limpeza.

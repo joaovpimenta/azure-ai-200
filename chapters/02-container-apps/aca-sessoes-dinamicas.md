@@ -9,9 +9,9 @@ tags:
   - container-apps
   - security
 difficulty: intermediate
-tldr: Dynamic Sessions oferece execução isolada de código por sessão, com pools e expiração.
-  Autentique a chamada ao endpoint do pool, isole identificadores por usuário e controle saída de
-  rede e dados fornecidos.
+tldr: Dynamic Sessions executa código em sessões isoladas e temporárias. Separe
+  sessões por usuário ou trabalho, autorize o acesso e controle os dados e a
+  saída de rede.
 related_links:
   - label: Dynamic Sessions
     url: https://learn.microsoft.com/en-us/azure/container-apps/sessions
@@ -24,8 +24,8 @@ questions:
     type: single-choice
     title: Sessões dinâmicas para executar código gerado por IA
     exam_domain: containerized-solutions
-    stem: Um agente atende vários tenants e executa código gerado por IA. Como isolar o estado entre
-      usuários?
+    stem: Um agente atende vários tenants e executa código gerado por IA. Como
+      isolar o estado entre usuários?
     options:
       - id: opt-4
         text: Tratar arquivos da sessão como armazenamento permanente.
@@ -33,9 +33,11 @@ questions:
         rationale: O ambiente é efêmero e pode expirar.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/sessions
       - id: opt-1
-        text: Mapear identificadores de sessão distintos no backend e autorizar o uso do pool.
+        text: Mapear identificadores de sessão distintos no backend e autorizar o uso do
+          pool.
         correct: true
-        rationale: O identificador delimita o estado e o backend deve proteger a associação com o usuário.
+        rationale: O identificador delimita o estado e o backend deve proteger a
+          associação com o usuário.
         learn_url: https://learn.microsoft.com/en-us/azure/container-apps/sessions
       - id: opt-2
         text: Compartilhar uma única sessão para reduzir custo.
@@ -52,17 +54,18 @@ questions:
       - ai-code-interpreter
       - container-apps
       - security
+    learn_url: https://learn.microsoft.com/en-us/azure/container-apps/sessions
 ---
 
 # Sessões dinâmicas para executar código gerado por IA
 
-Um agente pode produzir Python para analisar um CSV. Executar esse código no processo da API expõe credenciais e memória da aplicação. Dynamic Sessions fornece ambientes isolados, alocados por um pool e acessados por uma API de execução.
+Um agente de IA pode gerar Python para analisar um arquivo. Dynamic Sessions executa esse código em um ambiente isolado, sem colocá-lo dentro do processo da API. Um pool mantém sessões disponíveis; cada sessão guarda estado temporário de uma interação.
 
 ## Pool, sessão e fronteira de confiança
 
-O ==session pool== configura capacidade, comportamento e ciclo de vida. Um identificador associa chamadas à mesma sessão, permitindo reaproveitar estado durante uma interação. Use identificadores distintos por usuário ou trabalho; não compartilhe uma sessão entre tenants.
+O ==session pool== configura capacidade, comportamento e ciclo de vida. Um identificador associa chamadas à mesma sessão, permitindo reaproveitar estado durante uma interação. Use identificadores distintos por usuário ou trabalho; não compartilhe uma sessão entre clientes independentes (tenants).
 
-Pools de interpretador gerenciado e pools de contêineres personalizados têm contratos e capacidades distintos. O isolamento baseado em Hyper-V não remove a necessidade de validar entradas, controlar dados disponibilizados e restringir ==egress==. Código não confiável ainda pode consumir recursos ou tentar enviar dados para a rede quando permitido.
+Pools de interpretador gerenciado e pools de contêineres personalizados têm contratos e capacidades distintos. O isolamento baseado em Hyper-V não remove a necessidade de validar entradas, controlar dados disponibilizados e restringir ==egress== (saída de rede). Código não confiável ainda pode consumir recursos ou tentar enviar dados para a rede quando permitido.
 
 ## Executar com Python e C#
 
@@ -122,6 +125,6 @@ Não. O estado é efêmero e sujeito a expiração ou encerramento. Exporte os a
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Sandbox permite qualquer segredo**: Não injete credenciais de produção no ambiente de código não confiável.
-- **Pegadinha 2: Identificador é autorização**: O endpoint exige autenticação e autorização; o backend deve proteger o vínculo entre usuário e sessão.
-- **Pegadinha 3: Estado permanente**: O pool gerencia expiração e capacidade; persistência precisa ser externa.
+- **Sandbox permite qualquer segredo**: Não injete credenciais de produção no ambiente de código não confiável.
+- **Identificador é autorização**: O endpoint exige autenticação e autorização; o backend deve proteger o vínculo entre usuário e sessão.
+- **Estado permanente**: O pool gerencia expiração e capacidade; persistência precisa ser externa.

@@ -11,9 +11,9 @@ tags:
   - feature-flags
   - sentinel-key
 difficulty: intermediate
-tldr: App Configuration centraliza configurações e feature flags; labels selecionam variantes de uma
-  chave. Refresh precisa ser integrado ao processo, e referências ao Key Vault exigem autorização
-  adicional.
+tldr: Chave e label identificam uma configuração. Feature flags controlam
+  recursos. Atualização dinâmica exige integração no cliente; mudar o portal não
+  atualiza todos os processos imediatamente.
 related_links:
   - label: Chaves e valores
     url: https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value
@@ -29,8 +29,8 @@ questions:
     type: single-choice
     title: "App Configuration: chaves, rótulos, refresh e feature flags"
     exam_domain: secure-monitor-troubleshoot
-    stem: A equipe alterou uma sentinel, mas um worker não atualiza os parâmetros em memória. O que
-      falta verificar?
+    stem: A equipe alterou uma chave sentinela, mas um processo em segundo plano
+      (worker) não atualiza os parâmetros em memória. O que falta verificar?
     options:
       - id: opt-3
         text: Se o portal reconstruiu a imagem da aplicação.
@@ -43,9 +43,10 @@ questions:
         rationale: Referências ao Key Vault requerem autorização separada.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value
       - id: opt-1
-        text: Se o provider monitora a sentinel e se o processo solicita refresh.
+        text: Se o cliente monitora a chave sentinela e se o processo solicita refresh.
         correct: true
-        rationale: O sinal só tem efeito quando o cliente integra o mecanismo de atualização.
+        rationale: O sinal só tem efeito quando o cliente integra o mecanismo de
+          atualização.
         learn_url: https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value
       - id: opt-2
         text: Se a label foi usada como papel RBAC.
@@ -59,22 +60,23 @@ questions:
       - dynamic-refresh
       - feature-flags
       - sentinel-key
+    learn_url: https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value
 ---
 
 # App Configuration: chaves, rótulos, refresh e feature flags
 
-A equipe precisa alterar o limite de documentos recuperados e ativar um novo reranker sem reconstruir a aplicação. App Configuration centraliza esses valores, enquanto Key Vault guarda credenciais. Separar configuração e segredo simplifica governança e auditoria.
+App Configuration centraliza parâmetros da aplicação, como quantos documentos buscar. Feature flags permitem ativar recursos sem publicar outra imagem. Use Key Vault para segredos e configure como cada processo deve buscar atualizações.
 
 ## Chaves, labels e flags
 
-Uma configuração é identificada por ==key e label==. `rag:topK` com label `prod` e a mesma chave com label `test` são entradas diferentes. Label não é inferida automaticamente pelo ambiente: a aplicação deve selecionar a variante correta.
+Uma configuração é identificada por ==key e label==: chave e rótulo. `rag:topK` com label `prod` e a mesma chave com label `test` são entradas diferentes. Label não é inferida automaticamente pelo ambiente: a aplicação deve selecionar a variante correta.
 
 | Recurso | Uso | Limite |
 |---|---|---|
 | Key-value | Parâmetro de aplicação | Não é cofre de segredos |
 | Label | Ambiente, região ou variante | Não representa permissão de acesso |
 | Feature flag | Ativação com filtros e condições | Exige biblioteca de avaliação |
-| Sentinel key | Sinalizar conjunto de mudanças | Exige configuração de refresh |
+| Sentinel key (chave sentinela) | Sinalizar conjunto de mudanças | Exige configuração de refresh |
 
 Uma flag pode usar filtros temporais, percentuais ou targeting quando suportados pelo cliente. Ler uma string chamada `enabled` não implementa automaticamente essas regras. Para parâmetros que precisam mudar juntos, publique primeiro os valores e atualize a sentinel por último; use snapshots quando a necessidade exigir uma versão imutável de configuração.
 
@@ -126,6 +128,6 @@ Não. Cada cliente precisa buscar a atualização e avaliar a flag. O comportame
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Label protege produção**: Label seleciona valores; RBAC e desenho de recursos controlam acesso.
-- **Pegadinha 2: Sentinel cria transação automaticamente**: Ela coordena refresh quando o cliente foi configurado para observá-la.
-- **Pegadinha 3: Data Reader lê também o Key Vault**: Cada serviço exige sua própria autorização.
+- **Label protege produção**: Label seleciona valores; RBAC e desenho de recursos controlam acesso.
+- **Sentinel cria transação automaticamente**: Ela coordena refresh quando o cliente foi configurado para observá-la.
+- **Data Reader lê também o Key Vault**: Cada serviço exige sua própria autorização.

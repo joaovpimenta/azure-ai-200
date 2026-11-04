@@ -173,7 +173,7 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
       <div class="header-actions">
         <nav class="main-nav" aria-label="Navegação Principal">
           <a href="${rootRel}index.html" class="header-link nav-link ${currentRoute === 'home' ? 'active' : ''}" data-route="home">Artigos</a>
-          <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Cram</a>
+          <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Revisão rápida</a>
           <a href="${rootRel}simulator/index.html" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
           <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Prontidão</a>
         </nav>
@@ -595,7 +595,7 @@ const homeContent = `<header class="archive-intro">
 
 const views = [
   { file: 'index.html', title: 'Arquivo de artigos', route: 'home', content: homeContent },
-  { file: 'cram/index.html', title: 'Cram Sheet de Alta Densidade', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
+  { file: 'cram/index.html', title: 'Revisão rápida (Cram)', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
   { file: 'simulator/index.html', title: 'Simulador de Exame AI-200', route: 'simulator', content: '<div id="simulator-view">Carregando simulador de questões...</div>' },
   { file: 'mastery/index.html', title: 'Mapa de Cobertura e Prontidão', route: 'mastery', content: '<div id="mastery-view">Carregando métricas de prontidão...</div>' }
 ];

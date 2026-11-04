@@ -12,9 +12,9 @@ tags:
   - kql-render
   - application-insights
 difficulty: intermediate
-tldr: KQL filtra, agrega e correlaciona telemetria. Selecione o esquema do contexto de consulta e
-  evite multiplicar linhas em joins; percentis e pesos de amostragem precisam de interpretação
-  explícita.
+tldr: Em KQL, where filtra, summarize agrega, bin agrupa em intervalos e join
+  combina tabelas. Confira esquema e amostragem. Várias dependências por
+  requisição podem multiplicar linhas no join.
 related_links:
   - label: Visão geral de KQL
     url: https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor
@@ -27,14 +27,14 @@ questions:
     type: single-choice
     title: "KQL: where, summarize, bin, join e render"
     exam_domain: secure-monitor-troubleshoot
-    stem: Um join entre AppRequests e AppDependencies aumenta a contagem de requisições. Qual é uma
-      correção adequada para uma linha por requisição?
+    stem: Um join entre AppRequests e AppDependencies aumenta a contagem de
+      requisições. Qual é uma correção adequada para uma linha por requisição?
     options:
       - id: opt-1
         text: Agregar dependências por OperationId antes do join.
         correct: true
-        rationale: Isso evita multiplicar linhas pela quantidade de dependências da operação no escopo
-          consultado.
+        rationale: Isso evita multiplicar linhas pela quantidade de dependências da
+          operação no escopo consultado.
         learn_url: https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor
       - id: opt-2
         text: Usar render timechart para remover duplicação lógica.
@@ -49,7 +49,8 @@ questions:
       - id: opt-4
         text: Trocar DurationMs por um campo de outro esquema sem adaptação.
         correct: false
-        rationale: Misturar esquemas não resolve a cardinalidade e pode quebrar a consulta.
+        rationale: Misturar esquemas não resolve a cardinalidade e pode quebrar a
+          consulta.
         learn_url: https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor
     tags:
       - kql
@@ -59,11 +60,12 @@ questions:
       - joins
       - kql-render
       - application-insights
+    learn_url: https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor
 ---
 
 # KQL: where, summarize, bin, join e render
 
-Uma regressão deve ser descrita por janela de tempo, volume, erros e distribuição de latência. KQL permite explorar logs de Application Insights e Log Analytics sem alterar os dados de origem.
+KQL é a linguagem usada para consultar logs no Azure Monitor. Você pode filtrar um período, contar falhas e comparar tempos de resposta. O p95 é o tempo abaixo do qual ficaram 95% das medições; ele ajuda a enxergar lentidão que a média esconde.
 
 ## Contexto e esquema
 
@@ -114,7 +116,7 @@ A soma das durações de dependências pode exceder o tempo da requisição quan
 `count()` conta linhas; `dcount()` estima valores distintos. `join kind=inner` descarta requisições sem correspondência; `leftouter` preserva o lado esquerdo. Um gráfico vazio pode indicar contexto, intervalo ou nome de tabela incorreto, além de ausência real de tráfego.
 
 <details>
-<summary>Checagem Rápida: Um join direto entre requests e dependencies preserva a contagem de requests?</summary>
+<summary>Checagem Rápida: Um join direto entre requisições e dependências preserva a contagem de requests?</summary>
 
 Não necessariamente. Várias dependências por operação podem multiplicar linhas. Agregue conforme a unidade de análise antes de contar.
 
@@ -122,6 +124,6 @@ Não necessariamente. Várias dependências por operação podem multiplicar lin
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: DurationMs e duration são intercambiáveis**: Confirme tipo e esquema no contexto de consulta.
-- **Pegadinha 2: Média revela cauda**: Use percentis e volume para investigar usuários mais lentos.
-- **Pegadinha 3: Render muda a agregação**: Ele escolhe a visualização do resultado; a semântica vem das etapas anteriores.
+- **DurationMs e duration são intercambiáveis**: Confirme tipo e esquema no contexto de consulta.
+- **Média revela cauda**: Use percentis e volume para investigar usuários mais lentos.
+- **Render muda a agregação**: Ele escolhe a visualização do resultado; a semântica vem das etapas anteriores.

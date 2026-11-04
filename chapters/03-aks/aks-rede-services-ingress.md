@@ -10,9 +10,9 @@ tags:
   - kubernetes
   - architecture
 difficulty: intermediate
-tldr: Service oferece descoberta e balanceamento para Pods; Ingress define rotas HTTP e depende de
-  um controller. Investigue DNS, endpoints, portas e políticas em cada salto do caminho de uma
-  requisição.
+tldr: Service dá acesso estável aos Pods. Ingress define rotas HTTP/HTTPS e
+  precisa de um controlador. Confira DNS, portas, labels e prontidão dos Pods ao
+  investigar falhas.
 related_links:
   - label: Rede de aplicações no AKS
     url: https://learn.microsoft.com/en-us/azure/aks/concepts-network-services
@@ -22,8 +22,8 @@ questions:
     type: single-choice
     title: Services, Ingress e conectividade ponta a ponta
     exam_domain: containerized-solutions
-    stem: Um manifesto Ingress foi aplicado em um cluster sem controller compatível. Qual afirmação é
-      correta?
+    stem: Um manifesto Ingress foi aplicado em um cluster sem controller compatível.
+      Qual afirmação é correta?
     options:
       - id: opt-2
         text: O objeto cria automaticamente um proxy em todo cluster.
@@ -43,7 +43,8 @@ questions:
       - id: opt-1
         text: É necessário um controller que implemente a classe e as regras do Ingress.
         correct: true
-        rationale: O objeto é declarativo; o controller fornece o comportamento de roteamento.
+        rationale: O objeto é declarativo; o controller fornece o comportamento de
+          roteamento.
         learn_url: https://learn.microsoft.com/en-us/azure/aks/concepts-network-services
     tags:
       - aks
@@ -51,11 +52,12 @@ questions:
       - ingress
       - kubernetes
       - architecture
+    learn_url: https://learn.microsoft.com/en-us/azure/aks/concepts-network-services
 ---
 
 # Services, Ingress e conectividade ponta a ponta
 
-Uma requisição de chat pode atravessar DNS público, balanceador, controlador de Ingress, Service e Pod antes de chamar o modelo. Um erro 502 pode surgir em qualquer transição. Entender esse caminho reduz tentativas de corrigir o código quando a causa está no roteamento.
+No AKS, Service fornece um endereço estável para acessar Pods. Ingress define rotas HTTP por domínio e caminho, como api.exemplo.com/chat. Um controlador de Ingress precisa implementar essas regras. Para diagnosticar falhas, acompanhe cada etapa até a aplicação.
 
 ## Service e Ingress
 
@@ -121,6 +123,6 @@ Não. Confira labels, namespace, readiness e `targetPort`. Um proxy não consegu
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: LoadBalancer sempre é público**: A configuração pode solicitar balanceador interno.
-- **Pegadinha 2: Ingress equivale a controller**: O objeto contém regras; o controller as implementa.
-- **Pegadinha 3: Entrada saudável garante saída**: O Pod pode atender HTTP e ainda falhar ao resolver ou acessar o endpoint do modelo.
+- **LoadBalancer sempre é público**: A configuração pode solicitar balanceador interno.
+- **Ingress equivale a controller**: O objeto contém regras; o controller as implementa.
+- **Entrada saudável garante saída**: O Pod pode atender HTTP e ainda falhar ao resolver ou acessar o endpoint do modelo.

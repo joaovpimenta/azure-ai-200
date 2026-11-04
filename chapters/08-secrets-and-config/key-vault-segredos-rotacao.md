@@ -10,9 +10,9 @@ tags:
   - soft-delete
   - purge-protection
 difficulty: intermediate
-tldr: Key Vault armazena segredos versionados; rotação inclui atualizar o sistema de origem e os
-  consumidores. Soft delete permite recuperação; purge protection impede a purga antecipada durante
-  a retenção.
+tldr: Key Vault controla acesso e versões de segredos. Rotacione na origem,
+  atualize consumidores e só então revogue a versão antiga. Soft delete permite
+  recuperação; purge protection impede exclusão definitiva antecipada.
 related_links:
   - label: Segredos no Key Vault
     url: https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets
@@ -28,8 +28,8 @@ questions:
     type: single-choice
     title: "Key Vault: segredos, versões, rotação e soft delete"
     exam_domain: secure-monitor-troubleshoot
-    stem: Uma nova versão de secret foi criada no cofre, mas clientes ainda usam a credencial anterior.
-      Qual ação integra uma rotação completa?
+    stem: Uma nova versão de secret foi criada no cofre, mas clientes ainda usam a
+      credencial anterior. Qual ação integra uma rotação completa?
     options:
       - id: opt-2
         text: Excluir o secret como forma de revogar automaticamente a senha no banco.
@@ -44,12 +44,15 @@ questions:
       - id: opt-4
         text: Desabilitar purge protection para acelerar a atualização dos clientes.
         correct: false
-        rationale: Purge protection não controla refresh e não pode ser desligada após habilitação.
+        rationale: Purge protection não controla refresh e não pode ser desligada após
+          habilitação.
         learn_url: https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets
       - id: opt-1
-        text: Renovar os consumidores, testar a nova credencial e só depois revogar a antiga na origem.
+        text: Renovar os consumidores, testar a nova credencial e só depois revogar a
+          antiga na origem.
         correct: true
-        rationale: Rotação envolve origem, distribuição e consumo; criar versão não atualiza todos os caches.
+        rationale: Rotação envolve origem, distribuição e consumo; criar versão não
+          atualiza todos os caches.
         learn_url: https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets
     tags:
       - key-vault
@@ -57,11 +60,12 @@ questions:
       - secret-rotation
       - soft-delete
       - purge-protection
+    learn_url: https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets
 ---
 
 # Key Vault: segredos, versões, rotação e soft delete
 
-Uma credencial de banco deve poder mudar sem reconstruir a imagem da API. O Key Vault fornece armazenamento e acesso controlado a secrets, mas a aplicação ainda precisa adotar um fluxo de rotação e lidar com versões em cache.
+Key Vault guarda segredos, como credenciais de serviços externos. A aplicação pode carregar uma nova versão sem reconstruir sua imagem. Rotacionar uma credencial exige atualizar tanto o serviço que a aceita quanto os consumidores que a utilizam.
 
 ## Versões e permissões
 
@@ -114,6 +118,6 @@ Não. O banco continua aceitando a credencial até que ela seja revogada no pró
 
 ## Pegadinhas de Prova
 
-- **Pegadinha 1: Nova versão atualiza todos os clientes**: Referências fixas e caches precisam ser renovados.
-- **Pegadinha 2: Purge protection pode ser desligada para limpar**: Ela bloqueia purga antes da retenção e não pode ser desabilitada após habilitação.
-- **Pegadinha 3: Rotação é apenas gravar no cofre**: Atualize origem, consumidores e revogação de forma coordenada.
+- **Nova versão atualiza todos os clientes**: Referências fixas e caches precisam ser renovados.
+- **Purge protection pode ser desligada para limpar**: Ela bloqueia purga antes da retenção e não pode ser desabilitada após habilitação.
+- **Rotação é apenas gravar no cofre**: Atualize origem, consumidores e revogação de forma coordenada.
