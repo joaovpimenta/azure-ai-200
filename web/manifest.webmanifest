@@ -2,12 +2,12 @@
   "name": "Azure AI-200 Study Hub",
   "short_name": "AI-200",
   "description": "Plataforma de estudos ativos, retenção, simulados e revisão em áudio para a certificação Microsoft Azure AI-200 (AI-200T00)",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "theme_color": "#0284c7",
-  "background_color": "#0f172a",
+  "theme_color": "#277d69",
+  "background_color": "#f8f6f0",
   "lang": "pt-BR",
   "dir": "ltr",
   "categories": [
@@ -15,11 +15,6 @@
     "productivity"
   ],
   "icons": [
-    {
-      "src": "./favicon.ico",
-      "sizes": "48x48 32x32 16x16",
-      "type": "image/x-icon"
-    },
     {
       "src": "./icons/icon-192.png",
       "sizes": "192x192",
@@ -82,5 +77,6 @@
         }
       ]
     }
-  ]
+  ],
+  "id": "./"
 }

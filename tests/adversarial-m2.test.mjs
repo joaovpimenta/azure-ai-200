@@ -150,7 +150,7 @@ describe('Service Worker & PWA Manifest Conformance (web/sw.js & web/manifest.we
 
     assert.equal(m.name, 'Azure AI-200 Study Hub');
     assert.equal(m.short_name, 'AI-200');
-    assert.equal(m.start_url, './');
+    assert.equal(m.start_url, './index.html');
     assert.equal(m.scope, './');
     assert.equal(m.display, 'standalone');
     assert.equal(m.lang, 'pt-BR');
@@ -166,7 +166,7 @@ describe('Service Worker & PWA Manifest Conformance (web/sw.js & web/manifest.we
     assert.ok(existsSync(swPath), 'web/sw.js must exist');
     const code = readFileSync(swPath, 'utf-8');
 
-    assert.ok(code.includes("const CACHE_NAME = 'azure-ai-200-cache-v1';"), 'Must use versioned cache key');
+    assert.match(code, /const CACHE_NAME = 'azure-ai-200-cache-v\d+';/, 'Must use versioned cache key');
 
     const expectedModules = [
       './',
@@ -194,7 +194,7 @@ describe('Service Worker & PWA Manifest Conformance (web/sw.js & web/manifest.we
     assert.ok(code.includes('staleWhileRevalidate'), 'sw.js must define staleWhileRevalidate');
   });
 
-  test('Finding F-02: audit precached assets and manifest icons on dist/ filesystem', () => {
+  test('Finding F-02 regression: every precached asset and manifest icon exists in dist/', () => {
     const swCode = readFileSync(swPath, 'utf-8');
     const precacheMatch = swCode.match(/const PRECACHE_ASSETS = \[([\s\S]*?)\];/);
     assert.ok(precacheMatch, 'PRECACHE_ASSETS array must be present');
@@ -215,14 +215,13 @@ describe('Service Worker & PWA Manifest Conformance (web/sw.js & web/manifest.we
       }
     }
 
-    // Empirical observation: ./favicon.ico is listed in sw.js PRECACHE_ASSETS but absent on disk
-    assert.equal(missingAssets.length, 1, 'Only ./favicon.ico is missing from dist precache assets');
-    assert.equal(missingAssets[0].asset, './favicon.ico');
+    // A deployment must not ship dangling asset URLs.
+    assert.deepEqual(missingAssets, [], 'All precache assets must exist in the built site');
 
     // Audit manifest icon files on disk
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
     const missingIcons = manifest.icons.filter(i => !existsSync(join(distDir, i.src.replace(/^\.\//, ''))));
-    assert.equal(missingIcons.length, manifest.icons.length, 'Icon image files do not yet exist on disk in M2');
+    assert.deepEqual(missingIcons, [], 'All manifest icons must be present in the built site');
   });
 });
 
