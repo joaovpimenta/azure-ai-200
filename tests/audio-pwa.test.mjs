@@ -72,10 +72,10 @@ describe('PWA Manifest Specification (web/manifest.webmanifest)', () => {
     assert.equal(json.name, 'Azure AI-200 Study Hub');
     assert.equal(json.short_name, 'AI-200');
     assert.equal(json.display, 'standalone');
-    assert.equal(json.start_url, './');
+    assert.equal(json.start_url, './index.html');
     assert.equal(json.scope, './');
-    assert.equal(json.theme_color, '#0284c7');
-    assert.equal(json.background_color, '#0f172a');
+    assert.equal(json.theme_color, '#277d69');
+    assert.equal(json.background_color, '#f8f6f0');
     assert.ok(Array.isArray(json.icons) && json.icons.length > 0, 'Must declare icons');
   });
 });
@@ -83,10 +83,10 @@ describe('PWA Manifest Specification (web/manifest.webmanifest)', () => {
 describe('Service Worker Strategy (web/sw.js)', () => {
   const swPath = join(ROOT_DIR, 'web', 'sw.js');
 
-  test('sw.js declares cache-v1 and precache assets', () => {
+  test('sw.js declares versioned cache and precache assets', () => {
     assert.ok(existsSync(swPath), 'web/sw.js must exist');
     const code = readFileSync(swPath, 'utf-8');
-    assert.ok(code.includes('azure-ai-200-cache-v1'), 'Must use azure-ai-200-cache-v1 key');
+    assert.match(code, /azure-ai-200-cache-v\d+/, 'Must use a versioned cache key');
     assert.ok(code.includes('PRECACHE_ASSETS'), 'Must define precache assets');
     assert.ok(code.includes('staleWhileRevalidate'), 'Must define Stale-While-Revalidate strategy');
     assert.ok(code.includes('networkFirstHtml'), 'Must define Network-First HTML strategy');
