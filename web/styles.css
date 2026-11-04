@@ -1555,3 +1555,21 @@ details.check-card .check-card-body {
     display: none !important;
   }
 }
+
+
+/* Installable PWA: visible entry point and accessible fallback instructions. */
+.footer-inner { justify-content: space-between; gap: 16px; }
+.install-app { color: var(--accent); font-weight: 700; white-space: nowrap; }
+.install-app:hover { background: var(--soft); border-color: var(--accent); }
+.header-install { font-size: 13px; padding: 8px 11px; }
+.install-help { width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); box-sizing: border-box; border: 1px solid var(--line); border-radius: 12px; padding: 24px; background: var(--paper); color: var(--ink); box-shadow: 0 20px 48px #0003; }
+.install-help::backdrop { background: #001b18a8; }
+.install-help h2 { font: 700 24px/1.2 var(--serif); margin: 0 0 14px; }
+.install-help p { line-height: 1.65; margin: 0 0 22px; }
+.install-help button { border: 1px solid var(--accent); color: white; background: var(--accent); border-radius: 6px; padding: 9px 18px; cursor: pointer; }
+@media (max-width: 600px) {
+  .home-header-inner .header-actions { flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+  .home-header-inner .main-nav { flex-basis: 100%; order: 2; justify-content: flex-end; }
+  .header-install { padding: 5px 8px; }
+  .footer-inner { flex-wrap: wrap; padding-block: 16px; }
+}
