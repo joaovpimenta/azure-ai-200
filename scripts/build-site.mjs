@@ -7,6 +7,7 @@ import { resolve, join, relative, dirname } from 'node:path';
 import { extractFrontmatter } from './lib/frontmatter.mjs';
 import { compileMarkdown } from './lib/markdown.mjs';
 import { escapeHtml } from './lib/cloze.mjs';
+import { generatePwaIcons } from './lib/pwa-icons.mjs';
 
 const ROOT_DIR = resolve(process.cwd());
 const DIST_DIR = join(ROOT_DIR, 'dist');
@@ -144,10 +145,13 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
   <meta id="article-description" name="description" content="${escapeHtml(description || 'Tech Topics · Azure AI-200 — arquivo de artigos e estudo ativo sobre arquitetura de dados e contêineres para IA.')}" />
   <title>${title ? `${escapeHtml(title)} — Azure AI-200` : 'Azure AI-200 — Arquivo de artigos e estudo'}</title>
   <meta name="theme-color" content="#277d69" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Azure AI-200" />
   <link rel="manifest" href="${rootRel}manifest.webmanifest" />
-  <link rel="icon" href="${rootRel}favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="${rootRel}favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" sizes="180x180" href="${rootRel}apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -173,6 +177,7 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
           <a href="${rootRel}simulator/index.html" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
           <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Prontidão</a>
         </nav>
+        <button class="install-app header-install" type="button" data-install-app>Instalar</button>
         <a class="github-stars" href="https://github.com/joaovpimenta/azure-ai-200" target="_blank" rel="noopener noreferrer" aria-label="Ver repositório Azure AI-200 no GitHub" title="Estrelas do repositório no GitHub">
           <svg aria-hidden="true" class="github-mark" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
           <span class="github-star-label"><span aria-hidden="true">★</span> <span id="github-stars">—</span></span>
@@ -231,9 +236,14 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
   <footer class="site-footer">
     <div class="footer-inner">
       <p>Azure AI-200 · Arquivo de arquitetura de dados e contêineres para IA · Inspirado em Tech Topics</p>
-      <button id="install-app" class="header-link install-app" type="button" hidden>Instalar app</button>
+      <button id="install-app" class="header-link install-app" data-install-app type="button">Instalar app</button>
     </div>
   </footer>
+  <dialog id="install-help" class="install-help" aria-labelledby="install-help-title">
+    <h2 id="install-help-title">Instalar Azure AI-200</h2>
+    <p id="install-help-message"></p>
+    <button id="install-help-close" type="button">Fechar</button>
+  </dialog>
 </body>
 </html>`;
 }
@@ -611,6 +621,9 @@ if (existsSync(WEB_DIR)) {
   });
   console.log('✓ Copied static assets from web/ to dist/');
 }
+
+// Generate installable icons in the published dist/ directory on every build.
+generatePwaIcons(DIST_DIR);
 
 console.log(`\n🎉 Static build completed successfully!`);
 console.log(`   - Concepts compiled: ${catalog.filter(c => c.type === 'concept').length}`);
