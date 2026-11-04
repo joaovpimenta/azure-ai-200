@@ -32,14 +32,20 @@ Plataforma estática de estudo ativo, revisão de véspera e simulados para a ce
 | **01** | [`chapters/01-container-hosting/`](chapters/01-container-hosting/README.md) | `containerized-solutions` | 20–25% |
 | **02** | [`chapters/02-container-apps/`](chapters/02-container-apps/README.md) | `containerized-solutions` | 20–25% |
 | **03** | [`chapters/03-aks/`](chapters/03-aks/README.md) | `containerized-solutions` | 20–25% |
-| **04 (Piloto)** | [`chapters/04-cosmos-db-nosql/`](chapters/04-cosmos-db-nosql/README.md) | `data-management` | **25–30%** |
+| **04** | [`chapters/04-cosmos-db-nosql/`](chapters/04-cosmos-db-nosql/README.md) | `data-management` | **25–30%** |
 | **05** | [`chapters/05-postgresql-pgvector/`](chapters/05-postgresql-pgvector/README.md) | `data-management` | **25–30%** |
 | **06** | [`chapters/06-managed-redis/`](chapters/06-managed-redis/README.md) | `data-management` | **25–30%** |
 | **07** | [`chapters/07-backend-integration/`](chapters/07-backend-integration/README.md) | `connect-and-consume` | 20–25% |
 | **08** | [`chapters/08-secrets-and-config/`](chapters/08-secrets-and-config/README.md) | `secure-monitor-troubleshoot` | 20–25% |
 | **09** | [`chapters/09-observe-and-troubleshoot/`](chapters/09-observe-and-troubleshoot/README.md) | `secure-monitor-troubleshoot` | 20–25% |
 
-### Capítulo Piloto Completo (`04-cosmos-db-nosql`)
+### Cobertura editorial completa
+
+Todos os **35 artigos previstos no blueprint** estão implementados nas nove trilhas: 3 de hospedagem, 5 de Container Apps, 3 de AKS, 5 de Cosmos DB, 6 de PostgreSQL, 2 de Redis, 5 de integração de back-end, 3 de segredos/configuração e 3 de observabilidade.
+
+Cada novo conceito inclui resumo para revisão, autoavaliação, pegadinhas de prova, referências oficiais e uma questão formativa integrada ao simulado. Exemplos de SDK apresentam Python e C# em blocos consecutivos; tópicos de infraestrutura usam CLI, YAML, SQL ou KQL conforme a operação.
+
+### Capítulo Cosmos DB Completo (`04-cosmos-db-nosql`)
 
 1. [Modelo de recursos, partition key e Request Units](chapters/04-cosmos-db-nosql/cosmos-db-modelo-de-recursos-e-particionamento.md)
 2. [SDK: CosmosClient, CRUD, consultas parametrizadas e paginação](chapters/04-cosmos-db-nosql/cosmos-db-sdk-conexao-e-consultas.md)

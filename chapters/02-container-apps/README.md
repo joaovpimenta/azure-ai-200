@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Desenvolver%20solu%C3%A7%C3%B5es%20em%20cont%C3%AAineres%20no%20Azure-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -34,17 +34,17 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `aca-ambientes-e-implantacao` | Ambientes e implantação no Container Apps (CLI e YAML) | `container-orchestration` | Planejado | [Acessar Conceito](./aca-ambientes-e-implantacao.md) |
-| 2 | `aca-revisoes-e-trafego` | Revisões, modos de revisão e divisão de tráfego | `container-orchestration` | Planejado | [Acessar Conceito](./aca-revisoes-e-trafego.md) |
-| 3 | `aca-segredos-e-registro-privado` | Segredos, variáveis de ambiente e autenticação em registro privado | `container-orchestration`, `secure-solutions` | Planejado | [Acessar Conceito](./aca-segredos-e-registro-privado.md) |
-| 4 | `aca-escala-keda` | Regras de escala HTTP, TCP e KEDA (scale to zero) | `container-orchestration` | Planejado | [Acessar Conceito](./aca-escala-keda.md) |
-| 5 | `aca-sessoes-dinamicas` | Sessões dinâmicas para executar código gerado por IA | `container-orchestration` | Planejado | [Acessar Conceito](./aca-sessoes-dinamicas.md) |
+| 1 | `aca-ambientes-e-implantacao` | Ambientes e implantação no Container Apps (CLI e YAML) | `container-orchestration` | Implementado | [Acessar Conceito](./aca-ambientes-e-implantacao.md) |
+| 2 | `aca-revisoes-e-trafego` | Revisões, modos de revisão e divisão de tráfego | `container-orchestration` | Implementado | [Acessar Conceito](./aca-revisoes-e-trafego.md) |
+| 3 | `aca-segredos-e-registro-privado` | Segredos, variáveis de ambiente e autenticação em registro privado | `container-orchestration`, `secure-solutions` | Implementado | [Acessar Conceito](./aca-segredos-e-registro-privado.md) |
+| 4 | `aca-escala-keda` | Regras de escala HTTP, TCP e KEDA (scale to zero) | `container-orchestration` | Implementado | [Acessar Conceito](./aca-escala-keda.md) |
+| 5 | `aca-sessoes-dinamicas` | Sessões dinâmicas para executar código gerado por IA | `container-orchestration` | Implementado | [Acessar Conceito](./aca-sessoes-dinamicas.md) |
 
 ---
 
 ## Dicas de Estudo e Pontos de Alta Relevância para o Exame
 
-- **Modos de Revisão (`single` vs `multiple`)**: No modo `single`, qualquer nova implantação substitui imediatamente 100% do tráfego para a revisão mais recente e desativa as anteriores. No modo `multiple`, várias revisões permanecem ativas simultaneamente, permitindo atribuir porcentagens específicas de tráfego (ex.: 80% para a revisão estável e 20% para a revisão candidata de um novo modelo de IA) ou usar revisões nomeadas para validação interna.
-- **KEDA Scale-to-Zero e Min/Max Replicas**: Se a regra de escala tiver `minReplicas: 0`, a aplicação escala até zero réplicas quando não houver carga. O benefício é custo zero de computação; a desvantagem é o *cold start* na primeira requisição. Para APIs voltadas ao usuário final com SLA estrito de latência, configure `minReplicas: 1` ou utilize warming pools.
+- **Modos de Revisão (`single` vs `multiple`)**: No modo `single`, a revisão anterior continua atendendo até a nova estar pronta; então a plataforma transfere o tráfego e desativa a anterior. No modo `multiple`, várias revisões permanecem ativas simultaneamente, permitindo atribuir porcentagens específicas de tráfego (ex.: 80% para a revisão estável e 20% para a revisão candidata de um novo modelo de IA) ou usar revisões nomeadas para validação interna.
+- **KEDA Scale-to-Zero e Min/Max Replicas**: Se a regra de escala tiver `minReplicas: 0`, a aplicação escala até zero réplicas quando não houver carga. O benefício é reduzir o consumo de computação ociosa; outros recursos podem continuar gerando cobrança. A desvantagem é o *cold start* na primeira requisição. Para APIs voltadas ao usuário final com SLA estrito de latência, configure um piso de réplicas adequado e meça a latência de inicialização.
 - **Puxar Imagens do ACR sem Senha de Administrador**: Nunca habilite a conta de administrador no ACR para produção. Em vez disso, configure uma **Identidade Gerenciada** no Container App, atribua o papel `AcrPull` no ACR e configure o manifesto YAML do ACA apontando `identity: <managed-identity-id>` dentro do bloco `registries`.
-- **Sessões Dinâmicas vs Contêiner Convencional**: Sessões Dinâmicas (Dynamic Sessions) NÃO são contêineres convencionais de longa duração. Elas são alocadas dinamicamente via API REST ou SDK para executar scripts Python de agentes LLM em um ambiente descartável com limite de tempo e memória, garantindo que código arbitrário gerado por IA não acesse a rede interna da empresa nem recursos de nuvem.
+- **Sessões Dinâmicas vs Contêiner Convencional**: Sessões Dinâmicas (Dynamic Sessions) NÃO são contêineres convencionais de longa duração. Elas são alocadas dinamicamente via API REST ou SDK para executar scripts Python de agentes LLM em um ambiente descartável com limite de tempo e memória, devendo combinar isolamento por sessão, controle de saída de rede e restrição dos dados e credenciais disponibilizados.

@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Conectar%20e%20consumir%20servi%C3%A7os%20do%20Azure-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -30,11 +30,11 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `service-bus-filas-topicos-assinaturas` | Service Bus: filas, tópicos, assinaturas e filtros | `messaging-eventing` | Planejado | [Acessar Conceito](./service-bus-filas-topicos-assinaturas.md) |
-| 2 | `service-bus-dead-letter-e-processamento` | Peek-lock, dead-letter queue, sessões e retentativas | `messaging-eventing` | Planejado | [Acessar Conceito](./service-bus-dead-letter-e-processamento.md) |
-| 3 | `event-grid-eventos-filtros-retentativas` | Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter | `messaging-eventing` | Planejado | [Acessar Conceito](./event-grid-eventos-filtros-retentativas.md) |
-| 4 | `functions-triggers-e-bindings` | Functions: triggers, bindings e modelo de programação | `azure-functions` | Planejado | [Acessar Conceito](./functions-triggers-e-bindings.md) |
-| 5 | `functions-configuracao-e-implantacao` | Planos de hospedagem, configuração e implantação de function apps | `azure-functions` | Planejado | [Acessar Conceito](./functions-configuracao-e-implantacao.md) |
+| 1 | `service-bus-filas-topicos-assinaturas` | Service Bus: filas, tópicos, assinaturas e filtros | `messaging-eventing` | Implementado | [Acessar Conceito](./service-bus-filas-topicos-assinaturas.md) |
+| 2 | `service-bus-dead-letter-e-processamento` | Peek-lock, dead-letter queue, sessões e retentativas | `messaging-eventing` | Implementado | [Acessar Conceito](./service-bus-dead-letter-e-processamento.md) |
+| 3 | `event-grid-eventos-filtros-retentativas` | Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter | `messaging-eventing` | Implementado | [Acessar Conceito](./event-grid-eventos-filtros-retentativas.md) |
+| 4 | `functions-triggers-e-bindings` | Functions: triggers, bindings e modelo de programação | `azure-functions` | Implementado | [Acessar Conceito](./functions-triggers-e-bindings.md) |
+| 5 | `functions-configuracao-e-implantacao` | Planos de hospedagem, configuração e implantação de function apps | `azure-functions` | Implementado | [Acessar Conceito](./functions-configuracao-e-implantacao.md) |
 
 ---
 

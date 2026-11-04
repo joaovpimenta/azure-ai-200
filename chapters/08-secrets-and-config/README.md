@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Seguran%C3%A7a%2C%20Monitoramento%20e%20Solu%C3%A7%C3%A3o%20de%20Problemas-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -30,9 +30,9 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `identidade-gerenciada-defaultazurecredential` | Managed identities, RBAC e DefaultAzureCredential | `secure-solutions` | Planejado | [Acessar Conceito](./identidade-gerenciada-defaultazurecredential.md) |
-| 2 | `key-vault-segredos-rotacao` | Key Vault: segredos, versões, rotação e soft delete | `secure-solutions` | Planejado | [Acessar Conceito](./key-vault-segredos-rotacao.md) |
-| 3 | `app-configuration-chaves-rotulos-feature-flags` | App Configuration: chaves, rótulos, refresh e feature flags | `secure-solutions` | Planejado | [Acessar Conceito](./app-configuration-chaves-rotulos-feature-flags.md) |
+| 1 | `identidade-gerenciada-defaultazurecredential` | Managed identities, RBAC e DefaultAzureCredential | `secure-solutions` | Implementado | [Acessar Conceito](./identidade-gerenciada-defaultazurecredential.md) |
+| 2 | `key-vault-segredos-rotacao` | Key Vault: segredos, versões, rotação e soft delete | `secure-solutions` | Implementado | [Acessar Conceito](./key-vault-segredos-rotacao.md) |
+| 3 | `app-configuration-chaves-rotulos-feature-flags` | App Configuration: chaves, rótulos, refresh e feature flags | `secure-solutions` | Implementado | [Acessar Conceito](./app-configuration-chaves-rotulos-feature-flags.md) |
 
 ---
 

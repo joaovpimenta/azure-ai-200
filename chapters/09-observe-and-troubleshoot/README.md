@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Seguran%C3%A7a%2C%20Monitoramento%20e%20Solu%C3%A7%C3%A3o%20de%20Problemas-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -30,9 +30,9 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `opentelemetry-azure-monitor` | OpenTelemetry e Azure Monitor Distro: traces, métricas e logs | `monitor-troubleshoot` | Planejado | [Acessar Conceito](./opentelemetry-azure-monitor.md) |
-| 2 | `kql-consultas-logs-metricas` | KQL: where, summarize, bin, join e render | `monitor-troubleshoot` | Planejado | [Acessar Conceito](./kql-consultas-logs-metricas.md) |
-| 3 | `troubleshooting-latencia-e-falhas-ia` | Diagnóstico de latência, falhas e throttling em aplicações de IA | `monitor-troubleshoot` | Planejado | [Acessar Conceito](./troubleshooting-latencia-e-falhas-ia.md) |
+| 1 | `opentelemetry-azure-monitor` | OpenTelemetry e Azure Monitor Distro: traces, métricas e logs | `monitor-troubleshoot` | Implementado | [Acessar Conceito](./opentelemetry-azure-monitor.md) |
+| 2 | `kql-consultas-logs-metricas` | KQL: where, summarize, bin, join e render | `monitor-troubleshoot` | Implementado | [Acessar Conceito](./kql-consultas-logs-metricas.md) |
+| 3 | `troubleshooting-latencia-e-falhas-ia` | Diagnóstico de latência, falhas e throttling em aplicações de IA | `monitor-troubleshoot` | Implementado | [Acessar Conceito](./troubleshooting-latencia-e-falhas-ia.md) |
 
 ---
 

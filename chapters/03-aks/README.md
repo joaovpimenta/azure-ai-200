@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Desenvolver%20solu%C3%A7%C3%B5es%20em%20cont%C3%AAineres%20no%20Azure-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -30,9 +30,9 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `aks-manifestos-deployments` | Manifestos Kubernetes: Deployment, Service, ConfigMap e Secret | `container-orchestration` | Planejado | [Acessar Conceito](./aks-manifestos-deployments.md) |
-| 2 | `aks-rede-services-ingress` | Services, Ingress e conectividade ponta a ponta | `container-orchestration` | Planejado | [Acessar Conceito](./aks-rede-services-ingress.md) |
-| 3 | `aks-aca-troubleshooting-logs-eventos` | Troubleshooting: kubectl logs/describe/events e logs do Container Apps | `container-orchestration`, `monitor-troubleshoot` | Planejado | [Acessar Conceito](./aks-aca-troubleshooting-logs-eventos.md) |
+| 1 | `aks-manifestos-deployments` | Manifestos Kubernetes: Deployment, Service, ConfigMap e Secret | `container-orchestration` | Implementado | [Acessar Conceito](./aks-manifestos-deployments.md) |
+| 2 | `aks-rede-services-ingress` | Services, Ingress e conectividade ponta a ponta | `container-orchestration` | Implementado | [Acessar Conceito](./aks-rede-services-ingress.md) |
+| 3 | `aks-aca-troubleshooting-logs-eventos` | Troubleshooting: kubectl logs/describe/events e logs do Container Apps | `container-orchestration`, `monitor-troubleshoot` | Implementado | [Acessar Conceito](./aks-aca-troubleshooting-logs-eventos.md) |
 
 ---
 

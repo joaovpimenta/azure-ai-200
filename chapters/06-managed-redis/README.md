@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Gerenciamento%20de%20Dados%20para%20IA-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-25%20a%2030%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -28,8 +28,8 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `redis-cache-expiracao-invalidacao` | Cache-aside, TTL, políticas de eviction e invalidação | `managed-redis` | Planejado | [Acessar Conceito](./redis-cache-expiracao-invalidacao.md) |
-| 2 | `redis-indexacao-vetorial` | Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico | `managed-redis` | Planejado | [Acessar Conceito](./redis-indexacao-vetorial.md) |
+| 1 | `redis-cache-expiracao-invalidacao` | Cache-aside, TTL, políticas de eviction e invalidação | `managed-redis` | Implementado | [Acessar Conceito](./redis-cache-expiracao-invalidacao.md) |
+| 2 | `redis-indexacao-vetorial` | Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico | `managed-redis` | Implementado | [Acessar Conceito](./redis-indexacao-vetorial.md) |
 
 ---
 

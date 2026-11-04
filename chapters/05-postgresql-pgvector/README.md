@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Gerenciamento%20de%20Dados%20para%20IA-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-25%20a%2030%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -36,12 +36,12 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `postgresql-conexao-sdk-e-autenticacao` | Conexão com psycopg/Npgsql e autenticação Microsoft Entra | `postgresql` | Planejado | [Acessar Conceito](./postgresql-conexao-sdk-e-autenticacao.md) |
-| 2 | `postgresql-modelagem-e-tipos` | Modelagem de esquemas, tipos de dados e índices B-tree/GIN | `postgresql` | Planejado | [Acessar Conceito](./postgresql-modelagem-e-tipos.md) |
-| 3 | `pgvector-indices-hnsw-ivfflat` | pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat | `postgresql` | Planejado | [Acessar Conceito](./pgvector-indices-hnsw-ivfflat.md) |
-| 4 | `postgresql-recursos-para-cargas-vetoriais` | Compute, memória (maintenance_work_mem) e storage para vetores | `postgresql` | Planejado | [Acessar Conceito](./postgresql-recursos-para-cargas-vetoriais.md) |
-| 5 | `postgresql-rag-com-filtros` | Busca vetorial e RAG com filtros de metadados | `postgresql` | Planejado | [Acessar Conceito](./postgresql-rag-com-filtros.md) |
-| 6 | `postgresql-pool-de-conexoes-pgbouncer` | Pool de conexões, PgBouncer e otimização de throughput | `postgresql` | Planejado | [Acessar Conceito](./postgresql-pool-de-conexoes-pgbouncer.md) |
+| 1 | `postgresql-conexao-sdk-e-autenticacao` | Conexão com psycopg/Npgsql e autenticação Microsoft Entra | `postgresql` | Implementado | [Acessar Conceito](./postgresql-conexao-sdk-e-autenticacao.md) |
+| 2 | `postgresql-modelagem-e-tipos` | Modelagem de esquemas, tipos de dados e índices B-tree/GIN | `postgresql` | Implementado | [Acessar Conceito](./postgresql-modelagem-e-tipos.md) |
+| 3 | `pgvector-indices-hnsw-ivfflat` | pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat | `postgresql` | Implementado | [Acessar Conceito](./pgvector-indices-hnsw-ivfflat.md) |
+| 4 | `postgresql-recursos-para-cargas-vetoriais` | Compute, memória (maintenance_work_mem) e storage para vetores | `postgresql` | Implementado | [Acessar Conceito](./postgresql-recursos-para-cargas-vetoriais.md) |
+| 5 | `postgresql-rag-com-filtros` | Busca vetorial e RAG com filtros de metadados | `postgresql` | Implementado | [Acessar Conceito](./postgresql-rag-com-filtros.md) |
+| 6 | `postgresql-pool-de-conexoes-pgbouncer` | Pool de conexões, PgBouncer e otimização de throughput | `postgresql` | Implementado | [Acessar Conceito](./postgresql-pool-de-conexoes-pgbouncer.md) |
 
 ---
 

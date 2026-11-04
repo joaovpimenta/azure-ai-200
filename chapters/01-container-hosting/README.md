@@ -2,7 +2,7 @@
 
 [![Domínio do Exame](https://img.shields.io/badge/Dom%C3%ADnio-Desenvolver%20solu%C3%A7%C3%B5es%20em%20cont%C3%AAineres%20no%20Azure-0078D4?style=flat-square)](../../syllabus/ai-200-blueprint.json)
 [![Peso na Prova](https://img.shields.io/badge/Peso%20no%20Exame-20%20a%2025%25-green?style=flat-square)](../../syllabus/ai-200-blueprint.json)
-[![Status da Trilha](https://img.shields.io/badge/Status-Planejado-orange?style=flat-square)](#inventário-de-conceitos)
+[![Status da Trilha](https://img.shields.io/badge/Status-Completo-brightgreen?style=flat-square)](#inventário-de-conceitos)
 
 ---
 
@@ -29,9 +29,9 @@ De acordo com o blueprint oficial do exame **AI-200**:
 
 | # | Slug | Título do Conceito | Habilidades Mapeadas | Status | Arquivo / Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| 1 | `acr-registro-imagens-versionamento` | Azure Container Registry: registro, repositórios, tags e versionamento | `container-hosting` | Planejado | [Acessar Conceito](./acr-registro-imagens-versionamento.md) |
-| 2 | `acr-tasks-build-na-nuvem` | ACR Tasks: builds rápidos, multi-step e gatilhos | `container-hosting` | Planejado | [Acessar Conceito](./acr-tasks-build-na-nuvem.md) |
-| 3 | `app-service-conteineres-configuracao` | Contêineres no App Service: porta, startup, app settings e Key Vault references | `container-hosting`, `secure-solutions` | Planejado | [Acessar Conceito](./app-service-conteineres-configuracao.md) |
+| 1 | `acr-registro-imagens-versionamento` | Azure Container Registry: registro, repositórios, tags e versionamento | `container-hosting` | Implementado | [Acessar Conceito](./acr-registro-imagens-versionamento.md) |
+| 2 | `acr-tasks-build-na-nuvem` | ACR Tasks: builds rápidos, multi-step e gatilhos | `container-hosting` | Implementado | [Acessar Conceito](./acr-tasks-build-na-nuvem.md) |
+| 3 | `app-service-conteineres-configuracao` | Contêineres no App Service: porta, startup, app settings e Key Vault references | `container-hosting`, `secure-solutions` | Implementado | [Acessar Conceito](./app-service-conteineres-configuracao.md) |
 
 ---
 
