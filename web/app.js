@@ -964,32 +964,83 @@ export function setupKeyboardShortcuts() {
   });
 }
 
-// 8. Service Worker & Install App Prompt (forked from tech-topics/pwa.js)
+// 8. Offline service worker & accessible install guidance
 export function registerServiceWorker() {
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register(resolveUrl('sw.js'), { scope: getSiteBase() })
+  if (typeof window === 'undefined') return;
+
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    const register = () => {
+      // Resolve an absolute URL: pages deep under /chapters/ must share one SW scope.
+      const base = new URL(getSiteBase(), document.baseURI);
+      navigator.serviceWorker.register(new URL('sw.js', base).href, { scope: base.href })
         .catch(err => console.warn('[SW] Registration failed:', err));
-    });
+    };
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register, { once: true });
   }
 
-  if (typeof window !== 'undefined') {
-    let deferredPrompt = null;
-    const installBtn = document.getElementById('install-app');
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (installBtn) installBtn.hidden = false;
-    });
-    installBtn?.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.hidden = true;
-    });
-  }
+  const buttons = document.querySelectorAll('[data-install-app]');
+  const dialog = document.getElementById('install-help');
+  const message = document.getElementById('install-help-message');
+  const close = document.getElementById('install-help-close');
+  let deferredPrompt = null;
+
+  const installed = () =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    navigator.standalone === true;
+
+  const updateInstallButtons = () => {
+    buttons.forEach(button => { button.hidden = installed(); });
+  };
+
+  const showInstructions = () => {
+    const userAgent = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/i.test(userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(userAgent);
+    const isMacSafari = /Macintosh/i.test(userAgent) && /Safari/i.test(userAgent) &&
+      !/Chrome|Chromium|Edg/i.test(userAgent);
+    const instructions = isIOS
+      ? 'No iPhone ou iPad, abra este site no Safari, toque em Compartilhar e escolha Adicionar à Tela de Início.'
+      : isAndroid
+        ? 'No Chrome para Android, abra o menu de três pontos e escolha Instalar app ou Adicionar à tela inicial.'
+        : isMacSafari
+          ? 'No Safari para Mac, abra o menu Arquivo e selecione Adicionar ao Dock.'
+          : 'No Chrome ou Edge para desktop, abra o menu do navegador e selecione Instalar Azure AI-200, ou use o ícone de instalação na barra de endereços.';
+    if (message) message.textContent = instructions;
+    if (dialog?.showModal) dialog.showModal();
+    else window.alert(instructions);
+  };
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredPrompt = event;
+    updateInstallButtons();
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    if (dialog?.open) dialog.close();
+    updateInstallButtons();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) updateInstallButtons();
+  });
+  close?.addEventListener('click', () => dialog?.close());
+  buttons.forEach(button => button.addEventListener('click', async () => {
+    if (installed()) return;
+    if (!deferredPrompt) return showInstructions();
+    const prompt = deferredPrompt;
+    deferredPrompt = null;
+    try {
+      await prompt.prompt();
+      await prompt.userChoice;
+    } catch (err) {
+      console.warn('[PWA] Install prompt unavailable:', err);
+      showInstructions();
+    }
+    updateInstallButtons();
+  }));
+  updateInstallButtons();
 }
 
 // 9. Bootstrap Initialization
