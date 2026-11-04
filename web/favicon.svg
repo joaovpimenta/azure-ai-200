@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Azure AI-200">
+  <rect width="64" height="64" rx="14" fill="#173b32"/>
+  <rect x="9" y="9" width="46" height="46" rx="10" fill="#277d69"/>
+  <path d="M16 43 23 20h5l7 23h-5l-1.5-5h-6L21 43Zm8-9h4l-2-7Z" fill="#f8f6f0"/>
+  <path d="M37 20h11v4h-3v15h3v4H37v-4h3V24h-3Z" fill="#f8f6f0"/>
+</svg>
