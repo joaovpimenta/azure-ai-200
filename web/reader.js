@@ -316,11 +316,11 @@ function setupArticleSocialControls(article) {
 }
 
 // 6. Tech Topics Inline Audio Transport & Floating Recording Dock Wiring
-function setupConceptAudioPlayer(article) {
+export function setupConceptAudioPlayer(article) {
   const meta = getPageMetadata();
   const slug = article.dataset?.slug || meta.slug;
   if (!slug || window.__audioPlayerBound === slug) return;
-  window.__audioPlayerBound = slug;
+  window.__audioPlayer?.stop();
 
   const player = new AudioPlayer();
   const track = {
@@ -328,7 +328,7 @@ function setupConceptAudioPlayer(article) {
     title: meta.title || slug,
     chapter: article.dataset?.chapter || meta.chapter || 'Azure AI-200',
     chapterTitle: meta.category || meta.chapter || 'Azure AI-200',
-    mp3Url: meta.mp3Url || `https://github.com/joaovpimenta/azure-ai-200/releases/download/tts-${slug}/${slug}.mp3`,
+    mp3Url: meta.mp3Url || player.articleAudioUrl(slug),
     narrationText: meta.narrationText || meta.tldr || article.textContent || ''
   };
   player.setPlaylist([track], 0, false);
@@ -364,7 +364,7 @@ function setupConceptAudioPlayer(article) {
     if (inlineRate) inlineRate.textContent = rateLabel;
     if (dockRate) dockRate.textContent = rateLabel;
 
-    const srcName = player.mode === 'mp3' ? 'Kokoro Dora' : 'Voz do dispositivo';
+    const srcName = player.source === 'mp3' ? 'Kokoro Dora' : 'Voz do dispositivo';
     if (inlineSource) {
       inlineSource.textContent = srcName;
       inlineSource.hidden = player.state === 'idle';
@@ -380,16 +380,12 @@ function setupConceptAudioPlayer(article) {
       dock.hidden = false;
       document.body.classList.add('recording-open');
     }
-    if (inlineElapsed && player.chunks?.length > 0) {
-      inlineElapsed.textContent = `${player.currentChunkIndex + 1}/${player.chunks.length}`;
-    }
   }
 
-  const origUpdateUi = player.updateWidgetUi.bind(player);
-  player.updateWidgetUi = () => {
-    origUpdateUi();
-    updateTransportUi();
+  updateTransportUi.onProgress = ({ label }) => {
+    if (inlineElapsed) inlineElapsed.textContent = label;
   };
+  player.subscribe(updateTransportUi);
 
   inlinePlay?.addEventListener('click', () => {
     player.togglePlay();
@@ -400,18 +396,7 @@ function setupConceptAudioPlayer(article) {
     updateTransportUi();
   });
 
-  const skipChunk = delta => {
-    if (player.mode === 'webspeech' && player.chunks?.length) {
-      player.currentChunkIndex = Math.max(0, Math.min(player.chunks.length - 1, player.currentChunkIndex + delta));
-      if (player.state === 'playing' && typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        player.speakNextChunk();
-      }
-      updateTransportUi();
-    } else if (player.audioElement) {
-      player.audioElement.currentTime = Math.max(0, (player.audioElement.currentTime || 0) + delta * 10);
-    }
-  };
+  const skipChunk = delta => player.seekBy(delta * 10);
 
   inlinePrev?.addEventListener('click', () => skipChunk(-1));
   dockPrev?.addEventListener('click', () => skipChunk(-1));
@@ -429,7 +414,7 @@ function setupConceptAudioPlayer(article) {
   dockRate?.addEventListener('click', cycleRate);
 
   listenDeviceBtn?.addEventListener('click', () => {
-    player.fallbackToWebSpeech(track.narrationText);
+    player.playDeviceVoice();
     updateTransportUi();
   });
 
@@ -439,6 +424,8 @@ function setupConceptAudioPlayer(article) {
     document.body.classList.remove('recording-open');
     updateTransportUi();
   });
+  window.__audioPlayerBound = slug;
+  updateTransportUi();
 }
 
 // 7. Recommendations ("Continue explorando")

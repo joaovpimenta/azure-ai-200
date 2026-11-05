@@ -59,14 +59,31 @@ describe('Milestone 4: CI/CD Workflows & Decoupled Audio Pipeline', () => {
     );
   });
 
-  test('kokoro-audio.yml exists, is decoupled via workflow_dispatch, and targets pf_dora voice', () => {
+  test('Kokoro generates real audio on PRs and Pages requires it before uploading', () => {
     const filePath = join(WORKFLOWS_DIR, 'kokoro-audio.yml');
     assert.ok(existsSync(filePath), 'Missing .github/workflows/kokoro-audio.yml');
 
     const raw = readFileSync(filePath, 'utf-8');
     const doc = YAML.parse(raw);
     assert.ok(doc.on?.workflow_dispatch, 'kokoro-audio.yml must trigger via workflow_dispatch');
-    assert.ok(!doc.on?.push, 'kokoro-audio.yml must be decoupled from push to avoid blocking quick text edits');
+    assert.ok(!doc.on?.push, 'Pages calls this workflow on push; avoid duplicate synthesis runs');
+    assert.ok(doc.on?.pull_request);
+    assert.ok(doc.on?.workflow_call);
+    assert.equal(doc.on.workflow_call.inputs.slug.default, 'all');
+    const commands = doc.jobs.synthesize.steps.map(step => step.run || '').join('\n');
+    assert.match(commands, /kokoro_release.py synthesize/);
+    assert.match(commands, /kokoro_release.py verify/);
+    const pages = YAML.parse(readFileSync(join(WORKFLOWS_DIR, 'pages.yml'), 'utf8'));
+    assert.equal(pages.jobs['generate-audio'].uses, './.github/workflows/kokoro-audio.yml');
+    const build = pages.jobs['validate-and-build'];
+    assert.equal(build.needs, 'generate-audio');
+    const steps = build.steps;
+    const download = steps.findIndex(step => step.uses?.startsWith('actions/download-artifact@'));
+    const verify = steps.findIndex(step => step.run?.includes('kokoro_release.py verify'));
+    const upload = steps.findIndex(step => step.uses?.startsWith('actions/upload-pages-artifact@'));
+    assert.ok(download > steps.findIndex(step => step.run === 'npm test'), 'Tests rebuild dist; audio must be downloaded afterwards');
+    assert.equal(steps[download].with.path, 'dist/audio');
+    assert.ok(download < verify && verify < upload, 'Coverage verification must gate publication');
     assert.equal(
       doc.on.workflow_dispatch.inputs?.voice?.default,
       'pf_dora',

@@ -3,6 +3,7 @@
  * Application bootstrap, Tech Topics archive cards, quick-actions preview, live search suggestions,
  * GitHub stars counter, and SPA/MPA routing for Azure AI-200.
  */
+import { renderStudyGuide } from './study-guide.js';
 import { initReader } from './reader.js';
 import { renderCramView } from './cram.js';
 import { renderSimulatorView } from './simulator.js';
@@ -821,6 +822,7 @@ export function renderHomeView(container) {
         <h1>Arquitetura de dados e contêineres para IA, um conceito por vez.</h1>
         <p>Artigos para dominar sistemas distribuídos, bancos vetoriais, contêineres e observabilidade no Azure — dos fundamentos à prova de certificação.</p>
       </header>
+      ${renderStudyGuide(getSiteBase())}
       <section class="archive-section" id="recent-posts" aria-labelledby="archive-heading">
         <div class="archive-toolbar">
           <div>

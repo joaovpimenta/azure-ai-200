@@ -143,6 +143,14 @@ describe('Modular Compiler Libraries (scripts/lib/*)', () => {
       assert.ok(!narr.includes('code()'));
     });
 
+    test('narration preserves technical terms and explains table cells with headers', () => {
+      const narr = extractNarrationText('Use `az acr build` para construir.\n\n| Serviço | Índice |\n|---|---|\n| Cosmos DB | `diskANN` |\n| PostgreSQL | **HNSW** |\n');
+      assert.match(narr, /Use az acr build para construir/);
+      assert.match(narr, /Serviço: Cosmos DB\. Índice: diskANN\./);
+      assert.match(narr, /Serviço: PostgreSQL\. Índice: HNSW\./);
+      assert.doesNotMatch(narr, /[|`*]/);
+    });
+
     test('compiles full concept markdown with cloze, code-tabs, details, and headings', () => {
       const md = `# Cosmos DB
 

@@ -4,7 +4,7 @@ Material de estudo para **Microsoft Certified: Azure AI Cloud Developer Associat
 
 ## Comece por aqui
 
-1. Se estiver começando, leia uma trilha por vez na ordem abaixo. Os artigos explicam o problema antes dos comandos.
+1. Siga o roteiro da home: fundamentos de identidade, imagens e documentos → hospedagem e conexão → dados de IA → operação e revisão. Os números das trilhas organizam o material; não são uma ordem obrigatória de leitura.
 2. Tente responder à checagem rápida antes de abrir a resposta. As lacunas ocultáveis ajudam a lembrar termos sem reler tudo.
 3. Faça as questões no modo estudo e leia a justificativa de cada alternativa, inclusive das erradas.
 4. Volte ao caderno de erros e use **Revisão rápida (Cram)** para revisar resumos e pegadinhas.
@@ -72,4 +72,6 @@ npm run preview
 1. Em **Settings → Pages** no repositório GitHub, selecione **Source: GitHub Actions**.
 2. A cada push na branch `main`, o workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) executa `npm run validate`, `npm run build` e `npm test`, publicando o diretório `dist/` automaticamente.
 3. Pull Requests passam pela validação automática em [`.github/workflows/validate.yml`](.github/workflows/validate.yml).
-4. Para gerar narração em áudio sob demanda, acione manualmente [`.github/workflows/kokoro-audio.yml`](.github/workflows/kokoro-audio.yml) na aba **Actions**.
+4. A publicação gera e verifica áudio para todos os artigos. Para baixar a narração sem publicar o site, acione manualmente [`.github/workflows/kokoro-audio.yml`](.github/workflows/kokoro-audio.yml) na aba **Actions**.
+
+O pipeline TTS e os comandos locais estão em [tools/tts/README.md](tools/tts/README.md). A home apresenta um roteiro por fundamentos, aplicação, dados de IA e operação, com sugestões do que deixar para a segunda leitura.

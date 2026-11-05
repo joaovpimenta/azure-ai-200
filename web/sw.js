@@ -3,7 +3,7 @@
  * Versioned Offline Cache with Stale-While-Revalidate and Network-First routing.
  */
 
-const CACHE_NAME = 'azure-ai-200-cache-v2';
+const CACHE_NAME = 'azure-ai-200-cache-v3';
 
 // Core assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -11,6 +11,7 @@ const PRECACHE_ASSETS = [
   './index.html',
   './styles.css',
   './app.js',
+  './study-guide.js',
   './reader.js',
   './audio-player.js',
   './quiz-core.js',
@@ -93,6 +94,10 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) {
     return;
   }
+
+  // Audio range requests must reach the server; Cache API cannot store 206 responses.
+  // Bypass the static cache so revised articles never play a stale recording.
+  if (request.headers.has('range') || url.pathname.endsWith('.mp3')) return;
 
   // D. HTML Navigation / Document requests -> Network-First with Cache Fallback
   const isHtml = request.mode === 'navigate' ||

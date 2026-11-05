@@ -7,6 +7,7 @@ import { resolve, join, relative, dirname } from 'node:path';
 import { extractFrontmatter } from './lib/frontmatter.mjs';
 import { compileMarkdown } from './lib/markdown.mjs';
 import { escapeHtml } from './lib/cloze.mjs';
+import { renderStudyGuide } from '../web/study-guide.js';
 import { generatePwaIcons } from './lib/pwa-icons.mjs';
 
 const ROOT_DIR = resolve(process.cwd());
@@ -569,6 +570,7 @@ const homeContent = `<header class="archive-intro">
   <h1>Arquitetura de dados e contêineres para IA, um conceito por vez.</h1>
   <p>Artigos para dominar sistemas distribuídos, bancos vetoriais, contêineres e observabilidade no Azure — dos fundamentos à prova de certificação.</p>
 </header>
+${renderStudyGuide('./')}
 <section class="archive-section" id="recent-posts" aria-labelledby="archive-heading">
   <div class="archive-toolbar">
     <div>
@@ -594,7 +596,7 @@ const homeContent = `<header class="archive-intro">
 </section>`;
 
 const views = [
-  { file: 'index.html', title: 'Arquivo de artigos', route: 'home', content: homeContent },
+  { file: 'index.html', title: 'Roteiro de estudo AI-200', route: 'home', content: homeContent },
   { file: 'cram/index.html', title: 'Revisão rápida (Cram)', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
   { file: 'simulator/index.html', title: 'Simulador de Exame AI-200', route: 'simulator', content: '<div id="simulator-view">Carregando simulador de questões...</div>' },
   { file: 'mastery/index.html', title: 'Meu progresso', route: 'mastery', content: '<div id="mastery-view">Carregando seu progresso...</div>' }

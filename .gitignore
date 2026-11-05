@@ -9,3 +9,4 @@ tools/tts/models/
 tools/tts/output/
 .DS_Store
 Thumbs.db
+.cache/
