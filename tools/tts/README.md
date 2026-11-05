@@ -5,6 +5,7 @@ O comando `prepare` só gera um roteiro. **MP3 é gerado por `synthesize`**, usa
 ## GitHub Actions
 
 - **No PR:** alterações nos artigos ou no pipeline executam `kokoro-audio.yml`. O artefato `narration-audio` contém um MP3 e `chapters.json` por artigo, incluindo a comparação de bancos.
+- A geração de todos os artigos usa seis jobs paralelos. Cada um verifica e guarda seu grupo no cache; um job final reúne os grupos e verifica novamente o catálogo inteiro antes de disponibilizar `narration-audio`. A geração manual de um único slug usa apenas um job.
 - **Na publicação em main:** Pages chama o mesmo workflow, baixa os áudios da própria execução e verifica a cobertura contra o catálogo atual antes de publicar. Um áudio ausente ou antigo impede o deploy.
 - **Manual:** execute “Generate Kokoro Narration Audio” com `slug=all` ou o slug de um artigo. Isso gera um artefato para download; não altera o site publicado. Para publicar, execute o workflow de Pages em main.
 - Os modelos têm versão e SHA-256 fixos. O cache reaproveita áudios somente quando texto, voz e velocidade coincidem. Mudanças no código de geração invalidam a chave do cache da Action.

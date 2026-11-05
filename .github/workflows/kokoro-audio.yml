@@ -44,10 +44,16 @@ jobs:
   synthesize:
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON((inputs.slug || 'all') == 'all' && '[0,1,2,3,4,5]' || '[0]') }}
     env:
       TTS_SLUG: ${{ inputs.slug || 'all' }}
       TTS_VOICE: ${{ inputs.voice || 'pf_dora' }}
       TTS_SPEED: ${{ inputs.speed || '1.0' }}
+      TTS_SHARD: ${{ matrix.shard }}
+      TTS_SHARDS: ${{ (inputs.slug || 'all') == 'all' && 6 || 1 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -80,14 +86,15 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: tools/tts/output
-          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
+          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
           restore-keys: |
-            tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-
+            tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-
       - name: Synthesize real MP3 files and measure chapter times
         run: |
           python tools/tts/kokoro_release.py synthesize \
             --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
             --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --shard-index "$TTS_SHARD" --shard-count "$TTS_SHARDS" \
             --model .cache/kokoro/kokoro-v1.0.onnx \
             --voices .cache/kokoro/voices-v1.0.bin \
             --output-dir tools/tts/output
@@ -96,14 +103,55 @@ jobs:
           python tools/tts/kokoro_release.py verify \
             --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
             --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --shard-index "$TTS_SHARD" --shard-count "$TTS_SHARDS" \
             --output-dir tools/tts/output
       - name: Save verified audio cache
         uses: actions/cache/save@v4
         with:
           path: tools/tts/output
-          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
+          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
       - name: Upload MP3 files, measured chapters and coverage manifest
         uses: actions/upload-artifact@v4
+        with:
+          name: narration-part-${{ matrix.shard }}
+          path: tools/tts/output/
+          if-no-files-found: error
+          retention-days: 1
+
+  assemble:
+    needs: synthesize
+    runs-on: ubuntu-latest
+    env:
+      TTS_SLUG: ${{ inputs.slug || 'all' }}
+      TTS_VOICE: ${{ inputs.voice || 'pf_dora' }}
+      TTS_SPEED: ${{ inputs.speed || '1.0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Build the catalog for final coverage verification
+        run: |
+          npm ci
+          npm run build
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: narration-part-*
+          merge-multiple: true
+          path: tools/tts/output
+      - name: Require all requested articles across every parallel job
+        run: |
+          python tools/tts/kokoro_release.py verify \
+            --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
+            --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --output-dir tools/tts/output
+      - uses: actions/upload-artifact@v4
         with:
           name: narration-audio
           path: tools/tts/output/

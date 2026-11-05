@@ -73,6 +73,13 @@ describe('Milestone 4: CI/CD Workflows & Decoupled Audio Pipeline', () => {
     const commands = doc.jobs.synthesize.steps.map(step => step.run || '').join('\n');
     assert.match(commands, /kokoro_release.py synthesize/);
     assert.match(commands, /kokoro_release.py verify/);
+    const assemble = doc.jobs.assemble;
+    assert.equal(assemble.needs, 'synthesize');
+    assert.ok(assemble.steps.some(step => step.uses?.startsWith('actions/download-artifact@') && step.with['merge-multiple']));
+    const finalVerify = assemble.steps.find(step => step.run?.includes('kokoro_release.py verify'));
+    assert.ok(finalVerify);
+    assert.doesNotMatch(finalVerify.run, /--shard-/, 'Final verification must cover the whole requested catalog');
+    assert.ok(assemble.steps.some(step => step.uses?.startsWith('actions/upload-artifact@') && step.with.name === 'narration-audio'));
     const pages = YAML.parse(readFileSync(join(WORKFLOWS_DIR, 'pages.yml'), 'utf8'));
     assert.equal(pages.jobs['generate-audio'].uses, './.github/workflows/kokoro-audio.yml');
     const build = pages.jobs['validate-and-build'];

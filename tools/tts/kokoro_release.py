@@ -144,7 +144,10 @@ def selected_entries(args: argparse.Namespace) -> list[dict[str, Any]]:
             raise ValueError("Invalid article slug")
         if not normalize_narration_text(entry.get("narrationText", "")):
             raise ValueError(f"Empty narration: {entry['slug']}")
-    return selected
+    count, index = args.shard_count, args.shard_index
+    if count < 1 or not 0 <= index < count:
+        raise ValueError("Invalid shard index/count")
+    return selected[index::count]
 
 
 def source_hash(entry: dict[str, Any], voice: str, speed: float) -> str:
@@ -279,6 +282,8 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--voice", default=DEFAULT_VOICE)
         command.add_argument("--speed", type=float, default=DEFAULT_SPEED)
         command.add_argument("--output-dir", default="tools/tts/output")
+        command.add_argument("--shard-index", type=int, default=0)
+        command.add_argument("--shard-count", type=int, default=1)
         if name == "synthesize":
             command.add_argument("--model", required=True)
             command.add_argument("--voices", required=True)
