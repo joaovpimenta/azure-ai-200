@@ -1586,6 +1586,7 @@ details.check-card .check-card-body {
 .study-steps p, .study-later p { line-height: 1.6; color: var(--text-secondary); }
 .study-steps ul { padding-left: 1.2rem; margin-top: .8rem; }
 .study-steps ul li { margin: .55rem 0; }
+.study-steps a, .study-later a { color: var(--accent); text-decoration: underline; text-underline-offset: .18em; }
 .study-guide a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .study-later { padding: 1.2rem 1.5rem; border-left: 3px solid var(--accent); background: var(--bg-secondary); }
 @media (max-width: 680px) { .study-steps { grid-template-columns: 1fr; } .study-start { width: 100%; text-align: center; } }

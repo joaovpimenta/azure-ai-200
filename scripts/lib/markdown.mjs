@@ -110,9 +110,14 @@ export function sanitizeSafeHtml(html, options = {}) {
  */
 export function extractNarrationText(markdown) {
   if (!markdown) return '';
+  const inlineTerms = [];
   return stripClozes(markdown)
     .replace(/```[\s\S]*?```/g, ' ') // Strip code and mermaid blocks
-    .replace(/`([^`]+)`/g, '$1')     // Preserve technical terms
+    .replace(/`([^`]+)`/g, (_, term) => {
+      // Protect operators such as <=> and placeholders such as <conta> from HTML stripping.
+      inlineTerms.push(term);
+      return `\uE000${inlineTerms.length - 1}\uE001`;
+    })
     .replace(/<\s*summary\b[^>]*>([\s\S]*?)<\s*\/\s*summary\s*>/gi, ' Pergunta de autoavaliação: $1. ')
     .replace(/<\/?[^>]+>/g, ' ')      // Strip remaining HTML tags
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [text](url) -> text
@@ -124,6 +129,7 @@ export function extractNarrationText(markdown) {
     })
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/\uE000(\d+)\uE001/g, (_, index) => inlineTerms[Number(index)])
     .replace(/\s+/g, ' ')
     .trim();
 }

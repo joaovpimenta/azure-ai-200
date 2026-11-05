@@ -149,6 +149,8 @@ describe('Modular Compiler Libraries (scripts/lib/*)', () => {
       assert.match(narr, /Serviço: Cosmos DB\. Índice: diskANN\./);
       assert.match(narr, /Serviço: PostgreSQL\. Índice: HNSW\./);
       assert.doesNotMatch(narr, /[|`*]/);
+      assert.equal(extractNarrationText('Compare `<=>` e `<->`; use `https://<conta>.example`. <strong>Confira.</strong>'),
+        'Compare <=> e <->; use https://<conta>.example. Confira.');
     });
 
     test('compiles full concept markdown with cloze, code-tabs, details, and headings', () => {
