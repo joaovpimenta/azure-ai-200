@@ -54,8 +54,8 @@
       ]
     },
     {
-      "name": "Cram Sheet & Pegadinhas",
-      "short_name": "Cram Sheet",
+      "name": "Revisão rápida e pegadinhas",
+      "short_name": "Revisão rápida",
       "description": "Revisão de véspera de alta densidade",
       "url": "./cram/index.html",
       "icons": [

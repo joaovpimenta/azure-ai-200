@@ -29,9 +29,9 @@ export function renderMasteryView(container, { blueprint, catalog }) {
     <header class="concept-header">
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h1>Mapa de Cobertura e Prontidão</h1>
+          <h1>Meu progresso</h1>
           <p style="color: var(--text-secondary); margin-top: 4px;">
-            Métricas de preparação ponderadas pelos pesos oficiais do Exame AI-200 (Pass: 700/1000).
+            Acompanhe os conceitos estudados e os resultados dos exercícios. Este indicador não prevê sua nota no exame oficial.
           </p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -46,12 +46,12 @@ export function renderMasteryView(container, { blueprint, catalog }) {
     <!-- Overall Readiness Hero -->
     <div class="quiz-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; background: linear-gradient(135deg, var(--surface), var(--bg-secondary));">
       <div>
-        <span class="badge ${isReady ? 'badge-domain' : 'badge-diff'}">Status Geral de Prontidão</span>
+        <span class="badge ${isReady ? 'badge-domain' : 'badge-diff'}">Progresso geral</span>
         <div style="font-size: 42px; font-weight: 800; color: ${isReady ? 'var(--success)' : 'var(--accent)'}; margin-top: 6px;">
           ${overallPercentage}%
         </div>
         <p style="color: var(--text-muted); font-size: 13.5px;">
-          Score Estimado: <strong>${readiness.examScaledScore}/1000</strong> — ${isReady ? '🎉 Você está pronto para agendar o exame oficial (acima de 700 pts)!' : 'Continue estudando para atingir os 700 pontos de aprovação.'}
+          ${isReady ? 'Você atingiu a meta de estudo do site. Revise os erros e pratique os temas menos conhecidos.' : 'Continue pelos conceitos ainda não estudados e revise suas dúvidas.'}
         </p>
       </div>
       <div style="min-width: 220px; flex: 1; max-width: 400px;">
@@ -60,19 +60,19 @@ export function renderMasteryView(container, { blueprint, catalog }) {
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
           <span>0%</span>
-          <span>Corte: 70% (700)</span>
+          <span>Meta do site: 70%</span>
           <span>100%</span>
         </div>
       </div>
     </div>
 
     <!-- Domain Breakdown Grid -->
-    <h2 style="font-size: 20px; font-weight: 700; margin: 28px 0 16px 0;">Ponderação Oficial por Domínio</h2>
+    <h2 style="font-size: 20px; font-weight: 700; margin: 28px 0 16px 0;">Progresso por área do exame</h2>
     <div class="mastery-grid">
       ${Object.entries(domainReadiness).map(([domId, d]) => `
         <div class="domain-readiness-card">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span class="badge badge-domain">Peso: ${Math.round(d.weight * 1000) / 10}%</span>
+            <span class="badge badge-domain">Peso no indicador: ${Math.round(d.weight * 1000) / 10}%</span>
             <span style="font-weight: 700; color: var(--text-primary);">${d.percentage}%</span>
           </div>
           <h3 style="font-size: 15px; margin: 10px 0 6px 0;">${formatDomainName(domId)}</h3>
@@ -81,14 +81,14 @@ export function renderMasteryView(container, { blueprint, catalog }) {
           </div>
           <div style="font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
             <span>${d.masteredCount}/${d.conceptCount} dominados</span>
-            <span>${d.quizAccuracy > 0 ? `Precisão: ${Math.round(d.quizAccuracy * 100)}%` : 'Sem simulado'}</span>
+            <span>${d.quizAccuracy > 0 ? `Acertos: ${Math.round(d.quizAccuracy * 100)}%` : 'Sem acertos registrados'}</span>
           </div>
         </div>
       `).join('')}
     </div>
 
     <!-- Syllabus Checklist -->
-    <h2 style="font-size: 20px; font-weight: 700; margin: 32px 0 16px 0;">Ementa Completa e Cobertura de Conceitos</h2>
+    <h2 style="font-size: 20px; font-weight: 700; margin: 32px 0 16px 0;">Conceitos e situação do estudo</h2>
     <div class="quiz-card" style="padding: 0; overflow-x: auto;">
       <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 600px;">
         <thead style="background: var(--bg-secondary); border-bottom: 1px solid var(--border);">
@@ -111,7 +111,7 @@ export function renderMasteryView(container, { blueprint, catalog }) {
                 <td style="padding: 10px 16px; color: var(--text-secondary);">${formatDomainName(c.exam_domain)}</td>
                 <td style="padding: 10px 16px; color: var(--text-muted);">${c.chapter || '-'}</td>
                 <td style="padding: 10px 16px; text-align: center;">
-                  <span class="status-dot ${st}" style="display: inline-block;" title="${st}"></span>
+                  <span class="status-dot ${st}" style="display: inline-block;" title="${formatStatus(st)}"></span>
                   <span style="font-size: 12px; text-transform: capitalize; margin-left: 4px;">${formatStatus(st)}</span>
                 </td>
               </tr>
@@ -172,7 +172,7 @@ function setupMasteryPersistenceHandlers(currentState) {
       try {
         const merged = importProgressJson(evt.target.result, currentState);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        alert('Progresso importado e sincronizado com sucesso!');
+        alert('Progresso importado neste navegador.');
         window.location.reload();
       } catch (err) {
         alert('Falha ao importar progresso: ' + err.message);
@@ -213,7 +213,7 @@ function setupMasteryPersistenceHandlers(currentState) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         localStorage.setItem('azure_ai_200_gist_id', data.id);
-        alert(`Gist privado criado e sincronizado com sucesso! (ID: ${data.id})`);
+        alert(`Gist não listado criado com o progresso! (ID: ${data.id})`);
       } else {
         // Fetch existing gist and merge
         const getRes = await fetch(`https://api.github.com/gists/${gistId}`, {
@@ -250,7 +250,7 @@ function setupMasteryPersistenceHandlers(currentState) {
           })
         });
 
-        alert('Sincronização bidirecional concluída com sucesso!');
+        alert('Progresso do navegador e do Gist combinado.');
         window.location.reload();
       }
     } catch (err) {

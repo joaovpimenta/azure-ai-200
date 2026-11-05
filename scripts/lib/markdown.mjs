@@ -103,20 +103,33 @@ export function sanitizeSafeHtml(html, options = {}) {
 }
 
 /**
- * Extracts plain narration prose from markdown, stripping code blocks, diagrams, and tables.
+ * Extracts narration, keeping inline terms and reading table cells with their headers.
+ * Fenced code and diagrams stay on the page rather than being read as source code.
  * @param {string} markdown
  * @returns {string}
  */
 export function extractNarrationText(markdown) {
   if (!markdown) return '';
+  const inlineTerms = [];
   return stripClozes(markdown)
     .replace(/```[\s\S]*?```/g, ' ') // Strip code and mermaid blocks
-    .replace(/`[^`]+`/g, ' ')         // Strip inline code
+    .replace(/`([^`]+)`/g, (_, term) => {
+      // Protect operators such as <=> and placeholders such as <conta> from HTML stripping.
+      inlineTerms.push(term);
+      return `\uE000${inlineTerms.length - 1}\uE001`;
+    })
     .replace(/<\s*summary\b[^>]*>([\s\S]*?)<\s*\/\s*summary\s*>/gi, ' Pergunta de autoavaliação: $1. ')
     .replace(/<\/?[^>]+>/g, ' ')      // Strip remaining HTML tags
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [text](url) -> text
     .replace(/^#+\s+(.*)$/gm, '$1. ') // Headings
-    .replace(/\|[^\n]+\|/g, ' ')      // Tables
+    .replace(/^\|[^\n]+\|[ \t]*\r?\n\|[ :|\-]+\|[ \t]*\r?\n(?:\|[^\n]+\|[ \t]*(?:\r?\n|$))+/gm, table => {
+      const rows = table.trim().split(/\r?\n/).map(row => row.trim().slice(1, -1).split('|').map(cell => cell.trim()));
+      const headers = rows[0];
+      return rows.slice(2).map(row => row.map((cell, i) => `${headers[i] || 'Valor'}: ${cell}.`).join(' ')).join(' ');
+    })
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/\uE000(\d+)\uE001/g, (_, index) => inlineTerms[Number(index)])
     .replace(/\s+/g, ' ')
     .trim();
 }

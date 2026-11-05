@@ -6,7 +6,7 @@
  * 1. Chapter playlist management (continuous track-by-track playback).
  * 2. Media Session API integration (lock-screen controls, metadata, artwork).
  * 3. 3-tier audio source hierarchy:
- *    - Tier 1: Pre-rendered MP3 from GitHub Releases URL.
+ *    - Tier 1: Pre-rendered MP3 published with the site.
  *    - Tier 2: Client-side Web Speech API (speechSynthesis) in pt-BR with speed 0.75x..2.0x.
  *    - Tier 3: Mobile background keep-alive via continuous silent audio loop.
  * 4. Utterance chunking (splits long technical prose into ~150-char clauses to eliminate browser timeouts).
@@ -16,9 +16,6 @@
 // 1-second silent WAV data URI to keep mobile audio session alive during Web Speech
 const SILENT_WAV_DATA_URI =
   'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAA';
-
-const DEFAULT_RELEASES_URL =
-  'https://github.com/joaovpimenta/azure-ai-200/releases/download';
 
 /**
  * Splits plain text into sentence/clause chunks under maxChars to bypass browser speech limits.
@@ -88,10 +85,9 @@ export function chunkNarrationText(text, maxChars = 160) {
 export class AudioPlayer {
   constructor(options = {}) {
     this.options = {
-      releasesBaseUrl: options.releasesBaseUrl || DEFAULT_RELEASES_URL,
       defaultSpeed: options.defaultSpeed || 1.0,
       autoPlayNext: options.autoPlayNext ?? true,
-      siteBase: options.siteBase || './',
+      siteBase: options.siteBase || (typeof document !== 'undefined' ? document.querySelector('meta[name="site-base"]')?.getAttribute('content') : null) || './',
       ...options
     };
 
@@ -105,6 +101,8 @@ export class AudioPlayer {
 
     // HTML5 Audio (Tier 1: Pre-rendered MP3)
     this.audioElement = null;
+    this.playbackRequest = 0;
+    this.cancelPendingMp3 = null;
 
     // Web Speech API (Tier 2: Client TTS)
     this.speechSynth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
@@ -149,7 +147,8 @@ export class AudioPlayer {
 
     this.audioElement.addEventListener('error', (err) => {
       console.warn('[AudioPlayer] MP3 playback error, falling back to Web Speech API:', err);
-      this._fallbackToTts();
+      // Initial load errors are handled by playTrack's promise rejection.
+      if (this.source === 'mp3') this.playDeviceVoice();
     });
 
     // Mobile Background Keep-Alive Silent Audio Element
@@ -210,6 +209,20 @@ export class AudioPlayer {
   // Public Playlist & Control API
   // ==========================================
 
+  articleAudioUrl(slug) {
+    const base = this.options.siteBase.endsWith('/') ? this.options.siteBase : `${this.options.siteBase}/`;
+    return `${base}audio/${slug}/${slug}.mp3`;
+  }
+
+  /** Switch the current article to the device voice without overlapping MP3 audio. */
+  playDeviceVoice() {
+    const track = this.currentTrack;
+    if (!track) return;
+    this.stop();
+    this._startSilentKeepAlive();
+    this._playTts(track);
+  }
+
   /**
    * Loads an array of concept tracks into the playlist.
    * @param {Array<{slug: string, title: string, chapter: string, chapterTitle?: string, mp3Url?: string, narrationText?: string, url?: string}>} tracks
@@ -249,7 +262,7 @@ export class AudioPlayer {
       title: c.title,
       chapter: chapterSlug,
       chapterTitle,
-      mp3Url: `${this.options.releasesBaseUrl}/tts-${c.slug}/${c.slug}.mp3`,
+      mp3Url: this.articleAudioUrl(c.slug),
       narrationText: c.narrationText || c.tldr || '',
       url: c.url
     }));
@@ -276,6 +289,7 @@ export class AudioPlayer {
     if (index < 0 || index >= this.playlist.length) return;
 
     this.stop();
+    const request = this.playbackRequest;
     this.currentIndex = index;
     const track = this.currentTrack;
     if (!track) return;
@@ -287,16 +301,18 @@ export class AudioPlayer {
     // Start mobile keep-alive audio loop immediately on user gesture
     this._startSilentKeepAlive();
 
-    const mp3Url = track.mp3Url || `${this.options.releasesBaseUrl}/tts-${track.slug}/${track.slug}.mp3`;
+    const mp3Url = track.mp3Url || this.articleAudioUrl(track.slug);
 
     // Attempt Level 1: Pre-rendered MP3
     try {
       await this._playMp3(mp3Url);
+      if (request !== this.playbackRequest) return;
       this.source = 'mp3';
       this.state = 'playing';
       this._updateMediaSessionState();
       this._emitStateChange();
     } catch (err) {
+      if (request !== this.playbackRequest) return;
       console.info(`[AudioPlayer] MP3 unavailable for '${track.slug}'. Activating Web Speech API fallback.`);
       this._playTts(track);
     }
@@ -336,6 +352,7 @@ export class AudioPlayer {
    * Pauses active playback.
    */
   pause() {
+    if (this.state === 'buffering') { this.stop(); return; }
     if (this.state !== 'playing') return;
 
     this.state = 'paused';
@@ -356,7 +373,7 @@ export class AudioPlayer {
    * Toggles between play and pause.
    */
   togglePlay() {
-    if (this.state === 'playing') {
+    if (this.state === 'playing' || this.state === 'buffering') {
       this.pause();
     } else {
       this.play();
@@ -367,6 +384,8 @@ export class AudioPlayer {
    * Stops playback and resets progress.
    */
   stop() {
+    this.playbackRequest++;
+    this.cancelPendingMp3?.();
     this.state = 'idle';
     this.source = 'none';
     this._stopSilentKeepAlive();
@@ -469,7 +488,7 @@ export class AudioPlayer {
   // ==========================================
 
   /**
-   * Tier 1: Attempts to play pre-rendered MP3 from GitHub Releases.
+   * Tier 1: Attempts to play pre-rendered MP3 published with the site.
    * @private
    */
   _playMp3(url) {
@@ -493,6 +512,12 @@ export class AudioPlayer {
       const cleanup = () => {
         audio.removeEventListener('canplay', onCanPlay);
         audio.removeEventListener('error', onError);
+        this.cancelPendingMp3 = null;
+      };
+
+      this.cancelPendingMp3 = () => {
+        cleanup();
+        reject(new Error('Playback cancelled'));
       };
 
       audio.addEventListener('canplay', onCanPlay, { once: true });
@@ -889,7 +914,7 @@ export class AudioPlayer {
     if (badgeEl) {
       badgeEl.setAttribute('data-source', this.source);
       if (this.source === 'mp3') {
-        badgeEl.textContent = 'MP3 Releases';
+        badgeEl.textContent = 'Kokoro Dora';
         badgeEl.style.backgroundColor = '#16a34a';
       } else if (this.source === 'tts') {
         badgeEl.textContent = 'Web Speech pt-BR';

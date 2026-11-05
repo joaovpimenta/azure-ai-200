@@ -119,3 +119,9 @@ describe('Security Gate Finding F-01 Verification', () => {
     }
   });
 });
+
+test('chapter playlist uses same-site MP3 paths under a nested Pages base', () => {
+  const player = new AudioPlayer({ siteBase: '../../' });
+  player.loadChapter('01-test', [{ type: 'concept', chapter: '01-test', slug: 'exemplo', title: 'Exemplo' }]);
+  assert.equal(player.currentTrack.mp3Url, '../../audio/exemplo/exemplo.mp3');
+});

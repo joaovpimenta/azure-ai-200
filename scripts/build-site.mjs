@@ -7,6 +7,7 @@ import { resolve, join, relative, dirname } from 'node:path';
 import { extractFrontmatter } from './lib/frontmatter.mjs';
 import { compileMarkdown } from './lib/markdown.mjs';
 import { escapeHtml } from './lib/cloze.mjs';
+import { renderStudyGuide } from '../web/study-guide.js';
 import { generatePwaIcons } from './lib/pwa-icons.mjs';
 
 const ROOT_DIR = resolve(process.cwd());
@@ -173,9 +174,9 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
       <div class="header-actions">
         <nav class="main-nav" aria-label="Navegação Principal">
           <a href="${rootRel}index.html" class="header-link nav-link ${currentRoute === 'home' ? 'active' : ''}" data-route="home">Artigos</a>
-          <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Cram</a>
+          <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Revisão rápida</a>
           <a href="${rootRel}simulator/index.html" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
-          <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Prontidão</a>
+          <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Meu progresso</a>
         </nav>
         <button class="install-app header-install" type="button" data-install-app>Instalar</button>
         <a class="github-stars" href="https://github.com/joaovpimenta/azure-ai-200" target="_blank" rel="noopener noreferrer" aria-label="Ver repositório Azure AI-200 no GitHub" title="Estrelas do repositório no GitHub">
@@ -569,6 +570,7 @@ const homeContent = `<header class="archive-intro">
   <h1>Arquitetura de dados e contêineres para IA, um conceito por vez.</h1>
   <p>Artigos para dominar sistemas distribuídos, bancos vetoriais, contêineres e observabilidade no Azure — dos fundamentos à prova de certificação.</p>
 </header>
+${renderStudyGuide('./')}
 <section class="archive-section" id="recent-posts" aria-labelledby="archive-heading">
   <div class="archive-toolbar">
     <div>
@@ -594,10 +596,10 @@ const homeContent = `<header class="archive-intro">
 </section>`;
 
 const views = [
-  { file: 'index.html', title: 'Arquivo de artigos', route: 'home', content: homeContent },
-  { file: 'cram/index.html', title: 'Cram Sheet de Alta Densidade', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
+  { file: 'index.html', title: 'Roteiro de estudo AI-200', route: 'home', content: homeContent },
+  { file: 'cram/index.html', title: 'Revisão rápida (Cram)', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
   { file: 'simulator/index.html', title: 'Simulador de Exame AI-200', route: 'simulator', content: '<div id="simulator-view">Carregando simulador de questões...</div>' },
-  { file: 'mastery/index.html', title: 'Mapa de Cobertura e Prontidão', route: 'mastery', content: '<div id="mastery-view">Carregando métricas de prontidão...</div>' }
+  { file: 'mastery/index.html', title: 'Meu progresso', route: 'mastery', content: '<div id="mastery-view">Carregando seu progresso...</div>' }
 ];
 
 for (const v of views) {

@@ -20,297 +20,200 @@ tags:
   - python
   - csharp
 difficulty: "advanced"
-tldr: "A busca vetorial no Azure Cosmos DB for NoSQL utiliza a função SQL VectorDistance() integrada a índices vetoriais especializados: Flat (exato), QuantizedFlat (quantização escalar) e DiskANN (baseado em grafo para larga escala). Vetores devem ser configurados em vectorEmbeddingPolicy e indexados em vectorIndexes."
+tldr: "Configure a política do vetor e seu índice. Flat é exato e limitado a 505
+  dimensões; quantizedFlat e DiskANN chegam a 4.096. Use VectorDistance no ORDER
+  BY e filtre documentos autorizados."
 related_links:
   - label: "Busca vetorial no Azure Cosmos DB for NoSQL"
     url: "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
     type: "learn"
   - label: "Índice vetorial DiskANN no Azure Cosmos DB"
-    url: "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-indexing#diskann"
+    url: "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/vector-search#vec\
+      tor-indexing-policies"
     type: "learn"
 questions:
-  - id: "q-cosmos-vector-01"
-    type: "multiple-choice"
-    title: "Requisitos de Configuração para Busca Vetorial de Alta Escala com DiskANN"
-    exam_domain: "data-management"
-    stem: "Você precisa habilitar busca vetorial aproximada (ANN) para uma base com mais de 2 milhões de embeddings de 1536 dimensões no Azure Cosmos DB for NoSQL com menor latência e consumo equilibrado de memória. Quais DUAS configurações são mandatórias na definição do contêiner?"
+  - id: q-cosmos-vector-01
+    type: multiple-choice
+    title: Configurar DiskANN
+    exam_domain: data-management
+    stem: Você escolheu DiskANN para buscar em 2 milhões de embeddings de 1.536
+      dimensões no Cosmos DB. Quais DUAS configurações devem declarar o vetor e
+      seu índice?
     select_count: 2
     options:
-      - id: "opt-a"
-        text: "Definir um vectorEmbeddingPolicy no contêiner especificando o caminho, tipo de dado (float32), dimensões e métrica de distância."
+      - id: opt-a
+        text: Definir vectorEmbeddingPolicy com caminho, tipo, dimensão e métrica.
         correct: true
-        rationale: "O vectorEmbeddingPolicy registra formalmente a presença do campo vetorial, suas dimensões e a função de distância esperada."
-      - id: "opt-b"
-        text: "Configurar um índice do tipo 'diskANN' dentro da seção vectorIndexes da política de indexação."
+        rationale: A política descreve como interpretar o vetor armazenado.
+        learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+      - id: opt-b
+        text: Adicionar o índice diskANN em vectorIndexes.
         correct: true
-        rationale: "O DiskANN é o algoritmo de índice baseado em grafo desenvolvido pela Microsoft Research, ideal para coleções com milhões de vetores de alta dimensionalidade."
-      - id: "opt-c"
-        text: "Adicionar o caminho do vetor na cláusula spatialIndexes da política de indexação."
+        rationale: O índice fornece a estrutura de busca aproximada escolhida no cenário.
+        learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+      - id: opt-c
+        text: Adicionar o vetor a spatialIndexes.
         correct: false
-        rationale: "spatialIndexes é usado para dados geoespaciais (Point, Polygon, LineString), e não para embeddings de IA."
-      - id: "opt-d"
-        text: "Configurar a chave de partição do contêiner obrigatoriamente como /embedding."
+        rationale: Índices espaciais atendem dados geográficos, como pontos e polígonos.
+        learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+      - id: opt-d
+        text: Usar /embedding como chave de partição.
         correct: false
-        rationale: "Um vetor de alta dimensionalidade jamais deve ser usado como chave de partição; ela deve permanecer em um identificador lógico como /tenantId."
+        rationale: A chave distribui documentos; não substitui política ou índice
+          vetorial.
+        learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
     tags:
       - cosmos-db
       - vector-search
       - diskann
-  - id: "q-cosmos-vector-02"
-    type: "code-completion"
-    title: "Sintaxe SQL para Consulta Vetorial Híbrida com VectorDistance"
-    exam_domain: "data-management"
-    stem: "Complete a instrução SQL parametrizada para executar uma busca híbrida no Azure Cosmos DB for NoSQL, filtrando por categoria de documento e ordenando pelos 5 vetores mais similares usando a função nativa de distância vetorial."
-    code_template: "SELECT TOP 5 c.id, c.title, {{slot_func}} AS SimilarityScore\nFROM c\nWHERE c.category = @category\nORDER BY {{slot_order}}"
+    learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+  - id: q-cosmos-vector-02
+    type: code-completion
+    title: Busca vetorial com filtro
+    exam_domain: data-management
+    stem: Complete a consulta que filtra por categoria e retorna os cinco vetores
+      mais próximos. A política usa distância cosseno.
+    code_template: |-
+      SELECT TOP 5 c.id, c.title, {{slot_func}} AS distance
+      FROM c
+      WHERE c.category = @category
+      ORDER BY {{slot_order}}
     slots:
-      - id: "slot_func"
+      - id: slot_func
         options:
-          - text: "VectorDistance(c.embedding, @queryVector)"
+          - text: VectorDistance(c.embedding, @queryVector)
             correct: true
-            rationale: "VectorDistance é a função interna do Cosmos DB que calcula a similaridade entre o vetor gravado e o vetor da consulta."
-          - text: "CosineSimilarity(c.embedding, @queryVector)"
+            rationale: VectorDistance calcula a distância conforme a política. Com cosseno,
+              valores menores indicam maior proximidade.
+            learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+          - text: CosineSimilarity(c.embedding, @queryVector)
             correct: false
-            rationale: "CosineSimilarity não é uma função nativa de sistema no SQL API do Cosmos DB; a função canônica é VectorDistance."
-      - id: "slot_order"
+            rationale: CosineSimilarity não é uma função nativa de sistema no SQL API do
+              Cosmos DB; a função canônica é VectorDistance.
+            learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+      - id: slot_order
         options:
-          - text: "VectorDistance(c.embedding, @queryVector)"
+          - text: VectorDistance(c.embedding, @queryVector)
             correct: true
-            rationale: "No Cosmos DB, a função VectorDistance() deve constar na cláusula ORDER BY para que o otimizador utilize o índice vetorial subjacente (DiskANN/Flat)."
-          - text: "c.id ASC"
+            rationale: No Cosmos DB, a função VectorDistance() deve constar na cláusula
+              ORDER BY para que o otimizador utilize o índice vetorial
+              subjacente (DiskANN/Flat).
+            learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
+          - text: c.id ASC
             correct: false
-            rationale: "Ordenar por c.id não retornará os vizinhos mais próximos e impedirá o uso do índice vetorial."
+            rationale: Ordenar por c.id não retornará os vizinhos mais próximos e impedirá o
+              uso do índice vetorial.
+            learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
     tags:
       - cosmos-db
       - vector-search
       - vectordistance
+    learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search
 ---
 
-# Embeddings, Políticas Vetoriais e VectorDistance()
+# Embeddings, política vetorial e VectorDistance()
 
-A integração de recursos de **Busca Vetorial Nativa** no **Azure Cosmos DB for NoSQL** transforma a base de dados transacional em um repositório unificado para arquiteturas RAG (Retrieval-Augmented Generation). Ao armazenar metadados, conteúdo textual e embeddings no mesmo documento JSON, a solução elimina a latência, a complexidade de sincronização e os custos adicionais decorrentes de manter bancos de dados relacionais e bancos vetoriais isolados.
+Um embedding é uma lista de números que representa conteúdo. Cosmos DB pode guardar texto, metadados e esse vetor no mesmo documento. A busca vetorial encontra documentos próximos da pergunta; no RAG, eles servem de contexto para o modelo responder.
 
----
+## Duas configurações diferentes
 
-## 1. Arquitetura de Embeddings no Cosmos DB NoSQL
+A ==vectorEmbeddingPolicy== define caminho, tipo, dimensão e métrica. ==vectorIndexes== define como acelerar a busca nesse caminho. Modelo e dimensão devem ser compatíveis nos documentos e nas perguntas.
 
-Diferente de bancos de dados relacionais que exigem tipos de dados binários rígidos ou extensões como `pgvector`, o Cosmos DB manipula vetores como **arrays numéricos padrão no JSON**:
-- Vetores de 1536 dimensões (`text-embedding-3-small`, `ada-002`) ou 3072 dimensões (`text-embedding-3-large`).
-- Armazenamento co-localizado com propriedades de controle de acesso (`tenantId`, `userId`, `roles`) e metadados (`timestamp`, `tags`).
-
----
-
-## 2. Configuração do Contêiner: `vectorEmbeddingPolicy`
-
-Para que o Cosmos DB reconheça um array numérico como um embedding e aplique aceleração por hardware, é obrigatório registrar a política de embeddings na criação do contêiner:
-
-A estrutura `vectorEmbeddingPolicy` requer quatro propriedades fundamentais:
-1. `path`: Caminho JSON da propriedade vetorial (ex: `"/embedding"`).
-2. `dataType`: Tipo primitivo numérico do vetor. Os tipos suportados são:
-   - ==`float32`== (padrão e mais utilizado para modelos OpenAI).
-   - `float16`, `int8`, `uint8` (para modelos com quantização prévia).
-3. `dimensions`: Número inteiro que expressa o tamanho do espaço vetorial (até ==4096 dimensões==).
-4. `distanceFunction`: Métrica matemática de distância espacial:
-   - `cosine`: Similaridade de cosseno. Padrão ouro para busca semântica em textos (avalia o ângulo entre vetores, ignorando magnitude).
-   - `dotproduct`: Produto escalar. Recomendado para vetores normalizados na norma $L_2$ por sua alta velocidade de computação.
-   - `euclidean`: Distância Euclidiana ($L_2$). Avalia a distância linear absoluta no espaço vetorial.
-
----
-
-## 3. Tipos de Índices Vetoriais: Flat, QuantizedFlat e DiskANN
-
-Dentro da `indexingPolicy`, a seção `vectorIndexes` define o algoritmo de busca:
-
-```mermaid
-flowchart TD
-    V["Índices Vetoriais no Cosmos DB"] --> Flat["Flat · Exato k-NN"]
-    V --> QFlat["QuantizedFlat · ANN com Compressão"]
-    V --> DiskANN["DiskANN · ANN em Grafo / Larga Escala"]
-
-    Flat --> F_Desc["100% Recall / Força bruta<br/>Até 505 dimensões recomendadas<br/>Pequenos volumes (até 50.000 itens)"]
-    QFlat --> Q_Desc["Quantização escalar em RAM<br/>Até 4096 dimensões<br/>Excelente equilíbrio RU/Latência"]
-    DiskANN --> D_Desc["Baseado em Grafo (MSR)<br/>Armazena vetores compactados em disco SSD<br/>Escala para bilhões de vetores"]
+```json
+{
+  "vectorEmbeddingPolicy": {
+    "vectorEmbeddings": [{
+      "path": "/embedding",
+      "dataType": "float32",
+      "dimensions": 1536,
+      "distanceFunction": "cosine"
+    }]
+  },
+  "indexingPolicy": {
+    "indexingMode": "consistent",
+    "automatic": true,
+    "includedPaths": [{"path": "/*"}],
+    "excludedPaths": [{"path": "/embedding/*"}],
+    "vectorIndexes": [{"path": "/embedding", "type": "diskANN"}]
+  }
+}
 ```
 
-| Tipo de Índice | Mecanismo | Dimensões Máximas | Recall | Escala Recomendada |
-|---|---|---|---|---|
-| **Flat** | Força bruta (k-Nearest Neighbors exato). Compara a query contra cada item da partição. | Até 505 dimensões | ==100% (Exato)== | Coleções pequenas (< 50.000 itens) |
-| **QuantizedFlat** | Comprime os vetores usando quantização escalar, mantendo os códigos quantizados na memória. | Até ==4096 dimensões== | ~95% (Aproximado) | Volumes médios; excelente relação de RUs |
-| **DiskANN** | Algoritmo baseado em grafos desenvolvido pela Microsoft Research. Armazena o grafo em SSD. | Até ==4096 dimensões== | > 95% (Aproximado) | ==Larga escala (milhões a bilhões de vetores)== |
+Esse fragmento configura os vetores; o contêiner ainda precisa de nome e chave, como `/tenantId`. Excluir `/embedding/*` do índice comum evita indexar cada componente como número isolado. O índice vetorial continua configurado em `vectorIndexes`.
 
-> **Atenção**: Para que os índices `quantizedFlat` e `diskANN` funcionem, a propriedade de vetor **deve ser obrigatoriamente excluída** de `excludedPaths` do índice invertido padrão.
+## Qual índice usar?
 
----
+| Tipo | Como busca | Dimensão máxima |
+|---|---|---|
+| `flat` | Comparação exata | 505 |
+| `quantizedFlat` | Compara vetores comprimidos; pode perder precisão | 4.096 |
+| `diskANN` | Busca aproximada por grafo, indicada para maior escala | 4.096 |
 
-## 4. Consultas com a Função SQL `VectorDistance()`
+Recall mede quantos vizinhos esperados a busca encontra. Índices aproximados não garantem recall fixo nem latência fixa. `quantizedFlat` e `diskANN` precisam de pelo menos 1.000 vetores indexados; abaixo disso, a busca pode usar varredura completa.
 
-A função do sistema `VectorDistance()` calcula a similaridade espacial entre dois vetores dentro de consultas SQL:
+## Consulta com Python e C#
 
-$$\text{VectorDistance}(c.\text{embedding}, \quad @\text{queryVector})$$
-
-### Sintaxe SQL Canônica para Busca Semântica
-```sql
-SELECT TOP 5
-    c.id,
-    c.text,
-    c.category,
-    VectorDistance(c.embedding, @queryVector) AS SimilarityScore
-FROM c
-WHERE c.category = @filterCategory AND c.tenantId = @tenantId
-ORDER BY VectorDistance(c.embedding, @queryVector)
-```
-
-### Busca Híbrida e Filtragem Pré-Vetorial (Pre-Filtering)
-O motor de consulta do Cosmos DB executa a filtragem de forma integrada:
-1. Os filtros relacionais escalares na cláusula `WHERE` (como `c.category = @filterCategory`) são avaliados primeiro utilizando os **índices invertidos tradicionais**.
-2. O subconjunto de documentos qualificados é então submetido ao grafo vetorial (**DiskANN**), que seleciona os $K$ vizinhos mais próximos.
-3. Isso garante que permissões de segurança por tenant ou categoria sejam aplicadas antes da ordenação por relevância semântica.
-
-<details>
-<summary>Checagem Rápida: O que acontece se utilizarmos VectorDistance() apenas na cláusula WHERE sem ORDER BY?</summary>
-
-Se você tentar executar `SELECT * FROM c WHERE VectorDistance(c.embedding, @vector) < 0.2`, o Cosmos DB **não utilizará o índice vetorial**. Ele será forçado a executar uma varredura completa da tabela (Full Table Scan), calculando a distância de cada item individualmente em tempo de execução, o que resultará em alto consumo de RUs e lentidão. O índice vetorial é ativado quando `VectorDistance()` é colocado na cláusula `ORDER BY`.
-</details>
-
----
-
-## 5. Implementação Prática Dual SDK (Python e C#)
-
-Abaixo, a criação de um contêiner configurando a política vetorial com métrica `cosine`, índice `diskANN` e execução de busca vetorial parametrizada:
+Pré-requisitos: contêiner `KnowledgeBase/DocumentEmbeddings` configurado como acima, dados com vetores de 1.536 dimensões e identidade com `Cosmos DB Built-in Data Reader`. Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT` e salve o embedding real da pergunta como array JSON em `query-vector.json`.
 
 ```python
+import json
+import os
 from azure.identity import DefaultAzureCredential
 from azure.cosmos import CosmosClient
 
-endpoint = "https://ai200-cosmos-nosql.documents.azure.com:443/"
-client = CosmosClient(url=endpoint, credential=DefaultAzureCredential())
-database = client.get_database_client("KnowledgeBase")
-
-# 1. Definição da Vector Embedding Policy
-vector_embedding_policy = {
-    "vectorEmbeddings": [
-        {
-            "path": "/embedding",
-            "dataType": "float32",
-            "dimensions": 1536,
-            "distanceFunction": "cosine"
-        }
-    ]
-}
-
-# 2. Definição da Indexing Policy com DiskANN
-indexing_policy = {
-    "indexingMode": "consistent",
-    "automatic": True,
-    "includedPaths": [{"path": "/*"}],
-    "excludedPaths": [{"path": "/embedding/*"}], # Exclui do índice invertido
-    "vectorIndexes": [
-        {
-            "path": "/embedding",
-            "type": "diskANN"
-        }
-    ]
-}
-
-container = database.create_container_if_not_exists(
-    id="DocumentEmbeddings",
-    partition_key={"paths": ["/tenantId"], "kind": "Hash"},
-    indexing_policy=indexing_policy,
-    vector_embedding_policy=vector_embedding_policy
-)
-
-# 3. Execução de Busca Vetorial com Parâmetro
-query_vector = [0.0152, -0.0231, 0.0891] # Vetor de 1536 dimensões (resumido)
-query_sql = """
-SELECT TOP 3 c.id, c.text, VectorDistance(c.embedding, @vector) AS Score
-FROM c
-WHERE c.tenantId = @tenant
-ORDER BY VectorDistance(c.embedding, @vector)
-"""
-
-results = container.query_items(
-    query=query_sql,
-    parameters=[
-        {"name": "@vector", "value": query_vector},
-        {"name": "@tenant", "value": "tenant-contoso"}
-    ],
-    partition_key="tenant-contoso"
-)
-
-for doc in results:
-    print(f"ID: {doc['id']} | Similaridade: {doc['Score']}")
+with open("query-vector.json", encoding="utf-8") as file:
+    vector: list[float] = json.load(file)
+if len(vector) != 1536:
+    raise ValueError("Esperado embedding com 1536 dimensões")
+with CosmosClient(os.environ["COSMOS_ENDPOINT"], DefaultAzureCredential()) as client:
+    container = client.get_database_client("KnowledgeBase").get_container_client("DocumentEmbeddings")
+    items = container.query_items(
+        query="""SELECT TOP 5 c.id, c.text,
+                 VectorDistance(c.embedding, @vector) AS distance
+                 FROM c WHERE c.tenantId = @tenant
+                 ORDER BY VectorDistance(c.embedding, @vector)""",
+        parameters=[{"name": "@vector", "value": vector},
+                    {"name": "@tenant", "value": "tenant-contoso"}],
+        partition_key="tenant-contoso",
+    )
+    for item in items:
+        print(item["id"], item["distance"])
 ```
 
 ```csharp
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+using System.Text.Json;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 
-string endpoint = "https://ai200-cosmos-nosql.documents.azure.com:443/";
-CosmosClient client = new CosmosClient(endpoint, new DefaultAzureCredential());
-Database database = client.GetDatabase("KnowledgeBase");
-
-// 1. Configuração de ContainerProperties com política de embedding
-ContainerProperties containerProperties = new ContainerProperties("DocumentEmbeddings", "/tenantId");
-
-containerProperties.VectorEmbeddingPolicy = new VectorEmbeddingPolicy(
-    new Collection<Embedding>
-    {
-        new Embedding
-        {
-            Path = "/embedding",
-            DataType = VectorDataType.Float32,
-            Dimensions = 1536,
-            DistanceFunction = DistanceFunction.Cosine
-        }
-    }
-);
-
-// 2. Política de indexação vetorial com DiskANN
-containerProperties.IndexingPolicy.ExcludedPaths.Add(new ExcludedPath { Path = "/embedding/*" });
-containerProperties.IndexingPolicy.VectorIndexes.Add(
-    new VectorIndexPath
-    {
-        Path = "/embedding",
-        Type = VectorIndexType.DiskANN
-    }
-);
-
-Container container = await database.CreateContainerIfNotExistsAsync(containerProperties);
-
-// 3. Consulta vetorial com VectorDistance() e parâmetros
-float[] queryVector = new float[] { 0.0152f, -0.0231f, 0.0891f }; // Representação conceitual
-
-QueryDefinition queryDefinition = new QueryDefinition(
-    @"SELECT TOP 3 c.id, c.text, VectorDistance(c.embedding, @vector) AS Score
-      FROM c
-      WHERE c.tenantId = @tenant
-      ORDER BY VectorDistance(c.embedding, @vector)")
-    .WithParameter("@vector", queryVector)
-    .WithParameter("@tenant", "tenant-contoso");
-
-using FeedIterator<dynamic> iterator = container.GetItemQueryIterator<dynamic>(
-    queryDefinition,
-    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey("tenant-contoso") }
-);
-
+float[] vector = JsonSerializer.Deserialize<float[]>(
+    await File.ReadAllTextAsync("query-vector.json"))!;
+if (vector.Length != 1536) throw new ArgumentException("Esperadas 1536 dimensões");
+using var client = new CosmosClient(
+    Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!, new DefaultAzureCredential());
+var container = client.GetContainer("KnowledgeBase", "DocumentEmbeddings");
+var query = new QueryDefinition(
+    "SELECT TOP 5 c.id, c.text, VectorDistance(c.embedding, @vector) AS distance " +
+    "FROM c WHERE c.tenantId = @tenant ORDER BY VectorDistance(c.embedding, @vector)")
+    .WithParameter("@vector", vector).WithParameter("@tenant", "tenant-contoso");
+using var iterator = container.GetItemQueryIterator<dynamic>(query,
+    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey("tenant-contoso") });
 while (iterator.HasMoreResults)
-{
-    FeedResponse<dynamic> response = await iterator.ReadNextAsync();
-    foreach (var item in response)
-    {
-        Console.WriteLine($"ID: {item.id} - Score: {item.Score}");
-    }
-}
+    foreach (var item in await iterator.ReadNextAsync())
+        Console.WriteLine($"{item.id}: {item.distance}");
 ```
 
----
+O cliente fixo é didático; em produção, derive `tenantId` da autorização. Com distância cosseno, menor valor significa maior proximidade. `WHERE` restringe documentos elegíveis; não presuma uma ordem física fixa de execução dos filtros.
+
+<details>
+<summary>Checagem Rápida: Vetor com filtro de categoria já é busca híbrida?</summary>
+
+Não. Isso é busca vetorial com filtro. Busca híbrida combina relevância textual e vetorial, normalmente com um método de fusão das classificações.
+
+</details>
 
 ## Pegadinhas de Prova
 
-- **Imutabilidade da Vector Policy**: As políticas de vetores (`vectorEmbeddingPolicy`) e seus índices associados só podem ser definidos **no momento da criação do contêiner**. Você não pode habilitar busca vetorial em um contêiner existente sem recriá-lo e migrar os dados.
-- **VectorDistance() obrigatório no ORDER BY**: Para utilizar o índice vetorial (DiskANN ou Flat), a função `VectorDistance()` deve estar presente no `ORDER BY`. Se você ordenar por outra coluna (ex: `ORDER BY c.createdAt`), o índice vetorial será ignorado e a consulta incorrerá em custo catastrófico de RUs.
-- **Tipos de Dados dos Vetores**: O Cosmos DB valida estritamente a dimensionalidade do array no momento da gravação. Se a política especificar 1536 dimensões e você enviar um array com 1535 ou 1537 elementos, a operação de escrita será rejeitada com erro de validação de esquema (`HTTP 400 Bad Request`).
-- **DiskANN vs Flat**: Em questões que descrevem catálogos pequenos (< 30.000 itens) ou que exigem garantia absoluta de precisão exata (100% recall), a resposta correta é o índice **Flat**. Quando a questão menciona milhões de itens, larga escala ou alta taxa de transferência, a resposta correta é **DiskANN**.
+- **Dimensão importa:** um vetor de três números não substitui um embedding de 1.536 dimensões. Valide os dados antes de gravar e consultar.
+- **Flat tem limite:** não atende vetores de 1.536 dimensões, mesmo em uma coleção pequena.
+- **Política não é índice:** configure ambos; use `VectorDistance` no `ORDER BY` para a busca ordenada por proximidade.
+- **Alterações de política exigem planejamento:** a documentação atual permite adicionar/remover caminhos. Para mudar uma configuração existente, remova e recrie a política/índice correspondente; planeje reindexação e impacto antes de aplicar.

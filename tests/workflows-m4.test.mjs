@@ -5,7 +5,8 @@
  */
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import YAML from 'yaml';
@@ -59,14 +60,38 @@ describe('Milestone 4: CI/CD Workflows & Decoupled Audio Pipeline', () => {
     );
   });
 
-  test('kokoro-audio.yml exists, is decoupled via workflow_dispatch, and targets pf_dora voice', () => {
+  test('Kokoro generates real audio on PRs and Pages requires it before uploading', () => {
     const filePath = join(WORKFLOWS_DIR, 'kokoro-audio.yml');
     assert.ok(existsSync(filePath), 'Missing .github/workflows/kokoro-audio.yml');
 
     const raw = readFileSync(filePath, 'utf-8');
     const doc = YAML.parse(raw);
     assert.ok(doc.on?.workflow_dispatch, 'kokoro-audio.yml must trigger via workflow_dispatch');
-    assert.ok(!doc.on?.push, 'kokoro-audio.yml must be decoupled from push to avoid blocking quick text edits');
+    assert.ok(!doc.on?.push, 'Pages calls this workflow on push; avoid duplicate synthesis runs');
+    assert.ok(doc.on?.pull_request);
+    assert.ok(doc.on?.workflow_call);
+    assert.equal(doc.on.workflow_call.inputs.slug.default, 'all');
+    const commands = doc.jobs.synthesize.steps.map(step => step.run || '').join('\n');
+    assert.match(commands, /kokoro_release.py synthesize/);
+    assert.match(commands, /kokoro_release.py verify/);
+    const assemble = doc.jobs.assemble;
+    assert.equal(assemble.needs, 'synthesize');
+    assert.ok(assemble.steps.some(step => step.uses?.startsWith('actions/download-artifact@') && step.with['merge-multiple']));
+    const finalVerify = assemble.steps.find(step => step.run?.includes('kokoro_release.py verify'));
+    assert.ok(finalVerify);
+    assert.doesNotMatch(finalVerify.run, /--shard-/, 'Final verification must cover the whole requested catalog');
+    assert.ok(assemble.steps.some(step => step.uses?.startsWith('actions/upload-artifact@') && step.with.name === 'narration-audio'));
+    const pages = YAML.parse(readFileSync(join(WORKFLOWS_DIR, 'pages.yml'), 'utf8'));
+    assert.equal(pages.jobs['generate-audio'].uses, './.github/workflows/kokoro-audio.yml');
+    const build = pages.jobs['validate-and-build'];
+    assert.equal(build.needs, 'generate-audio');
+    const steps = build.steps;
+    const download = steps.findIndex(step => step.uses?.startsWith('actions/download-artifact@'));
+    const verify = steps.findIndex(step => step.run?.includes('kokoro_release.py verify'));
+    const upload = steps.findIndex(step => step.uses?.startsWith('actions/upload-pages-artifact@'));
+    assert.ok(download > steps.findIndex(step => step.run === 'npm test'), 'Tests rebuild dist; audio must be downloaded afterwards');
+    assert.equal(steps[download].with.path, 'dist/audio');
+    assert.ok(download < verify && verify < upload, 'Coverage verification must gate publication');
     assert.equal(
       doc.on.workflow_dispatch.inputs?.voice?.default,
       'pf_dora',
@@ -106,6 +131,25 @@ describe('Milestone 4: CI/CD Workflows & Decoupled Audio Pipeline', () => {
     assert.ok(Array.isArray(plan.chapters) && plan.chapters.length > 0, 'chapters array must be non-empty');
 
     rmSync(join(ROOT_DIR, '.tmp'), { recursive: true, force: true });
+  });
+
+  test('audio artifacts exclude stale cache folders from other groups', () => {
+    const workflow = YAML.parse(readFileSync(join(WORKFLOWS_DIR, 'kokoro-audio.yml'), 'utf8'));
+    const stage = workflow.jobs.synthesize.steps.find(step => step.name === 'Stage only articles verified in the current group');
+    const dir = mkdtempSync(join(tmpdir(), 'tts-artifact-'));
+    try {
+      const output = join(dir, 'tools/tts/output');
+      for (const slug of ['current', 'stale']) {
+        mkdirSync(join(output, slug), { recursive: true });
+        writeFileSync(join(output, slug, `${slug}.mp3`), 'fixture');
+      }
+      writeFileSync(join(output, 'manifest.json'), JSON.stringify({ current: {} }));
+      const result = spawnSync('bash', ['-c', stage.run], { cwd: dir, encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.ok(existsSync(join(dir, '.tmp/narration-part/current/current.mp3')));
+      assert.ok(!existsSync(join(dir, '.tmp/narration-part/stale')));
+      assert.ok(existsSync(join(output, 'stale/stale.mp3')), 'Staging should preserve cached files');
+    } finally { rmSync(dir, { recursive: true, force: true }); }
   });
 
   test('Root README.md documents all 9 chapters, pilot concepts, and CLI commands', () => {

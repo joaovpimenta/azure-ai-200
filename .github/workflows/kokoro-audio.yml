@@ -4,90 +4,173 @@ on:
   workflow_dispatch:
     inputs:
       slug:
-        description: "Slug do conceito ou 'all' para sintetizar todos os conceitos publicados"
-        required: true
+        description: "Slug de um artigo ou all para gerar todos"
         default: "all"
+        type: string
       voice:
-        description: "Voz Kokoro ONNX (padrão: pf_dora)"
-        required: false
+        description: "Voz em português"
         default: "pf_dora"
+        type: string
       speed:
-        description: "Velocidade da fala (padrão: 1.0)"
-        required: false
+        description: "Velocidade de síntese (0.5 a 2.0)"
         default: "1.0"
-      publish_release:
-        description: "Publicar MP3 e chapters.json em GitHub Release tts-<slug>"
-        type: boolean
-        required: false
-        default: true
+        type: string
+  workflow_call:
+    inputs:
+      slug:
+        default: "all"
+        type: string
+      voice:
+        default: "pf_dora"
+        type: string
+      speed:
+        default: "1.0"
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "chapters/**"
+      - "comparisons/**"
+      - "tools/tts/**"
+      - "scripts/**"
+      - "package*.json"
+      - ".github/workflows/kokoro-audio.yml"
+      - ".github/workflows/pages.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: kokoro-audio-${{ inputs.slug }}
-  cancel-in-progress: false
+  group: kokoro-${{ github.workflow }}-${{ github.ref }}-${{ inputs.slug || 'all' }}
+  cancel-in-progress: true
 
 jobs:
   synthesize:
-    name: Synthesize PT-BR/EN-US narration with Kokoro (pf_dora)
     runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON((inputs.slug || 'all') == 'all' && '[0,1,2,3,4,5]' || '[0]') }}
+    env:
+      TTS_SLUG: ${{ inputs.slug || 'all' }}
+      TTS_VOICE: ${{ inputs.voice || 'pf_dora' }}
+      TTS_SPEED: ${{ inputs.speed || '1.0' }}
+      TTS_SHARD: ${{ matrix.shard }}
+      TTS_SHARDS: ${{ (inputs.slug || 'all') == 'all' && 6 || 1 }}
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: tools/tts/requirements.txt
+      - name: Build current narration catalog
+        run: |
+          npm ci
+          npm run validate
+          npm run build
+      - name: Install synthesis and MP3 tools
+        run: |
+          python -m pip install -r tools/tts/requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Cache pinned model files
+        uses: actions/cache@v4
+        with:
+          path: .cache/kokoro
+          key: kokoro-model-v1.1-${{ hashFiles('tools/tts/download_models.py') }}
+      - name: Download and verify model files
+        run: python tools/tts/download_models.py
+      - name: Restore previously synthesized articles
+        uses: actions/cache/restore@v4
+        with:
+          path: tools/tts/output
+          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
+          restore-keys: |
+            tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-
+      - name: Synthesize real MP3 files and measure chapter times
+        run: |
+          python tools/tts/kokoro_release.py synthesize \
+            --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
+            --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --shard-index "$TTS_SHARD" --shard-count "$TTS_SHARDS" \
+            --model .cache/kokoro/kokoro-v1.0.onnx \
+            --voices .cache/kokoro/voices-v1.0.bin \
+            --output-dir tools/tts/output
+      - name: Require complete and current audio coverage
+        run: |
+          python tools/tts/kokoro_release.py verify \
+            --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
+            --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --shard-index "$TTS_SHARD" --shard-count "$TTS_SHARDS" \
+            --output-dir tools/tts/output
+      - name: Save verified audio cache
+        uses: actions/cache/save@v4
+        with:
+          path: tools/tts/output
+          key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
+      - name: Stage only articles verified in the current group
+        run: |
+          python - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
+          source = Path('tools/tts/output')
+          target = Path('.tmp/narration-part')
+          target.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(source / 'manifest.json', target / 'manifest.json')
+          for slug in json.loads((source / 'manifest.json').read_text()):
+              shutil.copytree(source / slug, target / slug)
+          PY
+      - name: Upload MP3 files, measured chapters and coverage manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: narration-part-${{ matrix.shard }}
+          path: .tmp/narration-part/
+          if-no-files-found: error
+          retention-days: 1
 
-      - name: Install Node dependencies and build catalog
+  assemble:
+    needs: synthesize
+    runs-on: ubuntu-latest
+    env:
+      TTS_SLUG: ${{ inputs.slug || 'all' }}
+      TTS_VOICE: ${{ inputs.voice || 'pf_dora' }}
+      TTS_SPEED: ${{ inputs.speed || '1.0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - name: Build the catalog for final coverage verification
         run: |
           npm ci
           npm run build
-
-      - name: Prepare narration segments and sentence chapters
-        run: |
-          python tools/tts/kokoro_release.py prepare \
-            --catalog dist/data/catalog.json \
-            --slug "${{ inputs.slug }}" \
-            --voice "${{ inputs.voice }}" \
-            --speed "${{ inputs.speed }}" \
-            --output-dir tools/tts/output
-
-      - name: Upload narration plan & chapters artifact
-        uses: actions/upload-artifact@v4
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - uses: actions/download-artifact@v4
         with:
-          name: kokoro-narration-${{ inputs.slug }}
-          path: tools/tts/output/
-          retention-days: 14
-
-      - name: Publish MP3 assets to GitHub Releases (when synthesized)
-        if: inputs.publish_release == true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
+          pattern: narration-part-*
+          merge-multiple: true
+          path: tools/tts/output
+      - name: Require all requested articles across every parallel job
         run: |
-          set -euo pipefail
-          for dir in tools/tts/output/*/; do
-            [ -d "$dir" ] || continue
-            slug="$(basename "$dir")"
-            mp3_file="$dir/${slug}.mp3"
-            chapters_file="$dir/chapters.json"
-            if [ -f "$mp3_file" ] && [ -f "$chapters_file" ]; then
-              tag="tts-${slug}"
-              if gh release view "$tag" >/dev/null 2>&1; then
-                gh release upload "$tag" "$mp3_file" "$chapters_file" --clobber
-              else
-                gh release create "$tag" "$mp3_file" "$chapters_file" \
-                  --title "Narração Kokoro (pf_dora): ${slug}" \
-                  --notes "Áudio sintetizado automaticamente para revisão mobile/PWA."
-              fi
-            fi
-          done
+          python tools/tts/kokoro_release.py verify \
+            --catalog dist/data/catalog.json --slug "$TTS_SLUG" \
+            --voice "$TTS_VOICE" --speed "$TTS_SPEED" \
+            --output-dir tools/tts/output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: narration-audio
+          path: tools/tts/output/
+          if-no-files-found: error
+          retention-days: 14
