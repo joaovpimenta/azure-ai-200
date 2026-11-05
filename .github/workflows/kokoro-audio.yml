@@ -40,6 +40,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: kokoro-${{ github.workflow }}-${{ github.ref }}-${{ inputs.slug || 'all' }}
+  cancel-in-progress: true
+
 jobs:
   synthesize:
     runs-on: ubuntu-latest
@@ -110,11 +114,24 @@ jobs:
         with:
           path: tools/tts/output
           key: tts-${{ runner.os }}-${{ hashFiles('tools/tts/*.py', 'tools/tts/requirements.txt') }}-${{ env.TTS_SHARDS }}-${{ matrix.shard }}-${{ hashFiles('dist/data/catalog.json') }}-${{ env.TTS_SLUG }}-${{ env.TTS_VOICE }}-${{ env.TTS_SPEED }}
+      - name: Stage only articles verified in the current group
+        run: |
+          python - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
+          source = Path('tools/tts/output')
+          target = Path('.tmp/narration-part')
+          target.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(source / 'manifest.json', target / 'manifest.json')
+          for slug in json.loads((source / 'manifest.json').read_text()):
+              shutil.copytree(source / slug, target / slug)
+          PY
       - name: Upload MP3 files, measured chapters and coverage manifest
         uses: actions/upload-artifact@v4
         with:
           name: narration-part-${{ matrix.shard }}
-          path: tools/tts/output/
+          path: .tmp/narration-part/
           if-no-files-found: error
           retention-days: 1
 
