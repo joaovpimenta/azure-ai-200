@@ -49,12 +49,13 @@ export function setupActiveRecallToolbar(article) {
   toolbar.innerHTML = `
     <div class="toolbar-group">
       <button id="recall-switch-btn" type="button" class="recall-toggle-btn" data-state="${isRecallActive ? 'active' : 'inactive'}">
-        Recordação Ativa: ${isRecallActive ? 'Ligada' : 'Desligada'}
+        Praticar de memória: ${isRecallActive ? 'Ligado' : 'Desligado'}
       </button>
       <span id="cloze-progress-badge" class="cloze-counter-badge">
         0/${clozes.length} lacunas reveladas
       </span>
     </div>
+    <p>Tente lembrar o termo oculto; clique nele ou use Enter/Espaço para revelar.</p>
     <div class="toolbar-group">
       <button id="reveal-all-cloze-btn" type="button" class="recall-toggle-btn">Revelar todas</button>
       <button id="hide-all-cloze-btn" type="button" class="recall-toggle-btn">Ocultar todas</button>
@@ -82,7 +83,7 @@ export function setupActiveRecallToolbar(article) {
     document.body.dataset.activeRecall = nextState ? 'true' : 'false';
     localStorage.setItem('azure_ai_200_active_recall', nextState ? 'true' : 'false');
     switchBtn.dataset.state = nextState ? 'active' : 'inactive';
-    switchBtn.textContent = `Recordação Ativa: ${nextState ? 'Ligada' : 'Desligada'}`;
+    switchBtn.textContent = `Praticar de memória: ${nextState ? 'Ligado' : 'Desligado'}`;
   });
 
   revealAllBtn?.addEventListener('click', () => {
@@ -208,11 +209,11 @@ export function setupCheckCardsEvaluation(container) {
     const ratingBox = document.createElement('div');
     ratingBox.className = 'check-card-rating';
     ratingBox.innerHTML = `
-      <span>Avalie seu domínio desta resposta:</span>
+      <span>Você conseguiu responder antes de abrir?</span>
       <div class="rating-btn-group">
-        <button type="button" class="rating-btn" data-rating="easy">Fácil</button>
-        <button type="button" class="rating-btn" data-rating="medium">Médio</button>
-        <button type="button" class="rating-btn" data-rating="hard">Revisar</button>
+        <button type="button" class="rating-btn" data-rating="easy">Sim, sem ajuda</button>
+        <button type="button" class="rating-btn" data-rating="medium">Em parte</button>
+        <button type="button" class="rating-btn" data-rating="hard">Preciso revisar</button>
       </div>
     `;
 

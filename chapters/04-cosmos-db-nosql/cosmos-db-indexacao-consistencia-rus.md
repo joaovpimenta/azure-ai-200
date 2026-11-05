@@ -60,6 +60,9 @@ questions:
       - consistency
       - consistency-levels
     learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy
+    rationale: Strong lê a versão confirmada mais recente; Bounded Staleness admite
+      atraso limitado; Session preserva garantias dentro da sessão. Consistent
+      Prefix preserva ordem; Eventual garante convergência, sem ordem imediata.
   - id: q-cosmos-indexing-02
     type: single-choice
     title: Reduzir indexação desnecessária

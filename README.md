@@ -16,7 +16,7 @@ Os exemplos de SDK usam abas Python/C#. Prepare os recursos e permissões descri
 - Leitura com lacunas interativas, autoavaliações e exemplos de código.
 - Simulado com escolha única/múltipla, código, ordenação e estudo de caso.
 - Modo estudo com feedback imediato e modo cronometrado. O corte de 70% é uma regra de treino do site, não conversão da pontuação oficial.
-- Progresso salvo no navegador, exportação/importação e sincronização opcional com Gist privado.
+- Progresso salvo no navegador, exportação/importação e sincronização opcional com Gist não listado.
 - Instalação para uso offline e leitura em áudio.
 - [Comparação de bancos vetoriais](comparisons/vector-stores-azure.md).
 

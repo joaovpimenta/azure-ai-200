@@ -104,37 +104,37 @@
       "options": [
         {
           "id": "opt-cs2-identity-rbac",
-          "text": "Criar uma Identidade Gerenciada Atribuída pelo Usuário, associá-la ao Container App e atribuir a ela a função RBAC 'Key Vault Secrets User' no Key Vault.",
+          "text": "Associar uma identidade gerenciada atribuída pelo usuário ao app e conceder Key Vault Secrets User no cofre.",
           "correct": true,
-          "rationale": "A função 'Key Vault Secrets User' concede apenas permissão de leitura no plano de dados para recuperar o segredo sem direitos administrativos, cumprindo o princípio de privilégio mínimo.",
+          "rationale": "Esse papel permite ler os segredos necessários sem conceder sua edição.",
           "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
         },
         {
           "id": "opt-cs2-kv-ref",
-          "text": "Configurar a seção de segredos do Container App utilizando referências do Key Vault ('keyVaultUrl') vinculadas ao Resource ID da Identidade Gerenciada Atribuída pelo Usuário.",
+          "text": "Criar a referência com keyVaultUrl e o resource ID da identidade no campo identity.",
           "correct": true,
-          "rationale": "A referência usa a identidade para buscar o valor em execução. Ela evita gravar o valor no manifesto; o valor ainda precisa chegar ao consumidor autorizado.",
+          "rationale": "A referência informa qual segredo buscar e qual identidade usar. O valor é obtido em tempo de execução.",
           "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
         },
         {
           "id": "opt-cs2-admin-role",
-          "text": "Atribuir a função 'Key Vault Administrator' à identidade no nível da assinatura para simplificar permissões futuras.",
+          "text": "Conceder Key Vault Administrator em toda a assinatura.",
           "correct": false,
-          "rationale": "Administrator no escopo da assinatura concede muito mais acesso do que a leitura necessária.",
+          "rationale": "Concede mais acesso do que o necessário para ler o segredo.",
           "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
         },
         {
           "id": "opt-cs2-access-policies",
-          "text": "Habilitar políticas de acesso legadas do Key Vault com permissões universais de leitura para o pool da VNet.",
+          "text": "Conceder Key Vault Reader à identidade no cofre.",
           "correct": false,
-          "rationale": "Políticas de acesso legadas (vault access policies) não devem ser utilizadas quando a diretriz corporativa exige o modelo de permissões RBAC do Microsoft Entra ID.",
+          "rationale": "Reader permite consultar metadados, mas não ler os valores dos segredos.",
           "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
         },
         {
           "id": "opt-cs2-dockerfile-env",
-          "text": "Adicionar o valor do segredo em texto puro como instrução ENV no Dockerfile.",
+          "text": "Gravar o segredo em uma instrução ENV no Dockerfile.",
           "correct": false,
-          "rationale": "Inserir segredos em camadas de imagem Docker expõe credenciais a qualquer usuário com acesso ao repositório de imagens.",
+          "rationale": "O valor fica na imagem e pode ser lido por quem tiver acesso a ela.",
           "learn_url": "https://learn.microsoft.com/azure/container-apps/manage-secrets?tabs=arm-template#key-vault-references"
         }
       ],
@@ -166,23 +166,23 @@
         },
         {
           "id": "opt-cs3-polling",
-          "text": "Configurar uma consulta SQL periódica 'SELECT * FROM c WHERE c._ts > @lastCheck' executada a cada 5 segundos diretamente pela API web principal.",
+          "text": "Consultar c._ts a cada cinco segundos dentro da API web.",
           "correct": false,
-          "rationale": "Polling periódico via consultas SQL gera desperdício contínuo de RUs, não escala eficientemente em múltiplas partições físicas e pode perder atualizações intermediárias.",
+          "rationale": "Mantém o acompanhamento na API e exige controlar consulta, posição e recuperação manualmente. CFP já oferece leitura distribuída com checkpoints.",
           "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
         },
         {
           "id": "opt-cs3-stored-procedure",
-          "text": "Criar uma Stored Procedure no Cosmos DB que chama a API do Azure OpenAI em modo síncrono durante cada operação de inserção.",
+          "text": "Chamar Azure OpenAI de dentro de uma stored procedure do Cosmos DB.",
           "correct": false,
-          "rationale": "Stored Procedures no Cosmos DB são atômicas e executadas em JavaScript dentro do motor transacional; elas não podem realizar chamadas HTTP de saída externas (como invocar o Azure OpenAI).",
+          "rationale": "Stored procedures executam no banco e não podem fazer essa chamada HTTP externa.",
           "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
         },
         {
           "id": "opt-cs3-pre-trigger",
-          "text": "Utilizar triggers pré-inserção (pre-triggers) em JavaScript no Cosmos DB para calcular o embedding de 1.536 dimensões antes de persistir o documento.",
+          "text": "Chamar o modelo por um pre-trigger antes de gravar o documento.",
           "correct": false,
-          "rationale": "Triggers no Cosmos DB rodam no contexto da transação NoSQL sem acesso à rede externa para contactar modelos de IA.",
+          "rationale": "Pre-triggers do Cosmos DB não acessam o modelo por rede; também manteriam o trabalho antes da conclusão da gravação.",
           "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
         }
       ],

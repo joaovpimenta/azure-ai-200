@@ -28,7 +28,8 @@ related_links:
     url: "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
     type: "learn"
   - label: "Índice vetorial DiskANN no Azure Cosmos DB"
-    url: "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/vector-search#vector-indexing-policies"
+    url: "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/vector-search#vec\
+      tor-indexing-policies"
     type: "learn"
 questions:
   - id: q-cosmos-vector-01

@@ -175,7 +175,7 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
           <a href="${rootRel}index.html" class="header-link nav-link ${currentRoute === 'home' ? 'active' : ''}" data-route="home">Artigos</a>
           <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Revisão rápida</a>
           <a href="${rootRel}simulator/index.html" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
-          <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Prontidão</a>
+          <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Meu progresso</a>
         </nav>
         <button class="install-app header-install" type="button" data-install-app>Instalar</button>
         <a class="github-stars" href="https://github.com/joaovpimenta/azure-ai-200" target="_blank" rel="noopener noreferrer" aria-label="Ver repositório Azure AI-200 no GitHub" title="Estrelas do repositório no GitHub">
@@ -597,7 +597,7 @@ const views = [
   { file: 'index.html', title: 'Arquivo de artigos', route: 'home', content: homeContent },
   { file: 'cram/index.html', title: 'Revisão rápida (Cram)', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
   { file: 'simulator/index.html', title: 'Simulador de Exame AI-200', route: 'simulator', content: '<div id="simulator-view">Carregando simulador de questões...</div>' },
-  { file: 'mastery/index.html', title: 'Mapa de Cobertura e Prontidão', route: 'mastery', content: '<div id="mastery-view">Carregando métricas de prontidão...</div>' }
+  { file: 'mastery/index.html', title: 'Meu progresso', route: 'mastery', content: '<div id="mastery-view">Carregando seu progresso...</div>' }
 ];
 
 for (const v of views) {

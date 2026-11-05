@@ -45,23 +45,21 @@ questions:
       - id: opt-b
         text: Aumentar o throughput provisionado no contêiner de leases.
         correct: false
-        rationale: O throughput do contêiner de leases controla o registro de
-          checkpoints, não tendo relação com os tipos de eventos emitidos pelo
-          contêiner monitorado.
+        rationale: Mais capacidade para os leases ajuda a registrar progresso, mas não
+          faz Latest Version entregar exclusões físicas.
         learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor
       - id: opt-c
         text: Configurar o ChangeFeedProcessor com StartTime apontando para
           DateTime.MinValue.
         correct: false
-        rationale: StartTime define o ponto histórico inicial de leitura das alterações,
-          mas o log de Latest Version continuará omitindo eventos de deleção
-          física.
+        rationale: StartTime escolhe de onde começar a leitura; não muda os tipos de
+          alteração disponíveis.
         learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor
       - id: opt-d
         text: Criar uma stored procedure para executar as deleções de forma síncrona.
         correct: false
-        rationale: Stored procedures alteram itens no escopo da partição, mas deleções
-          físicas continuam invisíveis no modo Latest Version.
+        rationale: Excluir por stored procedure continua sendo exclusão física, que esse
+          modo não entrega.
         learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor
     tags:
       - cosmos-db
@@ -92,6 +90,9 @@ questions:
       - change-feed-processor
       - csharp
     learn_url: https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor
+    rationale: Prepare as referências e a função que trata os lotes antes de
+      construir o processador. StartAsync inicia a leitura; StopAsync encerra o
+      processamento quando a aplicação termina.
 ---
 
 # Change Feed Processor: alterações, leases e reprocessamento

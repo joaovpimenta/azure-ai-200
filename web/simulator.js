@@ -10,6 +10,20 @@ import {
 } from './quiz-core.js';
 import { STORAGE_KEY } from './progress-core.js';
 
+const domainLabels = {
+  'containerized-solutions': 'Contêineres',
+  'data-management': 'Dados e IA',
+  'connect-and-consume': 'Conexão e eventos',
+  'secure-monitor-troubleshoot': 'Segurança e monitoramento',
+};
+const questionTypeLabels = {
+  'single-choice': 'Escolha uma alternativa',
+  'multiple-choice': 'Escolha várias alternativas',
+  'code-completion': 'Complete o código',
+  'ordering': 'Ordene as etapas',
+  'case-study': 'Estudo de caso',
+};
+
 export function renderSimulatorView(container, { questions, blueprint }, urlParams = new URLSearchParams()) {
   const defaultMode = urlParams.get('mode') || 'study';
   const onlyMistakes = urlParams.get('errors') === 'true';
@@ -51,7 +65,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
           <h2>Nenhuma questão encontrada</h2>
           <p style="color: var(--text-muted); margin: 12px 0;">
             ${onlyMistakes
-              ? 'Seu Caderno de Erros está limpo! Não há questões erradas registradas.'
+              ? 'Não há erros registrados neste navegador. Faça um simulado para começar.'
               : 'Nenhuma questão corresponde aos filtros selecionados.'}
           </p>
           <div style="display: flex; justify-content: center; gap: 10px; margin-top: 16px;">
@@ -95,18 +109,18 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
       <div class="concept-header">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
           <div>
-            <span class="badge badge-domain">${q.exam_domain || 'Geral'}</span>
-            <span class="badge badge-diff">${q.type}</span>
+            <span class="badge badge-domain">${domainLabels[q.exam_domain] || 'Geral'}</span>
+            <span class="badge badge-diff">${questionTypeLabels[q.type] || q.type}</span>
             <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-left: 8px;">
               Questão ${currentIdx + 1} de ${currentQuestions.length}
             </span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <select id="simulator-lang-filter" class="slot-select" style="font-size: 12px; padding: 4px 8px;">
-              <option value="all" ${activeFilters.language === 'all' ? 'selected' : ''}>Todas Linguagens</option>
+              <option value="all" ${activeFilters.language === 'all' ? 'selected' : ''}>Todas as linguagens</option>
               <option value="python" ${activeFilters.language === 'python' ? 'selected' : ''}>Python SDK</option>
               <option value="csharp" ${activeFilters.language === 'csharp' ? 'selected' : ''}>C# (.NET) SDK</option>
-              <option value="agnostic" ${activeFilters.language === 'agnostic' ? 'selected' : ''}>Agnóstico</option>
+              <option value="agnostic" ${activeFilters.language === 'agnostic' ? 'selected' : ''}>Sem linguagem específica</option>
             </select>
             ${defaultMode === 'exam' ? `<span id="exam-timer" style="font-family: var(--font-mono); font-weight: 700; color: var(--warning);">100:00</span>` : ''}
             <button id="flag-review-btn" class="recall-toggle-btn">${isFlagged ? '🚩 Marcada' : '🏳️ Marcar'}</button>
@@ -125,7 +139,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
         <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
           <button id="prev-q-btn" class="recall-toggle-btn" ${currentIdx === 0 ? 'disabled' : ''}>← Anterior</button>
           <div style="display: flex; gap: 8px;">
-            ${defaultMode === 'study' ? `<button id="submit-answer-btn" class="recall-toggle-btn" style="background-color: var(--accent); color: #fff;">Verificar Resposta</button>` : ''}
+            ${defaultMode === 'study' ? `<button id="submit-answer-btn" class="recall-toggle-btn" style="background-color: var(--accent); color: #fff;">Conferir resposta</button>` : ''}
             <button id="next-q-btn" class="recall-toggle-btn" style="background-color: var(--accent); color: #fff;">
               ${isLast ? 'Finalizar Simulado' : 'Próxima →'}
             </button>
@@ -185,6 +199,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
         }
 
         return `
+          <p>Escolha uma opção em cada lacuna para completar o código.</p>
           <div class="code-template-box">
             <pre><code>${renderedTemplate}</code></pre>
           </div>
@@ -204,6 +219,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
             })
           : [...rawItems];
         return `
+          <p>Use as setas para colocar as etapas na ordem pedida.</p>
           <div class="ordering-list" id="ordering-items-container-${q.id}">
             ${items.map((item, idx) => `
               <div class="ordering-item" data-id="${item.id || `item_${idx + 1}`}" data-current-idx="${idx}">
@@ -240,7 +256,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
             `).join('')}
           </div>
           <div class="child-questions-section" style="margin-top: 20px;">
-            <h4 style="margin-bottom: 12px;">Questões do Estudo de Caso:</h4>
+            <h4 style="margin-bottom: 12px;">Responda com base nas quatro abas:</h4>
             ${(q.questions || []).map((childQ, qIdx) => `
               <div class="child-question-card" data-child-id="${childQ.id}" data-child-type="${childQ.type}" style="margin-bottom: 20px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md);">
                 <p style="font-weight: 600; margin-bottom: 8px;">${qIdx + 1}. ${childQ.stem || childQ.prompt || childQ.title}</p>
@@ -549,18 +565,18 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
     container.innerHTML = `
       <div class="quiz-card" style="text-align: center; padding: 40px 24px;">
         <span style="font-size: 48px;">${scoreReport.isPassing ? '🎉' : '📚'}</span>
-        <h2 style="font-size: 26px; margin: 12px 0;">${scoreReport.isPassing ? 'Aprovado no Simulado!' : 'Reforce seus Estudos'}</h2>
+        <h2 style="font-size: 26px; margin: 12px 0;">${scoreReport.isPassing ? 'Meta do treino atingida!' : 'Revise os temas com mais erros'}</h2>
         <div style="font-size: 36px; font-weight: 800; color: ${scoreReport.isPassing ? 'var(--success)' : 'var(--danger)'};">
           ${scoreReport.percentage}% (${scoreReport.correct}/${scoreReport.total})
         </div>
-        <p style="color: var(--text-muted); margin-top: 8px;">Pontuação de corte: 70% (700/1000)</p>
+        <p style="color: var(--text-muted); margin-top: 8px;">Meta deste treino: 70% de acertos. Esse percentual não equivale à escala de pontos do exame oficial.</p>
 
         <div style="margin: 24px auto; max-width: 600px; text-align: left;">
           <h4 style="margin-bottom: 12px;">Desempenho por Domínio:</h4>
           ${Object.values(scoreReport.domainScores).map(d => `
             <div style="margin-bottom: 10px;">
               <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                <span><strong>${d.domainId}</strong> (${d.correct}/${d.total})</span>
+                <span><strong>${domainLabels[d.domainId] || d.domainId}</strong> (${d.correct}/${d.total})</span>
                 <span>${d.percentage}%</span>
               </div>
               <div class="progress-bar-track">
@@ -573,7 +589,7 @@ export function renderSimulatorView(container, { questions, blueprint }, urlPara
         <div style="margin-top: 28px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
           <a href="#simulator" class="recall-toggle-btn">Novo Simulado</a>
           <a href="#simulator?errors=true" class="recall-toggle-btn">Revisar Caderno de Erros</a>
-          <a href="#mastery" class="recall-toggle-btn">Ver Prontidão Geral</a>
+          <a href="#mastery" class="recall-toggle-btn">Ver meu progresso</a>
         </div>
       </div>
     `;

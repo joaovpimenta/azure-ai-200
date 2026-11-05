@@ -70,10 +70,10 @@ questions:
     type: code-completion
     title: Configurar chave hierárquica
     exam_domain: data-management
-    stem: Complete a definição de um contêiner com chave hierárquica de três níveis
-      e autoscale de até 4.000 RU/s. O cliente de provisionamento já está
-      autorizado para criar o recurso; credenciais apenas de leitura de dados
-      não bastam.
+    stem: "Complete apenas a configuração do contêiner: chave hierárquica de três
+      níveis e autoscale de até 4.000 RU/s. PartitionKey e ThroughputProperties
+      já foram importados, e database já foi obtido por um cliente autorizado a
+      criar recursos. Permissão apenas de leitura não basta."
     code_template: |-
       container = database.create_container_if_not_exists(
           id='UserSessions',
@@ -134,8 +134,10 @@ Cosmos DB for NoSQL guarda documentos JSON. Para distribuir dados e tráfego, ag
 |---|---|
 | Conta | Regiões, endpoint e regras de acesso |
 | Banco | Agrupamento de contêineres; pode compartilhar capacidade |
-| Contêiner | Chave de partição, índices e documentos |
+| Contêiner de dados | Chave de partição, índices e documentos |
 | Item | Documento JSON com `id` |
+
+Aqui, contêiner é um agrupamento de documentos no banco; não é um contêiner Docker. `tenantId` identifica um cliente da aplicação.
 
 Uma ==RU== (Request Unit) mede o custo de uma operação. RU/s mede capacidade por segundo. Uma leitura pontual de um item de 1 KB custa 1 RU com consistência Session; consultas e escritas têm outros custos.
 

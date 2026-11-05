@@ -173,7 +173,7 @@
       "embeddings",
       "scenario"
     ],
-    "stem": "Uma consulta usa WHERE c.tenantId = @tenant AND c.isActive = true e ORDER BY VectorDistance(c.embedding, @vector). Os índices de filtro e vetor estão ausentes. Quais DUAS configurações dão suporte aos dois tipos de acesso?",
+    "stem": "Uma consulta usa WHERE c.tenantId = @tenant AND c.isActive = true e ORDER BY VectorDistance(c.embedding, @vector). Os índices de filtro e vetor estão ausentes. Quais DUAS configurações dão suporte aos dois tipos de acesso? tenantId identifica o cliente e isActive indica se o documento está ativo.",
     "options": [
       {
         "id": "opt-vector-index-def",
@@ -230,7 +230,7 @@
       "scenario"
     ],
     "stem": "Complete o cliente Python com DefaultAzureCredential e o método de consulta SQL parametrizada. O SDK Python usa Gateway (HTTPS), não Direct. O contêiner tem chave /tenantId e a identidade já está autorizada.",
-    "code_template": "from azure.cosmos import CosmosClient, PartitionKey\nfrom azure.identity import DefaultAzureCredential\n\n# Instanciar cliente autenticado com Entra ID\nclient = CosmosClient(\n    url=\"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    credential={{slot_1}},\n    connection_mode=\"Gateway\"\n)\n\ndatabase = client.get_database_client(\"knowledge-repo\")\ncontainer = database.get_container_client(\"embeddings\")\n\n# Executar consulta parametrizada\nquery_text = \"SELECT c.id, c.title FROM c WHERE c.category = @cat\"\nparams = [{\"name\": \"@cat\", \"value\": \"generative-ai\"}]\n\nresults = list(container.{{slot_2}}(\n    query=query_text,\n    parameters=params,\n    partition_key=\"tenant-contoso\"\n))",
+    "code_template": "from azure.cosmos import CosmosClient\nfrom azure.identity import DefaultAzureCredential\n\n# Instanciar cliente autenticado com Entra ID\nclient = CosmosClient(\n    url=\"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    credential={{slot_1}},\n    connection_mode=\"Gateway\"\n)\n\ndatabase = client.get_database_client(\"knowledge-repo\")\ncontainer = database.get_container_client(\"embeddings\")\n\n# Executar consulta parametrizada\nquery_text = \"SELECT c.id, c.title FROM c WHERE c.category = @cat\"\nparams = [{\"name\": \"@cat\", \"value\": \"generative-ai\"}]\n\nresults = list(container.{{slot_2}}(\n    query=query_text,\n    parameters=params,\n    partition_key=\"tenant-contoso\"\n))",
     "slots": [
       {
         "id": "slot_1",
@@ -238,19 +238,19 @@
           {
             "text": "DefaultAzureCredential()",
             "correct": true,
-            "rationale": "DefaultAzureCredential da biblioteca azure.identity fornece autenticação segura sem credenciais estáticas no código (Managed Identity / Entra ID).",
+            "rationale": "DefaultAzureCredential obtém um token usando uma identidade disponível, como a identidade gerenciada da aplicação.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           },
           {
             "text": "AzureKeyCredential(\"master-key-secret\")",
             "correct": false,
-            "rationale": "AzureKeyCredential é utilizado em SDKs do Azure AI Search / Cognitive Services, não no SDK Python do Cosmos DB (que recebe instâncias TokenCredential ou chaves string), além de violar a diretriz passwordless.",
+            "rationale": "Essa opção usa uma chave fixa e não atende à autenticação por identidade pedida.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           },
           {
             "text": "{\"client_id\": \"app-id\", \"client_secret\": \"pass\"}",
             "correct": false,
-            "rationale": "O parâmetro credential não aceita um dicionário com credenciais em texto plano.",
+            "rationale": "Esse dicionário não é uma credencial de token válida para esse cliente.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           }
         ]
@@ -261,25 +261,25 @@
           {
             "text": "query_items",
             "correct": true,
-            "rationale": "No SDK Python (azure.cosmos.ContainerProxy), o método oficial para executar consultas SQL parametrizadas retornando um ItemPaged iterator é query_items().",
+            "rationale": "query_items executa a consulta e recebe seus parâmetros.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           },
           {
             "text": "execute_query",
             "correct": false,
-            "rationale": "execute_query não é um método existente no objeto ContainerProxy do SDK Python do Cosmos DB.",
+            "rationale": "O cliente de contêiner não oferece esse método.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           },
           {
             "text": "read_all_items",
             "correct": false,
-            "rationale": "read_all_items() lê todos os itens sem aplicar filtro SQL nem aceitar parâmetros de consulta.",
+            "rationale": "read_all_items lista itens; não executa o filtro SQL apresentado.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           },
           {
             "text": "find_items",
             "correct": false,
-            "rationale": "find_items() não existe na API do Azure Cosmos DB for NoSQL.",
+            "rationale": "O cliente de contêiner não oferece esse método.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/quickstart-python"
           }
         ]
@@ -305,7 +305,7 @@
       "leases",
       "scenario"
     ],
-    "stem": "Complete o modo Direct e o método que inicia a construção do CFP. A rede permite Direct; os contêineres, ArticleDocument e o delegate já existem.",
+    "stem": "Complete a configuração do Change Feed Processor (CFP), que distribui a leitura de alterações. Use Direct. A rede, as permissões, os contêineres e a classe ArticleDocument já estão preparados. HandleChangesAsync é a função que processa cada lote; o host mantém o processo ativo.",
     "code_template": "using System;\nusing System.Threading.Tasks;\nusing Microsoft.Azure.Cosmos;\nusing Azure.Identity;\n\nCosmosClient client = new CosmosClient(\n    accountEndpoint: \"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    tokenCredential: new DefaultAzureCredential(),\n    clientOptions: new CosmosClientOptions\n    {\n        ConnectionMode = {{slot_1}}\n    }\n);\n\nContainer sourceContainer = client.GetContainer(\"AIEngineDb\", \"RawArticles\");\nContainer leaseContainer = client.GetContainer(\"AIEngineDb\", \"leases\");\n\nChangeFeedProcessor processor = sourceContainer\n    .{{slot_2}}(\"EmbeddingWorker\", HandleChangesAsync)\n    .WithInstanceName(Environment.MachineName)\n    .WithLeaseContainer(leaseContainer)\n    .Build();\n\nawait processor.StartAsync();",
     "slots": [
       {
@@ -337,13 +337,13 @@
           {
             "text": "GetChangeFeedProcessorBuilder<ArticleDocument>",
             "correct": true,
-            "rationale": "No SDK .NET v3, o método chamado no container de origem para inicializar a criação do Change Feed Processor é GetChangeFeedProcessorBuilder<T>(string processorName, ChangesDelegate<T> onChangesDelegate).",
+            "rationale": "GetChangeFeedProcessorBuilder recebe o nome do processador e a função que trata os lotes de ArticleDocument.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
           },
           {
             "text": "CreateChangeFeedObserver<ArticleDocument>",
             "correct": false,
-            "rationale": "ChangeFeedObserver fazia parte do SDK legado v2 e não é o método builder do SDK .NET v3.",
+            "rationale": "CreateChangeFeedObserver não é o método de construção do CFP no SDK .NET v3.",
             "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
           },
           {
