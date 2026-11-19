@@ -61,7 +61,7 @@ questions:
 
 # Cache-aside, TTL, políticas de eviction e invalidação
 
-Cache guarda resultados para evitar repetir consultas ou chamadas caras ao modelo. No padrão cache-aside, a aplicação consulta Redis primeiro e busca a fonte original se não encontrar a chave. Mantenha uma fonte durável para os dados que não podem ser perdidos.
+Duas pessoas autorizadas do mesmo cliente fazem a mesma pergunta sobre o mesmo manual. No padrão ==cache-aside==, a aplicação busca primeiro no Redis. Se houver uma resposta válida para aquele escopo e versão, ela evita repetir a chamada ao modelo. Quando não houver, consulta a fonte e preenche o cache.
 
 ## Fluxo cache-aside
 
@@ -93,6 +93,9 @@ value = client.get(key)
 if value is None:
     value = "Resultado obtido da fonte autoritativa"
     client.set(key, value, ex=300)
+    print("miss")
+else:
+    print("hit")
 print(value)
 ```
 
@@ -112,11 +115,16 @@ RedisValue value = await cache.StringGetAsync(key);
 if (value.IsNull) {
     value = "Resultado obtido da fonte autoritativa";
     await cache.StringSetAsync(key, value, TimeSpan.FromMinutes(5));
+    Console.WriteLine("miss");
+} else {
+    Console.WriteLine("hit");
 }
 Console.WriteLine(value);
 ```
 
 Reutilize cliente e multiplexer durante a vida do processo. O exemplo representa uma operação; não abra conexão para cada requisição. `SET` com expiração evita a janela entre gravar e aplicar TTL em comandos separados.
+
+Com a chave ausente, a primeira execução deve imprimir `miss` e a segunda `hit` antes da expiração. Troque `documento-v3` por `documento-v4` na chave e confirme outro `miss`. Isso simula a publicação de uma versão que torna o resultado anterior inadequado.
 
 ## Concorrência e recuperação
 

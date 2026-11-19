@@ -1,0 +1,1569 @@
+{
+  "id": "ai-200-mock-v1",
+  "questions": [
+    {
+      "id": "mock-ai200-01",
+      "type": "single-choice",
+      "title": "Promoção de imagem",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "acr-registro-imagens-versionamento",
+      "stem": "A imagem testada tem o digest D. Antes da implantação, a tag release é atualizada para outro manifest. A produção deve executar exatamente o artefato testado. Que dado o pipeline deve passar à implantação?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts",
+      "options": [
+        {
+          "text": "O endereço do repositório com @D.",
+          "correct": true,
+          "rationale": "O digest fixa o manifest aprovado mesmo quando a tag é alterada.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts"
+        },
+        {
+          "text": "O endereço do repositório com :release e o ID da execução de build.",
+          "correct": false,
+          "rationale": "O ID ajuda na auditoria, mas a plataforma ainda resolve a tag mutável.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts"
+        },
+        {
+          "text": "O nome do servidor ACR com o ID do commit.",
+          "correct": false,
+          "rationale": "Faltam o repositório e uma referência que o ACR possa resolver para o artefato.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts"
+        },
+        {
+          "text": "A tag com a data da validação, criada a partir do valor atual de release.",
+          "correct": false,
+          "rationale": "Se release já mudou, a nova tag pode apontar ao artefato errado.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-concepts"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-02",
+      "type": "single-choice",
+      "title": "Gatilho de imagem base",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "acr-tasks-build-na-nuvem",
+      "stem": "O Dockerfile da aplicação usa uma imagem base em um repositório que o ACR Tasks pode acompanhar. A equipe quer reconstruir o contêiner ao sair uma correção para a base, sem promover automaticamente o resultado. O que configurar?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview",
+      "options": [
+        {
+          "text": "Uma tarefa persistente que acompanhe a atualização da imagem base e publique um artefato para o pipeline validar.",
+          "correct": true,
+          "rationale": "A tarefa pode reagir à dependência; a promoção pode depender de testes em outra etapa.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview"
+        },
+        {
+          "text": "Um quick build agendado só quando chega um commit ao repositório da aplicação.",
+          "correct": false,
+          "rationale": "Uma correção na base pode chegar sem mudança no código da aplicação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview"
+        },
+        {
+          "text": "Uma revisão do Container Apps que reinicie ao receber tráfego.",
+          "correct": false,
+          "rationale": "Reiniciar a aplicação não executa um novo build com a imagem base.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview"
+        },
+        {
+          "text": "Uma regra de retenção dos manifests sem tag no ACR.",
+          "correct": false,
+          "rationale": "A regra trata limpeza de artefatos, não o gatilho de build.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-03",
+      "type": "single-choice",
+      "title": "Porta em aplicativo com sidecar",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "app-service-conteineres-configuracao",
+      "stem": "Um App Service Linux com suporte a sidecars puxa as imagens e registra que a API, marcada como contêiner principal, escuta em 0.0.0.0:8080. O caminho HTTP da plataforma tenta a porta 80. Qual ajuste faz sentido?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container",
+      "options": [
+        {
+          "text": "Configurar a porta de destino do contêiner principal em sitecontainers como 8080.",
+          "correct": true,
+          "rationale": "No modelo com sidecars, o roteamento usa a porta do contêiner principal.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container"
+        },
+        {
+          "text": "Adicionar WEBSITES_PORT=8080 e manter a configuração de porta do contêiner principal.",
+          "correct": false,
+          "rationale": "WEBSITES_PORT se aplica ao modelo clássico; a premissa usa sidecars.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container"
+        },
+        {
+          "text": "Publicar a porta 8080 só no Dockerfile com EXPOSE.",
+          "correct": false,
+          "rationale": "Esse metadado não corrige a porta de destino configurada na plataforma.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container"
+        },
+        {
+          "text": "Marcar o sidecar como contêiner principal para ele iniciar antes da API.",
+          "correct": false,
+          "rationale": "Isso muda o elemento selecionado para receber as solicitações, sem resolver o modelo da aplicação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-04",
+      "type": "single-choice",
+      "title": "Diagnóstico de ingress",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aca-ambientes-e-implantacao",
+      "stem": "Uma revisão do Container Apps está pronta. O processo escuta na porta 8000 e responde a uma chamada local dentro do contêiner. No ingress HTTP do aplicativo, a porta de destino é 80. A chamada chega ao domínio correto mas falha. O que corrigir primeiro?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/environment",
+      "options": [
+        {
+          "text": "Configurar targetPort como 8000 para esse ingress.",
+          "correct": true,
+          "rationale": "O proxy precisa encaminhar para a porta em que o processo escuta.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/environment"
+        },
+        {
+          "text": "Alterar a porta pública HTTPS para 8000 e manter targetPort em 80.",
+          "correct": false,
+          "rationale": "O problema é o destino dentro do contêiner, não a porta pública do cliente.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/environment"
+        },
+        {
+          "text": "Aumentar minReplicas sem mudar a revisão nem o ingress.",
+          "correct": false,
+          "rationale": "Mais réplicas manteriam a mesma incompatibilidade de portas.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/environment"
+        },
+        {
+          "text": "Mover o aplicativo a outro ambiente mantendo a mesma configuração.",
+          "correct": false,
+          "rationale": "Mudar a fronteira de rede não corrige a incompatibilidade com a porta 80.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/environment"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-05",
+      "type": "single-choice",
+      "title": "Validação de uma revisão",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aca-revisoes-e-trafego",
+      "stem": "Uma API usa múltiplas revisões no Container Apps. A revisão estável recebe 100% pelo domínio principal. O time de QA precisa chamar a candidata diretamente antes de começar o canary, sem receber respostas da estável. O que usar?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/revisions",
+      "options": [
+        {
+          "text": "Atribuir uma label à candidata e usar o endereço dessa label no QA.",
+          "correct": true,
+          "rationale": "A URL da label roteia para a revisão escolhida separadamente dos pesos do domínio principal.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+        },
+        {
+          "text": "Definir 1% para a candidata e mandar o QA usar apenas o domínio principal.",
+          "correct": false,
+          "rationale": "O domínio principal ainda pode retornar a revisão estável.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+        },
+        {
+          "text": "Manter 100% na revisão estável e apontar o domínio principal para latestRevision.",
+          "correct": false,
+          "rationale": "Isso pode mover o tráfego conforme a revisão mais recente, contrariando a estabilidade exigida.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+        },
+        {
+          "text": "Publicar uma segunda tag para a mesma imagem e chamar o domínio do ACR.",
+          "correct": false,
+          "rationale": "O ACR armazena imagens; a tag não cria um endpoint da aplicação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/revisions"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-06",
+      "type": "multiple-choice",
+      "title": "Escala da API e da fila",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aca-escala-keda",
+      "stem": "A API HTTP recebe pedidos e os coloca numa fila. A API está saudável, mas o worker fica em zero mesmo com mensagens na fila. A rede permite acesso ao Service Bus. Quais DUAS verificações tratam a ativação do worker?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app",
+      "select_count": 2,
+      "options": [
+        {
+          "text": "Confirmar que o worker tem uma regra de escala observando a fila correta.",
+          "correct": true,
+          "rationale": "A regra oferece um sinal externo quando não existem réplicas emitindo métricas.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+        },
+        {
+          "text": "Confirmar que a identidade usada pela regra está autorizada no Service Bus.",
+          "correct": true,
+          "rationale": "A identidade da regra precisa de acesso para o escalador obter o sinal da fila.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+        },
+        {
+          "text": "Reduzir a meta de simultaneidade HTTP da API.",
+          "correct": false,
+          "rationale": "Essa regra reage à entrada HTTP, não aos itens que ficaram na fila.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+        },
+        {
+          "text": "Configurar apenas CPU média como condição de partida.",
+          "correct": false,
+          "rationale": "Em zero réplicas, não existe telemetria de CPU do worker para acioná-lo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+        },
+        {
+          "text": "Aumentar somente o máximo de réplicas do worker.",
+          "correct": false,
+          "rationale": "O teto define capacidade máxima, mas não corrige a ausência do gatilho.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/scale-app"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-07",
+      "type": "single-choice",
+      "title": "Service sem endereços",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aks-manifestos-deployments",
+      "stem": "Depois de aplicar um manifesto no AKS, dois Pods estão Ready, mas o Service não tem endereços elegíveis. O Deployment usa a label app=chat-v2 nos Pods e o Service seleciona app=chat. Ambos já estão no mesmo namespace. Que mudança restabelece o roteamento?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts",
+      "options": [
+        {
+          "text": "Ajustar o selector do Service para app=chat-v2, após confirmar que só os Pods desejados têm essa label.",
+          "correct": true,
+          "rationale": "O Service descobre seus backends comparando o selector às labels dos Pods.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts"
+        },
+        {
+          "text": "Mudar targetPort no Service para a porta do Ingress.",
+          "correct": false,
+          "rationale": "Uma porta diferente não seleciona os Pods.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts"
+        },
+        {
+          "text": "Trocar o tipo do Service para LoadBalancer sem alterar o selector.",
+          "correct": false,
+          "rationale": "O balanceador ainda dependerá de backends selecionados corretamente.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts"
+        },
+        {
+          "text": "Renomear o Deployment para chat sem alterar o template.",
+          "correct": false,
+          "rationale": "O selector compara labels dos Pods, não o nome do Deployment.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/aks/core-aks-concepts"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-08",
+      "type": "single-choice",
+      "title": "Processo reiniciando",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aks-aca-troubleshooting-logs-eventos",
+      "stem": "Um rollout no AKS criou Pods que entram em CrashLoopBackOff. O pull funcionou e o contêiner atual ainda não produziu logs. Você precisa identificar a exceção do processo que acabou de morrer. Qual evidência procurar primeiro?",
+      "learn_url": "https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes",
+      "options": [
+        {
+          "text": "Os logs da instância anterior com kubectl logs --previous, para o contêiner e namespace corretos.",
+          "correct": true,
+          "rationale": "A instância anterior pode conter a exceção de inicialização e os detalhes da execução interrompida.",
+          "learn_url": "https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes"
+        },
+        {
+          "text": "O certificado público do endpoint Ingress.",
+          "correct": false,
+          "rationale": "O certificado atua no caminho de entrada e não explica a finalização observada.",
+          "learn_url": "https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes"
+        },
+        {
+          "text": "O endereço do EndpointSlice, sem inspecionar o Pod.",
+          "correct": false,
+          "rationale": "A associação de rede não revela a exceção da aplicação.",
+          "learn_url": "https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes"
+        },
+        {
+          "text": "O digest no ACR, sem consultar estado do contêiner.",
+          "correct": false,
+          "rationale": "O digest identifica a imagem; a premissa já confirma que ela foi baixada.",
+          "learn_url": "https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-09",
+      "type": "single-choice",
+      "title": "Dois destinos, duas permissões",
+      "exam_domain": "containerized-solutions",
+      "concept_slug": "aca-segredos-e-registro-privado",
+      "stem": "A identidade gerenciada do Container App já consegue ler o segredo do Key Vault. O registry privado rejeita o pull. O ACR está no modo RBAC clássico, a rede funciona e o aplicativo já aponta para essa identidade no registry. Qual autorização falta?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull",
+      "options": [
+        {
+          "text": "AcrPull no registro para a identidade usada pelo Container App.",
+          "correct": true,
+          "rationale": "No modo indicado, essa função autoriza baixar imagens.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull"
+        },
+        {
+          "text": "Key Vault Secrets Officer no cofre.",
+          "correct": false,
+          "rationale": "Esse papel administra segredos do cofre e não habilita leitura de imagens.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull"
+        },
+        {
+          "text": "Contributor apenas no recurso Container App.",
+          "correct": false,
+          "rationale": "Gerenciar o aplicativo não concede autorização de dados no ACR.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull"
+        },
+        {
+          "text": "AcrPush para a identidade do pipeline que publicou o artefato.",
+          "correct": false,
+          "rationale": "O problema está no acesso do consumidor que baixa, não no publicador.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-10",
+      "type": "code-completion",
+      "title": "Executar só na partição conhecida",
+      "exam_domain": "data-management",
+      "concept_slug": "cosmos-db-sdk-conexao-e-consultas",
+      "stem": "A função Python precisa procurar documentos por categoria, dentro do cliente autenticado. O contêiner tem chave /cliente. A variável tenant vem da autorização. Preencha o valor de parameters e a opção de escopo.",
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips",
+      "language": "python",
+      "code_template": "query = \"SELECT c.id FROM c WHERE c.categoria = @categoria\"\nitems = container.query_items(\n    query=query,\n    parameters={{params}},\n    partition_key={{escopo}},\n)",
+      "slots": [
+        {
+          "id": "params",
+          "options": [
+            {
+              "text": "[{\"name\": \"@categoria\", \"value\": categoria}]",
+              "correct": true,
+              "rationale": "O SDK recebe o nome com @ e o valor separado do texto SQL.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            },
+            {
+              "text": "{\"@categoria\": categoria}",
+              "correct": false,
+              "rationale": "A API espera uma lista de objetos name/value.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            },
+            {
+              "text": "[{\"name\": \"categoria\", \"value\": tenant}]",
+              "correct": false,
+              "rationale": "O nome precisa corresponder ao placeholder, e o valor do filtro é a categoria.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            }
+          ]
+        },
+        {
+          "id": "escopo",
+          "options": [
+            {
+              "text": "tenant",
+              "correct": true,
+              "rationale": "Com a chave simples /cliente, o valor da chave limita a consulta à partição desse cliente.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            },
+            {
+              "text": "categoria",
+              "correct": false,
+              "rationale": "Categoria é um filtro de conteúdo e não é o valor da chave /cliente.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            },
+            {
+              "text": "None",
+              "correct": false,
+              "rationale": "Omissão do valor não restringe a operação ao cliente autenticado.",
+              "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/performance-tips"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-11",
+      "type": "single-choice",
+      "title": "Leitura logo após gravação",
+      "exam_domain": "data-management",
+      "concept_slug": "cosmos-db-indexacao-consistencia-rus",
+      "stem": "A API A atualiza uma preferência no Cosmos DB. A API B, com outra instância de cliente, precisa responder imediatamente com a nova versão. A conta usa consistência Session e a equipe quer preservar esse nível. Como transportar a garantia para a chamada de B?",
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy",
+      "options": [
+        {
+          "text": "Propagar o token de sessão da gravação e fazer B usá-lo para a leitura correspondente.",
+          "correct": true,
+          "rationale": "O token representa o estado da sessão necessário para preservar leitura das próprias escritas entre clientes.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy"
+        },
+        {
+          "text": "Repetir o ID do recurso no cabeçalho de correlação.",
+          "correct": false,
+          "rationale": "Um identificador de requisição ajuda no rastreamento, mas não representa a posição da sessão.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy"
+        },
+        {
+          "text": "Criar um índice composto que inclua a versão do item.",
+          "correct": false,
+          "rationale": "Um índice muda o acesso aos dados, não qual versão uma sessão pode observar.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy"
+        },
+        {
+          "text": "Aumentar as RU/s e manter B sem contexto de sessão.",
+          "correct": false,
+          "rationale": "Mais capacidade pode reduzir limitação de taxa, mas não transfere a garantia de consistência.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/how-to-manage-indexing-policy"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-12",
+      "type": "single-choice",
+      "title": "Comparar política e índice vetorial",
+      "exam_domain": "data-management",
+      "concept_slug": "cosmos-db-busca-vetorial",
+      "stem": "Os documentos usam embeddings de 1.536 dimensões. A equipe configurou o caminho e a métrica na política vetorial, mas quer acelerar a consulta que ordena por VectorDistance. Ela aceita busca aproximada e mede recall com um conjunto de referência. Qual é uma opção adequada para um corpus grande?",
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search",
+      "options": [
+        {
+          "text": "Criar um índice DiskANN no mesmo caminho e medir latência, RU e recall.",
+          "correct": true,
+          "rationale": "O índice é compatível com a dimensão e apropriado para avaliar busca aproximada em maior escala.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+        },
+        {
+          "text": "Criar um índice flat no mesmo caminho para ter busca exata indexada.",
+          "correct": false,
+          "rationale": "O tipo flat não suporta 1.536 dimensões no Cosmos DB.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+        },
+        {
+          "text": "Adicionar o vetor apenas a includedPaths e remover sua política vetorial.",
+          "correct": false,
+          "rationale": "O índice escalar não substitui a política nem a estrutura de busca vetorial.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+        },
+        {
+          "text": "Trocar a função para ordenar pelo ID e continuar usando distância só na projeção.",
+          "correct": false,
+          "rationale": "Ordenar pelo ID não devolve os vizinhos mais próximos.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/vector-search"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-13",
+      "type": "single-choice",
+      "title": "Retomada do consumidor",
+      "exam_domain": "data-management",
+      "concept_slug": "cosmos-db-change-feed-processor",
+      "stem": "Um worker .NET grava embeddings e perde a conexão antes que o lote seja confirmado no lease. Ao reabrir o serviço, a alteração pode ser entregue outra vez. Como evitar que o índice de destino tenha duas entradas para o mesmo documento e versão?",
+      "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor",
+      "options": [
+        {
+          "text": "Usar chave idempotente derivada do documento e versão e gravar por upsert ou verificação atômica.",
+          "correct": true,
+          "rationale": "A entrega pelo menos uma vez exige que repetir a gravação conserve o efeito final.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+        },
+        {
+          "text": "Usar a hora da execução como parte obrigatória da chave de destino.",
+          "correct": false,
+          "rationale": "A segunda tentativa terá outra chave e pode criar uma cópia.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+        },
+        {
+          "text": "Mudar o nome do processador a cada reinicialização.",
+          "correct": false,
+          "rationale": "O novo nome usa checkpoints independentes e pode ampliar o reprocessamento.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+        },
+        {
+          "text": "Confirmar sucesso do lote antes da gravação do resultado.",
+          "correct": false,
+          "rationale": "Uma falha entre confirmação e gravação pode perder o resultado.",
+          "learn_url": "https://learn.microsoft.com/azure/cosmos-db/nosql/change-feed-processor"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-14",
+      "type": "single-choice",
+      "title": "Permissão no PostgreSQL",
+      "exam_domain": "data-management",
+      "concept_slug": "postgresql-conexao-sdk-e-autenticacao",
+      "stem": "O serviço autentica no PostgreSQL com um token Entra válido e SELECT current_user mostra o usuário esperado. SELECT na tabela public.trechos retorna permission denied for table. Qual ação é a mais específica?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts",
+      "options": [
+        {
+          "text": "Conceder SELECT em public.trechos ao papel SQL usado pela aplicação.",
+          "correct": true,
+          "rationale": "A conexão autenticou; o erro está no privilégio da operação na tabela.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts"
+        },
+        {
+          "text": "Solicitar token para o Azure Resource Manager.",
+          "correct": false,
+          "rationale": "A autenticação PostgreSQL já funcionou e usa o público do serviço de banco.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts"
+        },
+        {
+          "text": "Dar Contributor no recurso Azure Database for PostgreSQL.",
+          "correct": false,
+          "rationale": "Papel no plano de gerenciamento não concede permissões dentro do banco.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts"
+        },
+        {
+          "text": "Configurar sslmode=require em vez de verify-full.",
+          "correct": false,
+          "rationale": "Alterar a validação TLS não concede SELECT.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/security/security-entra-concepts"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-15",
+      "type": "single-choice",
+      "title": "Índice para listar documentos recentes",
+      "exam_domain": "data-management",
+      "concept_slug": "postgresql-modelagem-e-tipos",
+      "stem": "Uma tela lista os 20 documentos mais recentes do cliente. A consulta usa WHERE tenant_id = $1 ORDER BY updated_at DESC LIMIT 20. Qual índice é o melhor primeiro candidato para avaliar?",
+      "learn_url": "https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/",
+      "options": [
+        {
+          "text": "B-tree em (tenant_id, updated_at DESC).",
+          "correct": true,
+          "rationale": "O prefixo restringe o cliente e a segunda coluna suporta a ordenação pedida.",
+          "learn_url": "https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/"
+        },
+        {
+          "text": "GIN sobre o JSONB de metadados apenas.",
+          "correct": false,
+          "rationale": "O filtro nem a ordenação usam o documento JSONB.",
+          "learn_url": "https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/"
+        },
+        {
+          "text": "HNSW sobre o embedding.",
+          "correct": false,
+          "rationale": "A consulta não classifica por distância vetorial.",
+          "learn_url": "https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/"
+        },
+        {
+          "text": "Índice exclusivo em updated_at para toda a tabela.",
+          "correct": false,
+          "rationale": "Além de não priorizar o filtro por cliente, a exclusividade rejeitaria atualizações legítimas com a mesma data.",
+          "learn_url": "https://learn.microsoft.com/en-us/training/modules/build-query-azure-database-postgresql/"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-16",
+      "type": "single-choice",
+      "title": "Operador e classe de índice",
+      "exam_domain": "data-management",
+      "concept_slug": "pgvector-indices-hnsw-ivfflat",
+      "stem": "O índice HNSW foi criado com vector_l2_ops. O produto exige distância cosseno e a consulta ordena por embedding <=> $1 LIMIT 10. Qual alteração permite ao planejador considerar o índice para essa métrica?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector",
+      "options": [
+        {
+          "text": "Criar um índice com vector_cosine_ops mantendo a ordenação pelo operador de distância cosseno.",
+          "correct": true,
+          "rationale": "A consulta e a classe de operadores do índice precisam usar a mesma métrica.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Manter vector_l2_ops e ordenar pela similaridade escrita como 1 - (embedding <=> $1) DESC.",
+          "correct": false,
+          "rationale": "Além da classe incompatível, essa expressão não corresponde à forma de ordenação direta exigida para o índice.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Manter vector_l2_ops e aumentar só o hnsw.ef_search.",
+          "correct": false,
+          "rationale": "Mudar o tamanho da busca não transforma a métrica da classe.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Remover o LIMIT para o planejador ter mais resultados.",
+          "correct": false,
+          "rationale": "O padrão de busca vetorial indexada usa ordenação por distância e limite.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-17",
+      "type": "single-choice",
+      "title": "Queda de resultados com filtro seletivo",
+      "exam_domain": "data-management",
+      "concept_slug": "postgresql-rag-com-filtros",
+      "stem": "Uma consulta pgvector aproxima o top 8. Há mais de oito trechos autorizados para o cliente, mas com um filtro seletivo o plano HNSW devolve só dois. O filtro de autorização precisa permanecer na consulta. Qual é a primeira abordagem mais segura para avaliar o problema?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector",
+      "options": [
+        {
+          "text": "Comparar com busca exata sob os mesmos filtros e testar uma varredura iterativa suportada pela versão.",
+          "correct": true,
+          "rationale": "A referência exata mostra o que foi perdido. A varredura iterativa pode ampliar candidatos sem afrouxar o filtro.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Remover tenant_id da consulta e pedir ao modelo para excluir os outros trechos.",
+          "correct": false,
+          "rationale": "O conteúdo de outros clientes já teria sido recuperado e entregue ao modelo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Medir recall usando como referência resultados exatos de todos os clientes.",
+          "correct": false,
+          "rationale": "A população da referência precisa respeitar o mesmo filtro do resultado avaliado.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        },
+        {
+          "text": "Dobrar só o número de dimensões do modelo em produção.",
+          "correct": false,
+          "rationale": "Dimensão diferente exige embeddings compatíveis e não corrige diretamente a filtragem de candidatos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-18",
+      "type": "single-choice",
+      "title": "Separar custo de construção e consulta",
+      "exam_domain": "data-management",
+      "concept_slug": "postgresql-recursos-para-cargas-vetoriais",
+      "stem": "Em laboratório, o build do índice HNSW ficou lento após o grafo ultrapassar o orçamento de memória. A consulta depois que o índice está pronto tem latência adequada. Qual ajuste faz sentido medir primeiro no build?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector",
+      "options": [
+        {
+          "text": "Experimentar maintenance_work_mem maior dentro do orçamento de memória, isolando a construção.",
+          "correct": true,
+          "rationale": "O parâmetro afeta operações de manutenção e pode manter mais do grafo em memória durante o build.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector"
+        },
+        {
+          "text": "Aumentar hnsw.ef_search para cada usuário.",
+          "correct": false,
+          "rationale": "Esse parâmetro afeta a busca, e a latência de consulta já está aceitável.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector"
+        },
+        {
+          "text": "Aumentar indiscriminadamente o máximo de conexões.",
+          "correct": false,
+          "rationale": "Mais conexões podem disputar memória e não fornecem ao build esse orçamento específico.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector"
+        },
+        {
+          "text": "Aumentar o LIMIT da consulta que usa o índice.",
+          "correct": false,
+          "rationale": "O número de vizinhos devolvidos em consulta não altera o orçamento de construção.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-optimize-performance-pgvector"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-19",
+      "type": "single-choice",
+      "title": "Estado em pool transacional",
+      "exam_domain": "data-management",
+      "concept_slug": "postgresql-pool-de-conexoes-pgbouncer",
+      "stem": "Uma aplicação usa PgBouncer em modo transaction e depende de SET aplicado em uma transação para filtrar dados em outra. A equipe precisa manter o pooling transacional. Como proteger a transação que executa a consulta?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer",
+      "options": [
+        {
+          "text": "Definir o estado necessário com SET LOCAL no início da mesma transação que usa a consulta.",
+          "correct": true,
+          "rationale": "SET LOCAL vale para a transação e não depende de reutilizar o backend depois do commit.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer"
+        },
+        {
+          "text": "Executar SET uma vez por conexão lógica quando o processo inicia.",
+          "correct": false,
+          "rationale": "A conexão lógica pode passar para outro backend após a transação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer"
+        },
+        {
+          "text": "Aumentar o tempo de vida do token Entra.",
+          "correct": false,
+          "rationale": "A validade da credencial não controla a afinidade de backend.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer"
+        },
+        {
+          "text": "Ativar conexão TLS com verificação completa de host.",
+          "correct": false,
+          "rationale": "TLS protege a conexão, mas não faz o estado SQL acompanhar uma sessão do cliente em modo transaction.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-20",
+      "type": "single-choice",
+      "title": "Cache semântico com mudança de versão",
+      "exam_domain": "data-management",
+      "concept_slug": "redis-indexacao-vetorial",
+      "stem": "Uma pesquisa acha uma resposta Redis com distância quase zero. Ela pertence ao mesmo cliente, mas foi gerada para a versão anterior do manual, que tinha uma regra de cobrança diferente. Qual desenho evita reutilizar essa resposta obsoleta?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity",
+      "options": [
+        {
+          "text": "Filtrar pelo cliente autorizado e versão atual do manual/modelo, além de verificar limiar e TTL.",
+          "correct": true,
+          "rationale": "Versão e escopo fazem parte da elegibilidade. Similaridade e TTL isoladamente não garantem que a regra ainda vale.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity"
+        },
+        {
+          "text": "Confiar apenas na distância e deixar a entrada expirar.",
+          "correct": false,
+          "rationale": "Uma entrada antiga ainda pode ter distância baixa e estar dentro do TTL.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity"
+        },
+        {
+          "text": "Aumentar o número de vizinhos retornados e escolher o mais recente de qualquer cliente.",
+          "correct": false,
+          "rationale": "A seleção ainda precisa evitar conteúdo fora do escopo autorizado.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity"
+        },
+        {
+          "text": "Trocar HNSW por FLAT e manter o mesmo filtro de cliente apenas.",
+          "correct": false,
+          "rationale": "A busca exata por distância não resolve a versão incorreta.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/redis/overview-vector-similarity"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-21",
+      "type": "single-choice",
+      "title": "Gravar valor com validade",
+      "exam_domain": "data-management",
+      "concept_slug": "redis-cache-expiracao-invalidacao",
+      "stem": "Após uma atualização de manual, a aplicação precisa criar uma chave de cache com validade de cinco minutos. Se o processo cair logo depois de gravar o valor, a chave ainda deve expirar. Qual operação atende ao requisito?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside",
+      "options": [
+        {
+          "text": "SET chave valor EX 300 em uma operação.",
+          "correct": true,
+          "rationale": "O Redis aplica valor e prazo juntos, eliminando a janela entre comandos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
+        },
+        {
+          "text": "SET chave valor e depois EXPIRE chave 300, sem transação.",
+          "correct": false,
+          "rationale": "Se a aplicação cair entre os comandos, a chave ficará sem prazo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
+        },
+        {
+          "text": "Só EXPIRE chave 300 antes de criar a chave.",
+          "correct": false,
+          "rationale": "EXPIRE não cria uma chave ausente, e o SET posterior não inclui prazo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
+        },
+        {
+          "text": "SETNX chave valor sem configurar TTL.",
+          "correct": false,
+          "rationale": "A criação condicional não define a expiração.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-22",
+      "type": "single-choice",
+      "title": "Entregar trabalho a dois fluxos",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "service-bus-filas-topicos-assinaturas",
+      "stem": "Uma mensagem com o ID de um manual deve chegar uma vez a cada fluxo lógico, indexação e auditoria. Cada fluxo pode crescer com várias réplicas e processar no próprio ritmo. Qual topologia atende melhor?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions",
+      "options": [
+        {
+          "text": "Um tópico com uma assinatura independente por fluxo; as réplicas competem dentro da própria assinatura.",
+          "correct": true,
+          "rationale": "Cada assinatura recebe sua entrega elegível e pode ter consumidores concorrentes.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Uma fila única com um consumidor por fluxo e mais réplicas conforme a carga.",
+          "correct": false,
+          "rationale": "As réplicas concorrem pelas mesmas mensagens. Uma entrega não vai aos dois fluxos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Um tópico com uma assinatura chamada todos e dois grupos de consumidores na mesma assinatura.",
+          "correct": false,
+          "rationale": "Uma única assinatura não mantém uma cópia independente para cada grupo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Um tópico sem assinaturas e réplicas lendo diretamente o tópico.",
+          "correct": false,
+          "rationale": "O recebimento em Service Bus ocorre na fila ou na assinatura.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-23",
+      "type": "single-choice",
+      "title": "A regra que deixou tudo passar",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "service-bus-filas-topicos-assinaturas",
+      "stem": "Uma assinatura começa com a regra padrão que aceita todas as mensagens. Você adicionou uma regra que aceita tipo=manual e o roteamento ainda entrega contratos. A propriedade tipo já está nos metadados. O que fazer?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions",
+      "options": [
+        {
+          "text": "Remover a regra padrão que aceita tudo e manter a regra restritiva.",
+          "correct": true,
+          "rationale": "A regra ampla continua tornando os contratos elegíveis até ser removida.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Mover tipo para dentro do JSON do corpo e manter as duas regras.",
+          "correct": false,
+          "rationale": "O filtro usa propriedades suportadas; a regra ampla ainda aceitaria os contratos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Ativar detecção de duplicados no tópico.",
+          "correct": false,
+          "rationale": "A deduplicação limita duplicatas de envio, mas não filtra tipo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        },
+        {
+          "text": "Renomear a assinatura para manual e manter as regras.",
+          "correct": false,
+          "rationale": "O nome da assinatura não informa o filtro.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-queues-topics-subscriptions"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-24",
+      "type": "single-choice",
+      "title": "Separar falhas recuperáveis",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "service-bus-dead-letter-e-processamento",
+      "stem": "Um consumidor em PeekLock recebe JSON inválido que continuará inválido em qualquer tentativa. A equipe quer manter evidência do motivo, sem gastar todo o limite de reentregas. Qual operação usar?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement",
+      "options": [
+        {
+          "text": "Mover explicitamente à DLQ, anotando um motivo de rejeição.",
+          "correct": true,
+          "rationale": "DeadLetter termina as tentativas normais e mantém a mensagem disponível para investigação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement"
+        },
+        {
+          "text": "Completar a mensagem assim que detectar o erro.",
+          "correct": false,
+          "rationale": "Complete remove a mensagem do fluxo sem deixá-la na DLQ com a razão.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement"
+        },
+        {
+          "text": "Abandonar a mensagem em cada recebimento até esgotar as tentativas.",
+          "correct": false,
+          "rationale": "O abandono tenta redeliver um conteúdo que o consumidor já sabe ser inválido.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement"
+        },
+        {
+          "text": "Renovar o lock indefinidamente para adiar a decisão.",
+          "correct": false,
+          "rationale": "Renovação serve para terminar trabalho legítimo prolongado, não para recuperação de payload inválido.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-25",
+      "type": "ordering",
+      "title": "Falha após a gravação",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "service-bus-dead-letter-e-processamento",
+      "stem": "O worker grava o resultado, mas perde seu lock antes de Complete. Qual sequência permite reprocessar sem criar um segundo resultado? Ordene segundo o fluxo da próxima entrega.",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/message-transfers-locks-settlement",
+      "rationale": "A gravação pode já ter ocorrido quando o lock se perdeu. A decisão sobre o efeito precisa usar um identificador estável antes de confirmar a nova entrega.",
+      "items": [
+        {
+          "id": "step-1",
+          "order": 1,
+          "text": "Receber a mensagem novamente em PeekLock."
+        },
+        {
+          "id": "step-2",
+          "order": 2,
+          "text": "Identificar a operação pelo ID e versão do documento."
+        },
+        {
+          "id": "step-3",
+          "order": 3,
+          "text": "Confirmar que o efeito já existe ou gravá-lo com a mesma chave idempotente."
+        },
+        {
+          "id": "step-4",
+          "order": 4,
+          "text": "Completar a mensagem com o lock da nova entrega."
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-26",
+      "type": "multiple-choice",
+      "title": "Evento repetido e fora de ordem",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "event-grid-eventos-filtros-retentativas",
+      "stem": "O Event Grid entrega o evento da versão 8 do documento, depois a versão 7 e, por fim, repete a 8. O consumidor materializa o estado mais recente. Quais DUAS proteções atendem ao cenário?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts",
+      "select_count": 2,
+      "options": [
+        {
+          "text": "Usar um identificador estável para aplicar efeitos de forma idempotente.",
+          "correct": true,
+          "rationale": "Reconhecer repetição evita efeitos duplicados.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Guardar a versão processada e evitar que uma versão menor a substitua.",
+          "correct": true,
+          "rationale": "A ordem de entrega não é garantia de ordem de versão.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Usar hora de chegada como versão definitiva do registro.",
+          "correct": false,
+          "rationale": "Esse critério deixaria a versão 7 substituir a 8.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Aumentar o TTL de entrega e confiar que os eventos passarão a chegar em ordem.",
+          "correct": false,
+          "rationale": "O TTL limita tentativas; não oferece ordenação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Definir o tipo de evento como chave exclusiva para todos os documentos.",
+          "correct": false,
+          "rationale": "Isso suprimiria eventos legítimos do mesmo tipo em outros documentos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-27",
+      "type": "single-choice",
+      "title": "Diagnosticar entrega esgotada",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "event-grid-eventos-filtros-retentativas",
+      "stem": "Um webhook estava fora do ar por mais tempo que a política de tentativas do Event Grid. A equipe quer conseguir inspecionar os eventos esgotados e reprocessá-los após corrigir o serviço. O que deve estar configurado previamente?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts",
+      "options": [
+        {
+          "text": "Um destino de dead-letter no Blob Storage e autorização para o Event Grid gravar nele.",
+          "correct": true,
+          "rationale": "O destino retém eventos que não puderam ser entregues conforme a política.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Um filtro de subject mais amplo no tópico.",
+          "correct": false,
+          "rationale": "Um filtro altera quais eventos entram na assinatura, mas não guarda entregas esgotadas.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Um endpoint que devolva 200 antes de armazenar qualquer trabalho.",
+          "correct": false,
+          "rationale": "Confirmar antes de persistir pode perder eventos quando o processamento posterior falhar.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        },
+        {
+          "text": "Uma regra de retenção na fila interna do webhook, mesmo que ele nunca tenha recebido o evento.",
+          "correct": false,
+          "rationale": "O evento não chegou ao webhook; sua fila não pode recuperá-lo.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/event-grid/concepts"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-28",
+      "type": "single-choice",
+      "title": "Quando usar um SDK no lugar do binding",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "functions-triggers-e-bindings",
+      "stem": "Uma função Python já recebe a requisição por HTTP. Ela precisa tentar enviar uma mensagem, tratar uma falha de envio dentro da própria função e devolver uma resposta alternativa. O que muda no desenho?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings",
+      "options": [
+        {
+          "text": "Manter o trigger HTTP e enviar pelo SDK com tratamento de exceção no código.",
+          "correct": true,
+          "rationale": "O SDK deixa a função observar e tratar o resultado do envio antes de responder.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings"
+        },
+        {
+          "text": "Acrescentar um segundo trigger de fila à mesma função.",
+          "correct": false,
+          "rationale": "Uma função tem um trigger. Isso também não permite tratar a falha do envio.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings"
+        },
+        {
+          "text": "Usar apenas um output binding e presumir que todo erro do serviço é lançado no seu trecho de código.",
+          "correct": false,
+          "rationale": "O binding executa a integração fora do controle direto do corpo da função.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings"
+        },
+        {
+          "text": "Mover a chamada HTTP para um input binding de fila.",
+          "correct": false,
+          "rationale": "Um input binding fornece dados, mas não recebe a chamada HTTP nem envia a mensagem.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-triggers-bindings"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-29",
+      "type": "single-choice",
+      "title": "Função publicada sem disparo",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "functions-configuracao-e-implantacao",
+      "stem": "A função que processa mensagens funciona localmente. No Azure ela aparece na lista, mas o listener do Service Bus falha ao iniciar. O projeto local aponta para uma conexão de desenvolvimento e a versão publicada deve usar identidade gerenciada. O que verificar primeiro?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale",
+      "options": [
+        {
+          "text": "O prefixo de configuração do binding no ambiente publicado, o namespace e a função de recebimento da identidade.",
+          "correct": true,
+          "rationale": "A descoberta do código e a inicialização autorizada do listener são verificações distintas.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Aumentar somente o timeout de uma chamada HTTP de teste.",
+          "correct": false,
+          "rationale": "O trigger em questão usa Service Bus e falha antes de processar a mensagem.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Adicionar uma conexão local ao repositório e esperar que o deploy a converta em identidade.",
+          "correct": false,
+          "rationale": "As configurações do ambiente publicado precisam declarar a integração por identidade.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Trocar o nome da função na interface do portal mantendo o binding como está.",
+          "correct": false,
+          "rationale": "Nome não altera conexão, escopo ou permissão no broker.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-30",
+      "type": "single-choice",
+      "title": "Separar duração HTTP e trabalho",
+      "exam_domain": "connect-and-consume",
+      "concept_slug": "functions-configuracao-e-implantacao",
+      "stem": "Uma função HTTP inicia uma reindexação que pode demorar vários minutos. O navegador deve receber rapidamente um identificador e poder consultar o estado. Qual contrato desenhar?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale",
+      "options": [
+        {
+          "text": "Validar a solicitação, persistir ou enfileirar o trabalho e devolver 202 com identificador para consulta posterior.",
+          "correct": true,
+          "rationale": "O trabalho assíncrono desacopla o tempo de processamento do caminho HTTP.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Manter a resposta aberta até concluir e aumentar apenas functionTimeout.",
+          "correct": false,
+          "rationale": "O limite de execução não remove os limites do caminho HTTP e do cliente.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Devolver 200 antes de aceitar o trabalho e confiar na memória da instância.",
+          "correct": false,
+          "rationale": "Uma falha pode perder o trabalho e deixa sem estado durável para consulta.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        },
+        {
+          "text": "Publicar uma revisão a cada nova solicitação para obter um ID de trabalho.",
+          "correct": false,
+          "rationale": "Uma revisão representa implantação de código/configuração, não a unidade de execução.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-31",
+      "type": "single-choice",
+      "title": "Descobrir qual identidade fez a chamada",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "identidade-gerenciada-defaultazurecredential",
+      "stem": "Uma operação de leitura funciona no notebook e falha com 403 após o deploy. O log confirma que o serviço recebeu uma credencial. O ambiente pode selecionar identidades diferentes. Qual evidência confirma a hipótese de autorização?",
+      "learn_url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview",
+      "options": [
+        {
+          "text": "Identificar o principal usado em cada ambiente e comparar os papéis de dados no recurso de destino.",
+          "correct": true,
+          "rationale": "O principal do desenvolvedor pode ter acesso que a identidade da aplicação ainda não tem.",
+          "learn_url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview"
+        },
+        {
+          "text": "Verificar apenas se o recurso tem o mesmo nome nas duas configurações.",
+          "correct": false,
+          "rationale": "O nome do recurso não informa quem fez a chamada nem suas permissões.",
+          "learn_url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview"
+        },
+        {
+          "text": "Testar de novo com a mesma sessão da CLI no notebook.",
+          "correct": false,
+          "rationale": "Isso repete a identidade local e não verifica quem o aplicativo usa no Azure.",
+          "learn_url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview"
+        },
+        {
+          "text": "Conferir se ambas as cargas usam a mesma classe DefaultAzureCredential.",
+          "correct": false,
+          "rationale": "A mesma classe pode selecionar credenciais diferentes conforme o ambiente.",
+          "learn_url": "https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-32",
+      "type": "single-choice",
+      "title": "Versão fixa durante rotação",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "key-vault-segredos-rotacao",
+      "stem": "Uma aplicação usa a URI de um segredo que inclui a versão v1. A equipe adicionou v2 ao Key Vault, e a API externa aceita as duas chaves até o fim da migração. O que fazer antes de revogar a credencial v1 na API externa?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets",
+      "options": [
+        {
+          "text": "Atualizar a referência, renovar os consumidores e testar o acesso com v2 antes da revogação.",
+          "correct": true,
+          "rationale": "A URI fixa continua apontando para v1 até mudar. Testar a nova credencial reduz o risco de interromper os consumidores.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Esperar o cache expirar sem mudar a URI com v1.",
+          "correct": false,
+          "rationale": "Recarregar uma referência fixa volta a ler a mesma versão.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Excluir v1 do cofre para obrigar a URI antiga a escolher v2.",
+          "correct": false,
+          "rationale": "Uma URI com versão explícita não passa a apontar automaticamente para outra versão.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Revogar v1 primeiro e verificar se o provedor tenta as versões anteriores.",
+          "correct": false,
+          "rationale": "Isso pode interromper o acesso. A seleção de versões não fornece essa migração automática.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-33",
+      "type": "multiple-choice",
+      "title": "Proteção contra exclusão",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "key-vault-segredos-rotacao",
+      "stem": "Um cofre precisa permitir recuperação após exclusão acidental e impedir que um administrador apague definitivamente os itens excluídos antes do fim da retenção. Quais DUAS capacidades atendem ao cenário?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets",
+      "select_count": 2,
+      "options": [
+        {
+          "text": "Soft delete para manter itens excluídos recuperáveis durante a retenção.",
+          "correct": true,
+          "rationale": "A exclusão passa a ter uma janela para recuperação.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Purge protection para bloquear a purga antecipada dentro dessa janela.",
+          "correct": true,
+          "rationale": "Ela impede a remoção definitiva antes da expiração do prazo configurado.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Referências ao segredo com uma versão fixa.",
+          "correct": false,
+          "rationale": "Fixar a versão não muda o comportamento de exclusão ou purga.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Habilitar logs de auditoria como único mecanismo.",
+          "correct": false,
+          "rationale": "Os logs podem mostrar o evento, mas não recuperam um item purgado.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        },
+        {
+          "text": "Configurar refresh no App Configuration.",
+          "correct": false,
+          "rationale": "Atualizar valores consumidos não protege itens excluídos no cofre.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-34",
+      "type": "single-choice",
+      "title": "Atualizar um conjunto de parâmetros",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "app-configuration-chaves-rotulos-feature-flags",
+      "stem": "Dois parâmetros de produção precisam mudar juntos em um worker que já usa o provedor de App Configuration. A equipe quer que cada processo atualize o conjunto somente depois que os dois valores estiverem publicados. Qual fluxo seguir?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value",
+      "options": [
+        {
+          "text": "Publicar os dois valores, alterar a chave sentinela por último e integrar o refresh periódico do worker.",
+          "correct": true,
+          "rationale": "A sentinela indica que o conjunto está pronto, e o worker precisa executar o mecanismo de refresh.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Alterar a sentinela primeiro para os workers começarem a atualizar antes dos valores.",
+          "correct": false,
+          "rationale": "Um worker pode atualizar enquanto só parte do conjunto foi publicada.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Trocar o rótulo de produção no portal e esperar que os clientes descubram a variante.",
+          "correct": false,
+          "rationale": "A seleção da variante depende do que cada consumidor foi configurado para carregar.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Aumentar o TTL de um segredo no Key Vault.",
+          "correct": false,
+          "rationale": "Isso não configura quando o provedor lê um conjunto de chaves do App Configuration.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-35",
+      "type": "single-choice",
+      "title": "Separar parâmetros de ativação",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "app-configuration-chaves-rotulos-feature-flags",
+      "stem": "A equipe quer habilitar um novo recuperador para um subconjunto identificado de usuários e mudar o número de resultados em produção sem republicar a imagem. Qual divisão de configuração é adequada?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value",
+      "options": [
+        {
+          "text": "Usar uma feature flag com targeting e manter a quantidade em uma chave com o rótulo de produção.",
+          "correct": true,
+          "rationale": "A flag controla quem recebe o caminho novo. Um valor rotulado guarda o parâmetro escolhido para o ambiente.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Usar somente a label prod como regra de autorização individual.",
+          "correct": false,
+          "rationale": "O rótulo seleciona uma variante, mas não avalia a elegibilidade de cada usuário.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Guardar ambos no código para o resultado ser determinístico entre versões.",
+          "correct": false,
+          "rationale": "Isso exige nova publicação para mudar valores, contrariando o requisito.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        },
+        {
+          "text": "Criar um segredo no Key Vault para cada usuário que participe do teste.",
+          "correct": false,
+          "rationale": "Guardar segredos não é o mecanismo de avaliação de elegibilidade de recursos.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-36",
+      "type": "single-choice",
+      "title": "Correlacionar dois serviços",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "opentelemetry-azure-monitor",
+      "stem": "A requisição passa por duas APIs. Ambas registram um campo trace chamado rag.search, mas a interface exibe operações independentes. Os exporters já enviam spans. O que corrigir para exibir a chamada downstream na mesma transação?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable",
+      "options": [
+        {
+          "text": "Propagar e extrair o contexto de trace entre as APIs para manter o TraceId e a relação pai/filho.",
+          "correct": true,
+          "rationale": "A relação exige contexto compartilhado; o nome ajuda a localizar spans, mas não define sua árvore.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+        },
+        {
+          "text": "Aumentar o intervalo de exportação para agrupar os dois envios.",
+          "correct": false,
+          "rationale": "O intervalo de exportação não cria relação entre spans que já nasceram em traces diferentes.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+        },
+        {
+          "text": "Substituir a propagação padrão apenas pelo mesmo nome do serviço nas duas APIs.",
+          "correct": false,
+          "rationale": "O nome do serviço identifica a origem, não o contexto da requisição.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+        },
+        {
+          "text": "Usar a duração total como identificador da operação.",
+          "correct": false,
+          "rationale": "Durações iguais não estabelecem correlação nem relação parental.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-37",
+      "type": "code-completion",
+      "title": "Somar amostras por janela",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "kql-consultas-logs-metricas",
+      "stem": "Em AppRequests, o campo ItemCount representa quantos eventos cada linha amostrada representa. Você quer estimar o volume por janelas de cinco minutos. Complete a agregação KQL.",
+      "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor",
+      "code_template": "AppRequests\n| where TimeGenerated > ago(1h)\n| summarize EstimatedRequests = {{volume}} by {{intervalo}}\n| order by TimeGenerated asc",
+      "slots": [
+        {
+          "id": "volume",
+          "options": [
+            {
+              "text": "sum(ItemCount)",
+              "correct": true,
+              "rationale": "Somar os pesos estima o volume representado pelos registros.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            },
+            {
+              "text": "count()",
+              "correct": false,
+              "rationale": "Isso conta as linhas recebidas, sem aplicar o peso de amostragem.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            },
+            {
+              "text": "dcount(OperationId)",
+              "correct": false,
+              "rationale": "A quantidade aproximada de IDs distintos também não incorpora o peso de cada linha.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            }
+          ]
+        },
+        {
+          "id": "intervalo",
+          "options": [
+            {
+              "text": "bin(TimeGenerated, 5m)",
+              "correct": true,
+              "rationale": "bin alinha os instantes a intervalos de cinco minutos.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            },
+            {
+              "text": "TimeGenerated",
+              "correct": false,
+              "rationale": "Agrupar pelo instante exato não cria janelas de cinco minutos.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            },
+            {
+              "text": "AppRoleName",
+              "correct": false,
+              "rationale": "O nome de papel não representa a janela temporal.",
+              "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-38",
+      "type": "single-choice",
+      "title": "Percentil após a publicação",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "kql-consultas-logs-metricas",
+      "stem": "O dashboard mostra que a média da latência ficou quase igual, mas parte dos usuários teve respostas bem mais lentas. Você quer ver a cauda em janelas de cinco minutos e comparar os papéis da aplicação. Qual cálculo acrescentar?",
+      "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor",
+      "options": [
+        {
+          "text": "percentile(DurationMs, 95) agrupado por bin(TimeGenerated, 5m) e AppRoleName.",
+          "correct": true,
+          "rationale": "O p95 por janela e papel torna visível a cauda em cada parte da aplicação.",
+          "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+        },
+        {
+          "text": "sum(DurationMs) sem agrupar por tempo.",
+          "correct": false,
+          "rationale": "A soma muda com o número de chamadas e não mostra a distribuição nem a janela.",
+          "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+        },
+        {
+          "text": "max(ItemCount) por dia.",
+          "correct": false,
+          "rationale": "ItemCount representa amostragem, não duração. O agrupamento diário também esconderia períodos curtos.",
+          "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+        },
+        {
+          "text": "countif(Success == false) como única medida.",
+          "correct": false,
+          "rationale": "Falhas e latência são dimensões diferentes. Solicitações lentas podem terminar com sucesso.",
+          "learn_url": "https://learn.microsoft.com/en-us/kusto/query/?view=azure-monitor"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-39",
+      "type": "single-choice",
+      "title": "Retentativas amplificando 429",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "troubleshooting-latencia-e-falhas-ia",
+      "stem": "O modelo tem uma quota por implantação compartilhada por todas as réplicas. O SDK repete chamadas e o gateway também repete a operação inteira sem esperar Retry-After. As falhas aumentaram depois de escalar réplicas. Que intervenção é mais específica?",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/failures-performance-transactions",
+      "options": [
+        {
+          "text": "Respeitar Retry-After e controlar concorrência e orçamento total de tentativas contra a quota compartilhada.",
+          "correct": true,
+          "rationale": "O objetivo é reduzir amplificação e evitar que várias camadas insistam simultaneamente.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/failures-performance-transactions"
+        },
+        {
+          "text": "Duplicar o número de réplicas mantendo todos os retries.",
+          "correct": false,
+          "rationale": "Mais réplicas podem aumentar a pressão sobre a mesma quota.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/failures-performance-transactions"
+        },
+        {
+          "text": "Elevar só o limite de conexões TCP do banco.",
+          "correct": false,
+          "rationale": "O serviço que devolve 429 no enunciado é o modelo, e sua quota continua igual.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/failures-performance-transactions"
+        },
+        {
+          "text": "Tratar cada 429 como autorização inválida e trocar a identidade gerenciada.",
+          "correct": false,
+          "rationale": "O cenário descreve limitação de taxa, separada de autorização.",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/failures-performance-transactions"
+        }
+      ]
+    },
+    {
+      "id": "mock-ai200-40",
+      "type": "case-study",
+      "title": "Estudo de caso · renovação de credencial",
+      "exam_domain": "secure-monitor-troubleshoot",
+      "concept_slug": "key-vault-segredos-rotacao",
+      "stem": "Leia os requisitos e investigue o acesso e a latência da revisão candidata.",
+      "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets",
+      "tabs": [
+        {
+          "title": "Visão Geral",
+          "content": "<p>A equipe mantém um assistente de suporte. Precisa rotacionar a credencial de uma API externa sem interromper a aplicação.</p>"
+        },
+        {
+          "title": "Arquitetura Atual",
+          "content": "<p>Um Container App usa identidade gerenciada. Há duas revisões ativas. O cofre tem a versão antiga e uma nova. O serviço de configuração usa chaves com rótulos. A candidata exporta telemetria para Application Insights.</p>"
+        },
+        {
+          "title": "Requisitos Técnicos",
+          "content": "<p>Validar a nova credencial na candidata, atualizar o consumo das demais réplicas e só depois revogar a antiga. Identificar se o aumento no tempo de resposta veio da chamada à API externa.</p>"
+        },
+        {
+          "title": "Requisitos de Segurança",
+          "content": "<p>O Key Vault usa RBAC, a conectividade já existe e a identidade da aplicação só deve ler os segredos necessários. Valores de segredos e tokens não devem ser registrados.</p>"
+        }
+      ],
+      "questions": [
+        {
+          "id": "mock-ai200-40-1",
+          "type": "single-choice",
+          "title": "Versão nova e principal correto",
+          "exam_domain": "secure-monitor-troubleshoot",
+          "concept_slug": "key-vault-segredos-rotacao",
+          "stem": "Qual atribuição dá à identidade da candidata permissão para obter o valor no cofre sem permitir sua edição?",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets",
+          "options": [
+            {
+              "text": "Key Vault Secrets User à identidade gerenciada no escopo de leitura aplicável.",
+              "correct": true,
+              "rationale": "Esse papel permite ler valores de segredo, sem administrar o cofre nem editar o valor.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+            },
+            {
+              "text": "Key Vault Reader à identidade no cofre.",
+              "correct": false,
+              "rationale": "O papel Reader permite ver metadados, sem ler os valores.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+            },
+            {
+              "text": "Key Vault Contributor no recurso do cofre.",
+              "correct": false,
+              "rationale": "Esse papel gerencia o recurso, sem conceder leitura de valores do plano de dados.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+            },
+            {
+              "text": "Key Vault Secrets Officer à conta do desenvolvedor que faz deploy.",
+              "correct": false,
+              "rationale": "Além de conceder administração de segredos, a identidade que faz a leitura em produção é outra.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/key-vault/secrets/about-secrets"
+            }
+          ]
+        },
+        {
+          "id": "mock-ai200-40-2",
+          "type": "single-choice",
+          "title": "Variante da aplicação",
+          "exam_domain": "secure-monitor-troubleshoot",
+          "concept_slug": "app-configuration-chaves-rotulos-feature-flags",
+          "stem": "A equipe quer testar um tempo limite diferente apenas na candidata, que aceita seleção de configuração por rótulo. O que fazer?",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value",
+          "options": [
+            {
+              "text": "Publicar uma variante rotulada e fazer a candidata selecionar explicitamente esse rótulo.",
+              "correct": true,
+              "rationale": "A seleção explícita permite testar a variante sem alterar a chave lida pela versão estável.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+            },
+            {
+              "text": "Alterar a chave lida por ambas as revisões e confiar no tempo de propagação.",
+              "correct": false,
+              "rationale": "As duas revisões podem carregar o novo valor, contrariando o isolamento do teste.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+            },
+            {
+              "text": "Usar o nome da revisão como valor da chave sentinela sem configurar seu monitoramento.",
+              "correct": false,
+              "rationale": "A sentinela só tem efeito quando o cliente observa a chave e aciona refresh.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+            },
+            {
+              "text": "Alterar o papel Key Vault Reader para escolher valores da candidata.",
+              "correct": false,
+              "rationale": "A autorização do cofre não determina quais rótulos o App Configuration carrega.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-key-value"
+            }
+          ]
+        },
+        {
+          "id": "mock-ai200-40-3",
+          "type": "single-choice",
+          "title": "Reconhecer a etapa lenta",
+          "exam_domain": "secure-monitor-troubleshoot",
+          "concept_slug": "opentelemetry-azure-monitor",
+          "stem": "As métricas indicam p95 maior na candidata. Que evidência identifica se a chamada à API externa responde pelo atraso em uma requisição?",
+          "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable",
+          "options": [
+            {
+              "text": "Abrir a transação da requisição lenta e medir a duração e o contexto da dependência no trace.",
+              "correct": true,
+              "rationale": "O trace vincula a dependência à requisição e permite observar quanto tempo aquela etapa levou.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+            },
+            {
+              "text": "Inspecionar apenas a média global de CPU das duas revisões.",
+              "correct": false,
+              "rationale": "CPU média não identifica a dependência que atrasou a solicitação.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+            },
+            {
+              "text": "Registrar a nova chave nos atributos do span para localizar a tentativa.",
+              "correct": false,
+              "rationale": "O valor da chave deve ficar fora da telemetria. Identificadores de requisição bastam para correlacionar.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+            },
+            {
+              "text": "Contar todas as linhas de logs sem filtrar revisão ou intervalo.",
+              "correct": false,
+              "rationale": "Contagem bruta não mostra a etapa de origem da latência.",
+              "learn_url": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

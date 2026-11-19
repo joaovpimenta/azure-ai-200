@@ -63,7 +63,7 @@ questions:
 
 # Diagnóstico de latência, falhas e throttling em aplicações de IA
 
-Quando uma API de IA fica lenta, separe o tempo gasto na fila, no banco e no modelo. Limitação de taxa (throttling) acontece quando um serviço restringe chamadas, muitas vezes com HTTP 429. Mais réplicas podem piorar a situação se todas disputarem a mesma quota.
+O tempo de resposta do assistente dobrou depois da implantação. Um serviço está limitando o ritmo das chamadas e devolve HTTP 429. Siga uma requisição lenta pelo trace para identificar a dependência e separar o tempo de fila, busca, geração e espera entre tentativas.
 
 ## Separar etapas e classes de falha
 
@@ -98,11 +98,13 @@ A consulta conta registros observados, sujeitos a sampling. Use uma operação a
 
 Respeite ==Retry-After== quando fornecido e aumente progressivamente a espera entre tentativas (backoff), com pequena variação aleatória (jitter) e limite total de tempo. SDKs podem já repetir certas operações: outra camada de retries multiplica a carga. Não repita automaticamente erros permanentes de validação ou autorização.
 
+Se a aplicação fizer até três tentativas e o SDK fizer até três por chamada, uma requisição pode gerar até nove chamadas ao serviço. Confira as duas configurações, escolha onde aplicar o limite e registre tentativas por requisição para medir o efeito da mudança.
+
 Timeout não prova que a operação não foi executada. Para mensagens, gravações ou chamadas com efeitos externos, use idempotency keys e verificação de estado. Um circuit breaker pode evitar insistência durante falha prolongada; uma fila pode absorver picos sem aumentar imediatamente chamadas ao modelo.
 
 ## Mitigar e validar
 
-Reduza concorrência, limite taxa de entrada ou faça rollback de uma revisão rsaída de redeiva conforme a evidência. Aumentar réplicas ajuda somente quando o gargalo pode escalar e as dependências têm capacidade. Compare p95, taxa de falha e throughput após a alteração, usando janelas e volumes comparáveis.
+Reduza concorrência, limite taxa de entrada ou faça rollback de uma revisão regressiva conforme a evidência. Aumentar réplicas ajuda somente quando o gargalo pode escalar e as dependências têm capacidade. Compare p95, taxa de falha e throughput após a alteração, usando janelas e volumes comparáveis.
 
 <details>
 <summary>Checagem Rápida: Um retry imediato é sempre a melhor resposta a 429?</summary>

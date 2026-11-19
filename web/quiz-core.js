@@ -637,3 +637,27 @@ export function shuffleArray(array) {
   }
   return copy;
 }
+
+export function shuffleExamQuestions(questions) {
+  const mix = q => ({
+    ...q,
+    ...(q.options && { options: shuffleArray(q.options) }),
+    ...(q.slots && { slots: q.slots.map(slot => ({ ...slot, options: shuffleArray(slot.options) })) }),
+    ...(q.questions && { questions: q.questions.map(mix) })
+  });
+  return shuffleArray(questions).map(mix);
+}
+
+export function examSecondsLeft(deadline, now = Date.now()) {
+  return Math.max(0, Math.ceil((deadline - now) / 1000));
+}
+
+/** Gives an ordering exercise a starting sequence without revealing the solution. */
+export function createOrderingStart(items) {
+  const ranked = items.map((item, index) => ({ id: item.id || `item_${index + 1}`, order: item.order }));
+  const shuffled = shuffleArray(ranked);
+  if (shuffled.length > 1 && shuffled.every((item, index) => item.order === index + 1)) {
+    shuffled.push(shuffled.shift());
+  }
+  return shuffled.map(item => item.id);
+}

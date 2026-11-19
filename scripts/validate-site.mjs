@@ -8,6 +8,7 @@ import { extractFrontmatter } from './lib/frontmatter.mjs';
 import {
   validateFrontmatter,
   validateQuestion,
+  validateQuestions,
   validateTags,
   validateBlueprint,
   loadCanonicalTaxonomy,
@@ -28,9 +29,23 @@ const requirePilot = args.includes('--require-pilot');
 
 const errors = [];
 const warnings = [];
+const studyQuestionIds = new Set();
+const domainsBySlug = new Map();
+let blueprint;
 
 function fail(msg) { errors.push(msg); }
 function warn(msg) { warnings.push(msg); }
+
+function allQuestions(question) {
+  if (!question || typeof question !== 'object') return [];
+  const children = Array.isArray(question.questions) ? question.questions : [];
+  return [question, ...children.flatMap(allQuestions)];
+}
+
+function validateStudyQuestion(question, source) {
+  validateQuestion(question, source).forEach(fail);
+  allQuestions(question).forEach(item => studyQuestionIds.add(item.id));
+}
 
 console.log('\n🛡️ Running Deterministic Site Validation Gate...\n');
 
@@ -40,7 +55,7 @@ if (!existsSync(SYLLABUS_FILE)) {
 } else {
   try {
     const raw = readFileSync(SYLLABUS_FILE, 'utf-8');
-    const bp = JSON.parse(raw);
+    const bp = blueprint = JSON.parse(raw);
     const bpErrors = validateBlueprint(bp);
     bpErrors.forEach(fail);
 
@@ -71,7 +86,7 @@ if (!existsSync(TAXONOMY_FILE)) {
 
 // 3. Scan & Validate Markdown Content (Chapters and Comparisons)
 const existingRoutes = new Set([
-  'index.html', 'cram/', 'simulator/', 'mastery/'
+  'index.html', 'cram/', 'simulator/', 'mastery/', 'preparacao/'
 ]);
 
 const markdownFiles = [];
@@ -156,6 +171,7 @@ for (const item of markdownFiles) {
     filePath: item.path
   });
   fmErrors.forEach(fail);
+  if (item.type === 'concept') domainsBySlug.set(expectedSlug, fmData.exam_domain);
 
   // Validate mandatory section: ## Pegadinhas de Prova (for concepts)
   if (item.type === 'concept') {
@@ -184,8 +200,7 @@ for (const item of markdownFiles) {
   // Validate concept-embedded questions if present
   if (Array.isArray(fmData.questions)) {
     fmData.questions.forEach((q, idx) => {
-      const qErrors = validateQuestion(q, `${item.path} -> questions[${idx}]`);
-      qErrors.forEach(fail);
+      validateStudyQuestion(q, `${item.path} -> questions[${idx}]`);
     });
   }
 }
@@ -199,10 +214,7 @@ if (existsSync(EXAMS_DIR)) {
       try {
         const raw = JSON.parse(readFileSync(fPath, 'utf-8'));
         const list = Array.isArray(raw) ? raw : [raw];
-        list.forEach((q, idx) => {
-          const qErrors = validateQuestion(q, `${f} [${idx}]`);
-          qErrors.forEach(fail);
-        });
+        list.forEach((q, idx) => validateStudyQuestion(q, `${f} [${idx}]`));
       } catch (err) {
         fail(`JSON parse error in ${fPath}: ${err.message}`);
       }
@@ -214,13 +226,42 @@ if (existsSync(EXAMS_DIR)) {
       const fPath = join(caseStudiesDir, f);
       try {
         const raw = JSON.parse(readFileSync(fPath, 'utf-8'));
-        const qErrors = validateQuestion(raw, f);
-        qErrors.forEach(fail);
+        validateStudyQuestion(raw, f);
       } catch (err) {
         fail(`JSON parse error in ${fPath}: ${err.message}`);
       }
     }
   }
+}
+
+// Verify the separate timed bank, domain coverage, and article destinations.
+try {
+  const mock = JSON.parse(readFileSync(join(EXAMS_DIR, 'mock-ai-200.json'), 'utf8'));
+  if (!mock?.id || !Array.isArray(mock.questions) || !mock.questions.length) {
+    fail('O simulado precisa de um ID e pelo menos uma questão.');
+  } else {
+    validateQuestions(mock.questions).forEach(fail);
+    const usedIds = new Set(studyQuestionIds);
+    for (const question of mock.questions.flatMap(allQuestions)) {
+      if (usedIds.has(question.id)) fail(`ID de questão reaproveitado no simulado: ${question.id}`);
+      usedIds.add(question.id);
+      if (domainsBySlug.get(question.concept_slug) !== question.exam_domain || !existingRoutes.has(question.concept_slug)) {
+        fail(`Questão ${question.id} precisa indicar um artigo de revisão da área ${question.exam_domain}.`);
+      }
+      if (question.type === 'case-study') {
+        for (const tab of question.tabs || []) sanitizeCheck(tab.content).forEach(issue => fail(`${question.id}: ${issue}`));
+      }
+    }
+    for (const domain of blueprint?.domains || []) {
+      const count = mock.questions.filter(question => question?.exam_domain === domain.id).length;
+      const share = count / mock.questions.length * 100;
+      if (share < domain.weight.min || share > domain.weight.max) {
+        fail(`O simulado atribui ${share}% à área ${domain.id}; o guia indica ${domain.weight.min}–${domain.weight.max}%.`);
+      }
+    }
+  }
+} catch (err) {
+  fail(`Erro no banco cronometrado: ${err.message}`);
 }
 
 // 5. Output Results and Exit

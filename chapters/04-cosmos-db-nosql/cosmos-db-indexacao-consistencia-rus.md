@@ -105,7 +105,7 @@ questions:
 
 # Indexação, consistência e RUs
 
-Índices ajudam a localizar dados, mas também custam armazenamento e trabalho nas escritas. Consistência define quais versões uma leitura pode observar. RUs medem o custo dessas operações: ajuste os três conforme a aplicação.
+O assistente grava um manual com um embedding grande. As escritas ficaram mais caras e uma consulta em outro serviço ainda vê a versão anterior. Investigue duas coisas separadas: o índice determina trabalho nas consultas e escritas, enquanto a consistência determina qual versão a leitura pode observar.
 
 ## Indexar o que será consultado
 
@@ -141,6 +141,8 @@ Um ==índice composto== atende ordenação por vários campos, como `ORDER BY c.
 Strong e Bounded Staleness custam o dobro de RUs de leitura dos outros três níveis para a mesma operação. Não confunda essa regra com um tempo de resposta garantido.
 
 Em ==Session==, o SDK acompanha tokens de sessão. Se uma escrita ocorre no serviço A e a leitura no B, propague o token quando precisar preservar essa garantia entre clientes.
+
+Compare a mesma consulta em um contêiner de laboratório, antes e depois de uma mudança de índice. Espere a transformação do índice e registre RU por operação, dados e filtro usados. Quando investigar leituras aparentemente antigas, compare também a sessão do cliente que escreveu com a sessão do cliente que leu.
 
 <details>
 <summary>Checagem Rápida: Aumentar consistência reduz o custo de uma busca vetorial?</summary>

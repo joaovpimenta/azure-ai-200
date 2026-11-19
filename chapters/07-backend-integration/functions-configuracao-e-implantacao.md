@@ -65,7 +65,7 @@ questions:
 
 # Planos de hospedagem, configuração e implantação de function apps
 
-O plano de hospedagem define como a Function App recebe recursos, escala e é cobrada. Escolha-o conforme tempo de resposta, duração das tarefas e rede necessária. A Function App reúne funções, configurações e identidade.
+Você vai publicar uma Function App que aceita pedidos de reindexação. Antes de escolher o plano, descubra se ela precisa alcançar serviços em uma rede privada, quanto tempo o usuário pode esperar pela primeira chamada e se a carga justifica manter capacidade pronta.
 
 ## Comparar planos
 
@@ -101,9 +101,15 @@ Sampling guarda uma amostra da telemetria e pode alterar quantidades observadas 
 
 Pré-requisitos: Function App criada com plano, sistema operacional e runtime compatíveis, Core Tools v4 e identidade de deploy autorizada. A configuração de build deve corresponder à linguagem.
 
+Na raiz do projeto, inicie o host local e faça uma chamada de teste:
+
 ```bash
-# Execute na raiz do projeto Functions.
 func start
+```
+
+Depois de conferir a chamada, encerre o host local. Para publicar e verificar a descoberta de funções no Azure:
+
+```bash
 func azure functionapp publish minha-function-app
 az functionapp function list --name minha-function-app \
   --resource-group rg-ai200 -o table
@@ -115,7 +121,7 @@ Configure storage requerido pelo host, conexões de triggers/bindings, identidad
 
 ## Validar após publicar
 
-Faça uma chamada real ou publique uma mensagem de teste. Confirme descoberta das funções, autorização no recurso dependente, logs e resultado persistido. Deploy concluído não prova que um trigger conseguiu iniciar. Para operações HTTP demoradas, prefira aceitação assíncrona e consulta de status ou Durable Functions conforme o caso.
+Use a lista para confirmar que a função foi descoberta. Depois faça uma chamada real ou publique uma mensagem de teste com um ID conhecido. Procure esse ID nos logs e no destino do processamento. Se a função estiver listada mas não executar, confira inicialização do trigger, conexão e permissão no recurso. Para operações HTTP demoradas, considere aceitação assíncrona com consulta de status ou Durable Functions.
 
 <details>
 <summary>Checagem Rápida: Aumentar functionTimeout remove todo limite de uma requisição HTTP?</summary>

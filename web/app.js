@@ -3,12 +3,13 @@
  * Application bootstrap, Tech Topics archive cards, quick-actions preview, live search suggestions,
  * GitHub stars counter, and SPA/MPA routing for Azure AI-200.
  */
-import { renderStudyGuide } from './study-guide.js';
+import { renderStudyGuide, updateStudyGuideProgress } from './study-guide.js';
 import { initReader } from './reader.js';
 import { renderCramView } from './cram.js';
 import { renderSimulatorView } from './simulator.js';
 import { renderMasteryView } from './mastery.js';
 import { initMermaid } from './mermaid-theme.js';
+import { STORAGE_KEY } from './progress-core.js';
 
 export const FAVORITES_KEY = 'azure-ai-200:favorites:v1';
 
@@ -32,6 +33,7 @@ export const appState = {
   blueprint: null,
   cramIndex: [],
   questions: [],
+  mockExam: null,
   currentRoute: 'home',
   activeFilter: 'all',
   theme: 'light'
@@ -849,6 +851,9 @@ export function renderHomeView(container) {
   }
 
   const initialQuery = new URLSearchParams(window.location.search).get('q');
+  try {
+    updateStudyGuideProgress(container, getSiteBase(), JSON.parse(localStorage.getItem(STORAGE_KEY))?.conceptProgress);
+  } catch {}
   const searchInput = document.querySelector('#search-input');
   if (initialQuery && searchInput && !searchInput.value) {
     searchInput.value = initialQuery;
@@ -860,13 +865,17 @@ export function renderHomeView(container) {
 }
 
 // 7. Hash & Pre-rendered Page Router
+let disposeSimulator;
+let mockExamRequest;
 export function handleRouting() {
+  disposeSimulator?.();
+  disposeSimulator = null;
   const hash = window.location.hash || '';
   const bodyRoute = document.body?.dataset?.route || 'home';
   const viewport = document.getElementById('app-viewport');
   if (!viewport) return;
 
-  const effectiveRoute = hash && hash !== '#' && hash !== '#/' ? hash.slice(1) : bodyRoute;
+  const effectiveRoute = bodyRoute !== 'preparation' && hash && hash !== '#' && hash !== '#/' ? hash.slice(1) : bodyRoute;
   appState.currentRoute = effectiveRoute;
 
   document.querySelectorAll('.main-nav .nav-link').forEach(link => {
@@ -898,12 +907,28 @@ export function handleRouting() {
   document.body.classList.remove('article-page');
   viewport.className = 'page-shell';
 
-  if (effectiveRoute === 'cram' || effectiveRoute.startsWith('cram?')) {
+  if (effectiveRoute === 'preparation') {
+    return;
+  } else if (effectiveRoute === 'cram' || effectiveRoute.startsWith('cram?')) {
     renderCramView(viewport, appState);
   } else if (effectiveRoute === 'simulator' || effectiveRoute.startsWith('simulator?')) {
     const query = (hash.includes('?') ? hash.split('?')[1] : window.location.search.slice(1)) || '';
     const urlParams = new URLSearchParams(query);
-    renderSimulatorView(viewport, appState, urlParams);
+    const usesMockBank = urlParams.get('mode') === 'exam' || urlParams.get('errors') === 'true';
+    if (usesMockBank && !appState.mockExam) {
+      viewport.innerHTML = '<p role="status">Carregando questões…</p>';
+      mockExamRequest ??= fetchJsonSafely(resolveUrl('data/mock-exam.json'));
+      const requestedUrl = window.location.href;
+      mockExamRequest.then(mockExam => {
+        appState.mockExam = mockExam;
+        mockExamRequest = null;
+        if (window.location.href === requestedUrl && !disposeSimulator) {
+          disposeSimulator = renderSimulatorView(viewport, appState, urlParams, getSiteBase());
+        }
+      });
+    } else {
+      disposeSimulator = renderSimulatorView(viewport, appState, urlParams, getSiteBase());
+    }
   } else if (effectiveRoute === 'mastery' || effectiveRoute.startsWith('mastery?')) {
     renderMasteryView(viewport, appState);
   } else if (effectiveRoute.startsWith('concept/')) {
@@ -914,15 +939,11 @@ export function handleRouting() {
     } else {
       viewport.innerHTML = `
         <header class="archive-intro">
-          <span class="eyebrow">Ementa Oficial AI-200 · Em Elaboração</span>
-          <h1>${slug}</h1>
-          <p>Este conceito faz parte dos 35 tópicos oficiais mapeados em <code>syllabus/ai-200-blueprint.json</code>.</p>
+          <h1>Artigo indisponível</h1>
+          <p>Confira o endereço ou escolha outro artigo no acervo.</p>
         </header>
         <div class="signal-card" style="max-width: 720px;">
-          <h3>Como compilar este artigo</h3>
-          <p>Gere o brief de autoria determinístico executando no terminal:</p>
-          <pre class="code-block">node scripts/compose-study-brief.mjs --slug ${slug}</pre>
-          <p style="margin-top: 14px;"><a class="article-back" href="${resolveUrl('index.html')}">← Voltar para todos os artigos</a></p>
+          <p><a class="article-back" href="${resolveUrl('index.html#recent-posts')}">← Voltar para todos os artigos</a></p>
         </div>
       `;
     }

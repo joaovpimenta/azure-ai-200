@@ -57,7 +57,7 @@ questions:
 
 # Services, Ingress e conectividade ponta a ponta
 
-No AKS, Service fornece um endereço estável para acessar Pods. Ingress define rotas HTTP por domínio e caminho, como api.exemplo.com/chat. Um controlador de Ingress precisa implementar essas regras. Para diagnosticar falhas, acompanhe cada etapa até a aplicação.
+Seu navegador chama `api.exemplo.com/chat`. Como a chamada encontra um Pod se ele pode receber outro IP a qualquer momento? No AKS, o Ingress define a rota HTTP por domínio e caminho, e o Service encontra os Pods que podem atender. Um controlador precisa aplicar as regras de entrada.
 
 ## Service e Ingress
 
@@ -112,7 +112,7 @@ A porta referenciada é a `port` do Service, que encaminha para `targetPort` do 
 
 ## Diagnóstico por salto
 
-Confira resolução do host e certificado; examine status do Ingress e logs do controller. Depois verifique Service e EndpointSlices. Teste a aplicação por `kubectl port-forward` para separar falha do processo de falha no caminho de entrada. Esse teste não valida toda a rede real e não substitui uma chamada pelo endpoint público.
+Comece pelo nome público e pelo certificado. Examine o status do Ingress e os logs do controller, depois o Service e os EndpointSlices. Se você tem o Pod em mãos, `kubectl port-forward` permite testar sua resposta direto, sem passar pelo Ingress. Se só o acesso direto funciona, use o diagrama para procurar o primeiro salto com falha. Faça a verificação final pelo endereço do cliente.
 
 <details>
 <summary>Checagem Rápida: Um Service sem endpoints é corrigido aumentando o timeout do Ingress?</summary>

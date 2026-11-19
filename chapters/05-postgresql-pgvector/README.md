@@ -4,12 +4,12 @@ PostgreSQL combina tabelas, regras de integridade e consultas SQL. A extensão p
 
 ## Roteiro de leitura
 
-1. [Conexão com psycopg/Npgsql e autenticação Microsoft Entra](./postgresql-conexao-sdk-e-autenticacao.md)
-2. [Modelagem de esquemas, tipos de dados e índices B-tree/GIN](./postgresql-modelagem-e-tipos.md)
+1. [Modelagem de esquemas, tipos de dados e índices B-tree/GIN](./postgresql-modelagem-e-tipos.md)
+2. [Conexão com psycopg/Npgsql e autenticação Microsoft Entra](./postgresql-conexao-sdk-e-autenticacao.md)
 3. [pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat](./pgvector-indices-hnsw-ivfflat.md)
-4. [Compute, memória (maintenance_work_mem) e storage para vetores](./postgresql-recursos-para-cargas-vetoriais.md)
-5. [Busca vetorial e RAG com filtros de metadados](./postgresql-rag-com-filtros.md)
-6. [Pool de conexões, PgBouncer e otimização de throughput](./postgresql-pool-de-conexoes-pgbouncer.md)
+4. [Busca vetorial e RAG com filtros de metadados](./postgresql-rag-com-filtros.md)
+5. [Pool de conexões, PgBouncer e otimização de throughput](./postgresql-pool-de-conexoes-pgbouncer.md)
+6. [Compute, memória (maintenance_work_mem) e storage para vetores](./postgresql-recursos-para-cargas-vetoriais.md)
 
 ## Como estudar
 

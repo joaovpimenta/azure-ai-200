@@ -61,7 +61,7 @@ questions:
 
 # Compute, memória (maintenance_work_mem) e storage para vetores
 
-Uma busca vetorial usa CPU, memória e armazenamento. Para dimensionar o servidor, considere vetores, índices, texto e consultas simultâneas. Um teste rápido no notebook não mostra como o sistema se comportará com muitos usuários.
+A busca do assistente tem dois problemas possíveis: construir o índice demora ou consultar o índice sob carga demora. Meça cada fase separadamente. CPU, memória e disco ocupados durante a construção não explicam por si só a latência das consultas.
 
 ## Estimar e observar
 
@@ -80,22 +80,29 @@ Não aumente compute sem confirmar o gargalo: um filtro sem índice ou uma consu
 
 ==maintenance_work_mem== limita memória de certas operações de manutenção, incluindo fases de construção do HNSW. Ele não equivale a `work_mem`, que pode ser consumido por operações de sort/hash em várias consultas e processos. Multiplicar valores por operações e concorrência evita um orçamento de RAM irreal.
 
-Exemplo de inspeção e experimento em sessão de laboratório; confirme permissões e limites do servidor:
+Use a tabela `chunks` e o índice existentes do laboratório de pgvector. Confira permissões e limites do servidor. Primeiro observe o espaço e o plano da consulta:
 
 ```sql
 SHOW maintenance_work_mem;
 SHOW work_mem;
 SELECT pg_size_pretty(pg_total_relation_size('chunks'));
 SELECT pg_size_pretty(pg_relation_size('chunks_embedding_hnsw'));
-SET maintenance_work_mem = '256MB';
-ANALYZE chunks;
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id FROM chunks
 ORDER BY embedding <=> '[0.2,0.1,0.4]'::vector
 LIMIT 5;
 ```
 
-A dimensão do vetor deve corresponder à tabela do laboratório. `SET` afeta a sessão; não altera o servidor inteiro. Ajustes persistentes usam parâmetros do servidor e podem exigir reinício, conforme o parâmetro.
+Para medir a construção, repita este teste com dois valores permitidos de memória. Registre o tempo do `CREATE INDEX` e os avisos do servidor. O `ROLLBACK` descarta o índice temporário do experimento.
+
+```sql
+BEGIN;
+SET LOCAL maintenance_work_mem = '256MB';
+CREATE INDEX chunks_hnsw_lab ON chunks USING hnsw (embedding vector_cosine_ops);
+ROLLBACK;
+```
+
+A dimensão do vetor deve corresponder à tabela. Uma amostra de três linhas serve para conferir a sintaxe; compare os tempos com uma carga representativa.
 
 ## Benchmark útil
 

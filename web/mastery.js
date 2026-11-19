@@ -10,20 +10,21 @@ import {
   mergeProgress,
   OFFICIAL_DOMAIN_WEIGHTS
 } from './progress-core.js';
+import { getStudySequenceProgress } from './study-guide.js';
 
-export function renderMasteryView(container, { blueprint, catalog }) {
+export function renderMasteryView(container, { blueprint, catalog = [] }) {
   const metaBase = typeof document !== 'undefined' ? document.querySelector('meta[name="site-base"]')?.getAttribute('content') : './';
   const basePrefix = metaBase ? (metaBase.endsWith('/') ? metaBase : `${metaBase}/`) : './';
-  const progressRaw = localStorage.getItem(STORAGE_KEY);
   let progressState = null;
   try {
-    if (progressRaw) progressState = JSON.parse(progressRaw);
+    progressState = JSON.parse(localStorage.getItem(STORAGE_KEY));
   } catch {}
 
   const readiness = calculateReadiness(progressState, blueprint, OFFICIAL_DOMAIN_WEIGHTS);
-  const overallPercentage = readiness.overallPercentage;
-  const isReady = readiness.isPassing;
   const domainReadiness = readiness.domainReadiness;
+  const studyCoverage = getStudySequenceProgress(progressState?.conceptProgress);
+  const lastMock = Array.isArray(progressState?.quizHistory)
+    ? progressState.quizHistory.find(attempt => attempt?.mode === 'exam' && attempt.examId) : null;
 
   container.innerHTML = `
     <header class="concept-header">
@@ -31,7 +32,7 @@ export function renderMasteryView(container, { blueprint, catalog }) {
         <div>
           <h1>Meu progresso</h1>
           <p style="color: var(--text-secondary); margin-top: 4px;">
-            Acompanhe os conceitos estudados e os resultados dos exercícios. Este indicador não prevê sua nota no exame oficial.
+            Acompanhe as práticas concluídas e o desempenho na tentativa cronometrada mais recente.
           </p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -43,48 +44,30 @@ export function renderMasteryView(container, { blueprint, catalog }) {
       </div>
     </header>
 
-    <!-- Overall Readiness Hero -->
-    <div class="quiz-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; background: linear-gradient(135deg, var(--surface), var(--bg-secondary));">
-      <div>
-        <span class="badge ${isReady ? 'badge-domain' : 'badge-diff'}">Progresso geral</span>
-        <div style="font-size: 42px; font-weight: 800; color: ${isReady ? 'var(--success)' : 'var(--accent)'}; margin-top: 6px;">
-          ${overallPercentage}%
-        </div>
-        <p style="color: var(--text-muted); font-size: 13.5px;">
-          ${isReady ? 'Você atingiu a meta de estudo do site. Revise os erros e pratique os temas menos conhecidos.' : 'Continue pelos conceitos ainda não estudados e revise suas dúvidas.'}
-        </p>
-      </div>
-      <div style="min-width: 220px; flex: 1; max-width: 400px;">
-        <div class="progress-bar-track" style="height: 14px;">
-          <div class="progress-bar-fill" style="width: ${overallPercentage}%;"></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-          <span>0%</span>
-          <span>Meta do site: 70%</span>
-          <span>100%</span>
-        </div>
-      </div>
-    </div>
+    <section class="quiz-card">
+      <h2>Evidências de preparação</h2>
+      <p><strong>Roteiro</strong> · ${studyCoverage.completed} de ${studyCoverage.total} práticas concluídas no roteiro.</p>
+      <p><strong>Último simulado</strong> · ${lastMock
+        ? `${Number(lastMock.percentage)}% de pontuação local · ${Number(lastMock.correct)} de ${Number(lastMock.total)} totalmente corretas · ${Number(lastMock.unanswered || 0)} em branco.`
+        : 'Faça uma tentativa cronometrada para ver o desempenho por área.'}</p>
+      <a class="article-back" href="${basePrefix}preparacao/index.html">Abrir preparação para a prova →</a>
+    </section>
 
-    <!-- Domain Breakdown Grid -->
     <h2 style="font-size: 20px; font-weight: 700; margin: 28px 0 16px 0;">Progresso por área do exame</h2>
     <div class="mastery-grid">
-      ${Object.entries(domainReadiness).map(([domId, d]) => `
-        <div class="domain-readiness-card">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span class="badge badge-domain">Peso no indicador: ${Math.round(d.weight * 1000) / 10}%</span>
-            <span style="font-weight: 700; color: var(--text-primary);">${d.percentage}%</span>
-          </div>
-          <h3 style="font-size: 15px; margin: 10px 0 6px 0;">${formatDomainName(domId)}</h3>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" style="width: ${d.percentage}%;"></div>
-          </div>
-          <div style="font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
-            <span>${d.masteredCount}/${d.conceptCount} dominados</span>
-            <span>${d.quizAccuracy > 0 ? `Acertos: ${Math.round(d.quizAccuracy * 100)}%` : 'Sem acertos registrados'}</span>
-          </div>
-        </div>
-      `).join('')}
+      ${Object.entries(domainReadiness).map(([domId, d]) => {
+        const coverage = catalog.filter(item => item.type === 'concept' && item.exam_domain === domId && progressState?.conceptProgress?.[item.slug]?.practiceCompletedAt).length;
+        const recorded = lastMock?.domainScores?.[domId];
+        return `
+          <div class="domain-readiness-card">
+            <h3>${formatDomainName(domId)}</h3>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" style="width: ${d.conceptCount ? 100 * coverage / d.conceptCount : 0}%;"></div>
+            </div>
+            <p>${coverage}/${d.conceptCount} práticas concluídas</p>
+            <p>${recorded ? `Simulado · ${Number(recorded.correct)}/${Number(recorded.total)} totalmente corretas` : 'Aguardando simulado'}</p>
+          </div>`;
+      }).join('')}
     </div>
 
     <!-- Syllabus Checklist -->

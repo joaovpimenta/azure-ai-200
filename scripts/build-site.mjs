@@ -7,7 +7,7 @@ import { resolve, join, relative, dirname } from 'node:path';
 import { extractFrontmatter } from './lib/frontmatter.mjs';
 import { compileMarkdown } from './lib/markdown.mjs';
 import { escapeHtml } from './lib/cloze.mjs';
-import { renderStudyGuide } from '../web/study-guide.js';
+import { renderStudyCasePrompt, renderStudyGuide, renderStudySequenceNav } from '../web/study-guide.js';
 import { generatePwaIcons } from './lib/pwa-icons.mjs';
 
 const ROOT_DIR = resolve(process.cwd());
@@ -175,7 +175,8 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
         <nav class="main-nav" aria-label="Navegação Principal">
           <a href="${rootRel}index.html" class="header-link nav-link ${currentRoute === 'home' ? 'active' : ''}" data-route="home">Artigos</a>
           <a href="${rootRel}cram/index.html" class="header-link nav-link ${currentRoute === 'cram' ? 'active' : ''}" data-route="cram">Revisão rápida</a>
-          <a href="${rootRel}simulator/index.html" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
+          <a href="${rootRel}simulator/index.html#simulator?mode=exam" class="header-link nav-link ${currentRoute === 'simulator' ? 'active' : ''}" data-route="simulator">Simulado</a>
+          <a href="${rootRel}preparacao/index.html" class="header-link nav-link ${currentRoute === 'preparation' ? 'active' : ''}" data-route="preparation">Preparação</a>
           <a href="${rootRel}mastery/index.html" class="header-link nav-link ${currentRoute === 'mastery' ? 'active' : ''}" data-route="mastery">Meu progresso</a>
         </nav>
         <button class="install-app header-install" type="button" data-install-app>Instalar</button>
@@ -249,7 +250,19 @@ export function renderHtmlShell({ title, description, content, rootRel, currentR
 </html>`;
 }
 
-function buildArticleEnvelope({ slug, chFolder, category, title, dek, metaText, coverRelPath, bodyHtml, relatedLinks = [], rootRel }) {
+function compileArticleMarkdown(content, sourceFile, rootRel) {
+  return compileMarkdown(content, {
+    resolveLink(href) {
+      const link = /^([^?#]+)\.md([?#].*)?$/i.exec(href);
+      if (!link || /^(?:[a-z][\w+.-]*:|\/)/i.test(link[1])) return href;
+      const target = relative(ROOT_DIR, resolve(dirname(sourceFile), link[1])).replaceAll('\\', '/');
+      if (!/^(?:chapters\/[\w-]+|comparisons)\/[a-z0-9-]+$/.test(target)) return href;
+      return `${rootRel}${target}/index.html${link[2] || ''}`;
+    }
+  });
+}
+
+function buildArticleEnvelope({ slug, chFolder, category, title, dek, metaText, coverRelPath, bodyHtml, relatedLinks = [], rootRel, questionCount = 0 }) {
   // Strip leading <h1> from compiled markdown body so it does not duplicate #article-heading
   const cleanedBody = bodyHtml.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/i, '');
   const refsHtml = Array.isArray(relatedLinks) && relatedLinks.length > 0
@@ -303,10 +316,19 @@ function buildArticleEnvelope({ slug, chFolder, category, title, dek, metaText, 
       <span class="share-status" id="share-status" role="status" aria-live="polite"></span>
     </div>
   </header>
+  ${renderStudyCasePrompt(rootRel, slug)}
   <div class="article-hero"><img id="article-image" src="${rootRel}${coverRelPath}" alt="${escapeHtml(title)}" /></div>
   <div class="article-body concept-body fgs-guide" id="article-body">
     ${cleanedBody}
   </div>
+  ${questionCount ? `<section class="study-practice" aria-labelledby="study-practice-heading">
+    <div>
+      <h2 id="study-practice-heading">Pratique este conceito</h2>
+      <p>${questionCount === 1 ? '1 questão comentada' : `${questionCount} questões comentadas`} sobre o que você acabou de estudar.</p>
+    </div>
+    <a class="study-start" href="${rootRel}simulator/index.html#simulator?concept=${encodeURIComponent(slug)}">Responder ${questionCount === 1 ? 'à questão' : 'às questões'} →</a>
+  </section>` : ''}
+  ${renderStudySequenceNav(rootRel, slug)}
   ${refsHtml}
   <section class="recommendations-section" id="recommendations" aria-labelledby="recommendations-heading" hidden>
     <h2 id="recommendations-heading">Continue explorando</h2>
@@ -360,12 +382,13 @@ if (existsSync(CHAPTERS_DIR)) {
       const outFile = join(outDir, 'index.html');
       const rootRel = computeRootRel(outFile, DIST_DIR);
 
-      const compiled = compileMarkdown(content);
+      const compiled = compileArticleMarkdown(content, fullPath, rootRel);
       const category = CHAPTER_LABELS[chFolder] || chFolder;
       const diffLabel = DIFFICULTY_LABELS[data.difficulty] || 'Intermediário';
       const readMin = data.estimated_minutes || Math.max(8, Math.round(rawText.split(/\s+/).length / 160));
       const readStr = `${readMin} min de leitura`;
       const metaText = [diffLabel, readStr, `${compiled.metadata?.clozeCount || 0} pontos de recordação ativa`].join(' · ');
+      const articleQuestions = Array.isArray(data.questions) ? data.questions : [];
 
       // Generate cover SVG
       const coverRelPath = `assets/covers/${slug}.svg`;
@@ -388,7 +411,8 @@ if (existsSync(CHAPTERS_DIR)) {
         coverRelPath,
         bodyHtml: compiled.html,
         relatedLinks: data.related_links || [],
-        rootRel
+        rootRel,
+        questionCount: articleQuestions.length
       });
 
       const pageHtml = renderHtmlShell({
@@ -426,6 +450,7 @@ if (existsSync(CHAPTERS_DIR)) {
         tags: data.tags || [],
         difficulty: data.difficulty,
         tldr: data.tldr,
+        questionIds: articleQuestions.map(question => question.id),
         narrationText: compiled.metadata?.narrationText || '',
         url: `chapters/${chFolder}/${slug}/index.html`
       });
@@ -441,9 +466,7 @@ if (existsSync(CHAPTERS_DIR)) {
         pegadinhasHtml: compiled.pegadinhas.html
       });
 
-      if (Array.isArray(data.questions)) {
-        questionsBank.push(...data.questions);
-      }
+      questionsBank.push(...articleQuestions);
     }
   }
 }
@@ -461,7 +484,7 @@ if (existsSync(COMPARISONS_DIR)) {
     const outFile = join(outDir, 'index.html');
     const rootRel = computeRootRel(outFile, DIST_DIR);
 
-    const compiled = compileMarkdown(content);
+    const compiled = compileArticleMarkdown(content, fullPath, rootRel);
     const category = CHAPTER_LABELS.comparisons;
     const diffLabel = DIFFICULTY_LABELS[data.difficulty] || 'Avançado';
     const readMin = data.estimated_minutes || 12;
@@ -560,9 +583,11 @@ if (existsSync(EXAMS_DIR)) {
 }
 
 // 6. Write JSON datasets
+const mockExam = JSON.parse(readFileSync(join(EXAMS_DIR, 'mock-ai-200.json'), 'utf8'));
 writeFileSync(join(DIST_DIR, 'data', 'catalog.json'), JSON.stringify(catalog, null, 2), 'utf-8');
 writeFileSync(join(DIST_DIR, 'data', 'cram-index.json'), JSON.stringify(cramIndex, null, 2), 'utf-8');
 writeFileSync(join(DIST_DIR, 'data', 'questions.json'), JSON.stringify(questionsBank, null, 2), 'utf-8');
+writeFileSync(join(DIST_DIR, 'data', 'mock-exam.json'), JSON.stringify(mockExam, null, 2), 'utf-8');
 
 // 7. Generate Pre-rendered Views (Index, Cram, Simulator, Mastery)
 const homeContent = `<header class="archive-intro">
@@ -595,10 +620,18 @@ ${renderStudyGuide('./')}
   <div class="signal-grid" id="blueprint-domains-container"></div>
 </section>`;
 
+const preparationContent = compileMarkdown(readFileSync(join(ROOT_DIR, 'docs', 'preparacao-ai-200.md'), 'utf8')).html
+  .replace('</h1>', `</h1>
+    <div class="exam-prep-actions">
+      <a class="study-start" href="../simulator/index.html#simulator?mode=exam">Abrir simulado · ${mockExam.questions.length} questões →</a>
+      <a class="recall-toggle-btn" href="../cram/index.html">Revisão rápida</a>
+      <a class="recall-toggle-btn" href="../simulator/index.html">Questões comentadas</a>
+    </div>`);
 const views = [
   { file: 'index.html', title: 'Roteiro de estudo AI-200', route: 'home', content: homeContent },
   { file: 'cram/index.html', title: 'Revisão rápida (Cram)', route: 'cram', content: '<div id="cram-view">Carregando resumos de véspera...</div>' },
   { file: 'simulator/index.html', title: 'Simulador de Exame AI-200', route: 'simulator', content: '<div id="simulator-view">Carregando simulador de questões...</div>' },
+  { file: 'preparacao/index.html', title: 'Preparação para a prova AI-200', route: 'preparation', content: `<article class="article-body fgs-guide" id="exam-preparation">${preparationContent}</article>` },
   { file: 'mastery/index.html', title: 'Meu progresso', route: 'mastery', content: '<div id="mastery-view">Carregando seu progresso...</div>' }
 ];
 
@@ -630,5 +663,6 @@ generatePwaIcons(DIST_DIR);
 console.log(`\n🎉 Static build completed successfully!`);
 console.log(`   - Concepts compiled: ${catalog.filter(c => c.type === 'concept').length}`);
 console.log(`   - Comparisons compiled: ${catalog.filter(c => c.type === 'comparison').length}`);
-console.log(`   - Exam questions assembled: ${questionsBank.length}`);
+console.log(`   - Study questions assembled: ${questionsBank.length}`);
+console.log(`   - Timed mock exam: ${mockExam.questions.length} questions`);
 console.log(`   - Output directory: ${DIST_DIR}\n`);

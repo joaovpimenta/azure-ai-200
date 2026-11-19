@@ -16,7 +16,7 @@ related_links:
 
 # Título Oficial do Conceito
 
-Contextualização inicial do conceito dentro do escopo do exame **Azure AI-200 (Developing AI Cloud Solutions on Azure)**, destacando sua relevância arquitetural e impacto no design de sistemas inteligentes.
+Comece com uma decisão de aplicação. O assistente precisa reabrir um trecho de um cliente e já conhece o ID do item e a chave de partição. Qual operação você usaria para encontrá-lo?
 
 ## Fundamentos e Arquitetura
 
@@ -25,9 +25,10 @@ Explicação técnica profunda dos mecanismos fundamentais. Integre as marcaçõ
 O Azure Cosmos DB utiliza o particionamento horizontal para distribuir dados e throughput através de ==partições físicas== gerenciadas automaticamente, enquanto as aplicações particionam seus documentos logicamente por meio da ==partition key==.
 
 <details>
-<summary>Checagem Rápida: Qual o limite máximo de armazenamento de uma única partição lógica no Cosmos DB?</summary>
+<summary>Checagem rápida · O que acontece se a aplicação só conhece o ID do trecho?</summary>
 
-Cada partição lógica possui o limite estrito de **20 GB** de dados. Quando uma partição lógica atinge esse volume sem particionamento adequado, o Cosmos DB rejeita novas gravações gerando erros de cota de armazenamento.
+Ela precisa obter a chave completa ou consultar por outros critérios. Uma leitura pontual exige o ID e a chave de partição.
+
 </details>
 
 ### Detalhes Técnicos e Comportamento Operacional
@@ -36,21 +37,17 @@ Aprofundamento sobre configurações operacionais, comportamento sob carga, mét
 
 ## Implementação Prática Dual SDK
 
-Apresente sempre os blocos consecutivos em Python e C#. O compilador agrupa automaticamente blocos adjacentes em abas sincronizadas interativas:
+Defina `COSMOS_ENDPOINT`. No contêiner `KnowledgeDb/DocumentEmbeddings`, com chave `/tenantId`, prepare um item `doc-1` com `tenantId` igual a `tenant-a`. Autorize a identidade com `Cosmos DB Built-in Data Reader`. Instale `azure-cosmos` e `azure-identity` em Python ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET.
 
 ```python
-from azure.cosmos import CosmosClient, PartitionKey
+import os
+from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 
-endpoint = "https://ai200-cosmos.documents.azure.com:443/"
-credential = DefaultAzureCredential()
-
-client = CosmosClient(url=endpoint, credential=credential, connection_mode="direct")
-database = client.create_database_if_not_exists(id="KnowledgeDb")
-container = database.create_container_if_not_exists(
-    id="DocumentEmbeddings",
-    partition_key=PartitionKey(path="/documentCategory")
-)
+with DefaultAzureCredential() as credential:
+    with CosmosClient(os.environ["COSMOS_ENDPOINT"], credential) as client:
+        container = client.get_database_client("KnowledgeDb").get_container_client("DocumentEmbeddings")
+        print(container.read_item(item="doc-1", partition_key="tenant-a")["id"])
 ```
 
 ```csharp
@@ -58,19 +55,15 @@ using System;
 using Microsoft.Azure.Cosmos;
 using Azure.Identity;
 
-string endpoint = "https://ai200-cosmos.documents.azure.com:443/";
-CosmosClient client = new CosmosClient(
-    accountEndpoint: endpoint,
-    tokenCredential: new DefaultAzureCredential(),
-    clientOptions: new CosmosClientOptions { ConnectionMode = ConnectionMode.Direct }
-);
-
-Database database = await client.CreateDatabaseIfNotExistsAsync("KnowledgeDb");
-Container container = await database.CreateContainerIfNotExistsAsync(
-    id: "DocumentEmbeddings",
-    partitionKeyPath: "/documentCategory"
-);
+using var client = new CosmosClient(
+    Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!, new DefaultAzureCredential(),
+    new CosmosClientOptions { ConnectionMode = ConnectionMode.Gateway });
+var container = client.GetContainer("KnowledgeDb", "DocumentEmbeddings");
+var item = await container.ReadItemAsync<dynamic>("doc-1", new PartitionKey("tenant-a"));
+Console.WriteLine(item.Resource.id);
 ```
+
+Os dois exemplos devem imprimir `doc-1`. Se mudar apenas a chave para `tenant-b` e esse par não existir, a leitura deve indicar item não encontrado.
 
 ## Diagrama Arquitetural
 
@@ -78,13 +71,13 @@ Utilize diagramas Mermaid compatíveis com renderização estática limpa:
 
 ```mermaid
 flowchart TD
-    App[Aplicação / Container App] -->|Direct TCP 10000..20000| Backend[Partições Físicas Cosmos DB]
-    App -.->|Fallback Gateway HTTPS 443| Gateway[Gateway Nodes]
+    App[Aplicação / Container App] -->|Direct TCP para dados| Backend[Partições físicas Cosmos DB]
+    App -->|Gateway HTTPS 443| Gateway[Nós de gateway]
     Gateway --> Backend
 ```
 
 ## Pegadinhas de Prova
 
 - **Pegadinha 1: Imutabilidade da Partition Key**: A chave de partição (`partitionKey`) de um container **NÃO** pode ser alterada após a criação. Para alterar a estratégia de particionamento, é mandatório criar um novo container e migrar os dados via Azure Data Factory, Spark ou Change Feed.
-- **Pegadinha 2: Portas do Direct Mode**: O Direct Mode conecta-se diretamente às réplicas backend através de portas TCP dinâmicas no intervalo de `10000 a 20000`. Se o tráfego de saída da VNet/firewall corporativo permitir apenas a porta `443`, a aplicação falhará com timeouts a menos que seja configurada explicitamente com `ConnectionMode.Gateway`.
-- **Pegadinha 3: Consultas Cross-Partition**: Consultas sem a especificação da chave de partição no filtro `WHERE` ou nas opções de requisição forçam uma varredura em leque (fan-out) por todas as partições físicas, consumindo ordens de grandeza a mais em Request Units (RU/s).
+- **Portas do Direct Mode.** O .NET pode usar TCP `10000–20000` com endpoints públicos ou de serviço; private endpoints podem usar outra faixa. Se a rede só permite `443`, Gateway usa HTTPS para NoSQL.
+- **Leitura pontual e consulta.** Uma consulta sem a chave pode se espalhar por várias partições, dependendo dos filtros. Compare RUs por operação para medir o efeito no seu caso.

@@ -17,7 +17,7 @@ related_links:
     url: https://learn.microsoft.com/en-us/azure/container-apps/sessions
     type: learn
   - label: Executar código em sessões
-    url: https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter
+    url: https://learn.microsoft.com/en-us/rest/api/data-plane/containerapps/code-execution/execute?view=rest-data-plane-containerapps-2025-10-02-preview
     type: learn
 questions:
   - id: q-aca-sessoes-dinamicas-01
@@ -59,7 +59,7 @@ questions:
 
 # Sessões dinâmicas para executar código gerado por IA
 
-Um agente de IA pode gerar Python para analisar um arquivo. Dynamic Sessions executa esse código em um ambiente isolado, sem colocá-lo dentro do processo da API. Um pool mantém sessões disponíveis; cada sessão guarda estado temporário de uma interação.
+O assistente recebe uma planilha de teste e precisa calcular uma soma. Se ele gerar Python para essa tarefa, o serviço pode executá-lo em uma sessão isolada do processo da API. Um pool mantém sessões disponíveis. Reutilizar a mesma sessão durante uma interação permite recuperar arquivos e variáveis temporários.
 
 ## Pool, sessão e fronteira de confiança
 
@@ -85,12 +85,15 @@ response = requests.post(
     f"{endpoint}/executions",
     params={"api-version": "2025-10-02-preview", "identifier": session_id},
     headers={"Authorization": f"Bearer {token.token}"},
-    json={"properties": {"codeInputType": "inline", "executionType": "synchronous",
-                         "code": "print(sum([1, 2, 3]))"}},
-    timeout=60,
+    json={"codeInputType": "Inline", "executionType": "Synchronous",
+          "code": "print(sum([1, 2, 3]))", "timeoutInSeconds": 15},
+    timeout=30,
 )
 response.raise_for_status()
-print(response.json())
+execution = response.json()
+if execution["status"] != "Succeeded":
+    raise RuntimeError(f"Execução: {execution['status']}")
+print(execution["result"]["stdout"].strip())
 ```
 
 ```csharp
@@ -98,23 +101,27 @@ using Azure.Core;
 using Azure.Identity;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 string endpoint = Environment.GetEnvironmentVariable("SESSION_POOL_ENDPOINT")!.TrimEnd('/');
 string sessionId = Guid.NewGuid().ToString();
 var credential = new DefaultAzureCredential();
 AccessToken token = await credential.GetTokenAsync(
     new TokenRequestContext(new[] { "https://dynamicsessions.io/.default" }));
-using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 using var response = await http.PostAsJsonAsync(
     $"{endpoint}/executions?api-version=2025-10-02-preview&identifier={sessionId}",
-    new { properties = new { codeInputType = "inline", executionType = "synchronous",
-        code = "print(sum([1, 2, 3]))" } });
+    new { codeInputType = "Inline", executionType = "Synchronous",
+        code = "print(sum([1, 2, 3]))", timeoutInSeconds = 15 });
 response.EnsureSuccessStatusCode();
-Console.WriteLine(await response.Content.ReadAsStringAsync());
+using var execution = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+string? status = execution.RootElement.GetProperty("status").GetString();
+if (status != "Succeeded") throw new InvalidOperationException($"Execução: {status}");
+Console.WriteLine(execution.RootElement.GetProperty("result").GetProperty("stdout").GetString()?.Trim());
 ```
 
-Em produção, o backend mantém o mapeamento de identificadores e renova tokens; não entrega um token amplo ao navegador. Analise também o resultado de execução retornado: uma resposta HTTP bem-sucedida pode conter erro do código executado.
+As duas versões devem imprimir `6`. Confira o status da execução além do status HTTP. Em produção, mantenha o vínculo entre sessão e usuário no backend e autorize cada operação por esse vínculo.
 
 <details>
 <summary>Checagem Rápida: Uma sessão pode armazenar o único exemplar de um relatório?</summary>

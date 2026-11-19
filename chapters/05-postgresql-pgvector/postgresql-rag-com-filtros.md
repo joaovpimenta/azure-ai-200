@@ -58,7 +58,7 @@ questions:
 
 # Busca vetorial e RAG com filtros de metadados
 
-RAG é a técnica de buscar informação antes de pedir ao modelo que responda. A aplicação transforma a pergunta em embedding, recupera trechos de documentos (chunks) e os envia como contexto. Só envie conteúdo que o usuário tenha permissão para acessar.
+Dois clientes têm manuais de cobrança quase idênticos. O vizinho mais próximo da pergunta pertence ao cliente errado. No ==RAG==, a aplicação busca trechos antes de pedir uma resposta ao modelo. A busca precisa limitar os trechos ao cliente autorizado e à versão do embedding usada na consulta.
 
 ## Contrato da recuperação
 
@@ -71,13 +71,14 @@ A consulta deve combinar ==metadata filtering== e distância. Em índices aproxi
 Os trechos pressupõem conexões abertas e autenticadas, tabela `rag_chunks` com `tenant_id uuid`, `model_version text`, `content text` e `embedding vector(3)`. Os vetores pequenos são didáticos. Em produção, serialize somente floats finitos e valide a dimensão antes da consulta.
 
 ```python
+import math
 import uuid
 from typing import Any
 
 
-def retrieve(conn: Any, tenant_id: uuid.UUID, vector: list[float]) -> list[tuple]:
-    if len(vector) != 3:
-        raise ValueError("Dimensão incompatível")
+def retrieve(conn: Any, tenant_id: uuid.UUID, vector: list[float]) -> list[str]:
+    if len(vector) != 3 or not all(math.isfinite(value) for value in vector):
+        raise ValueError("Esperado um vetor de três componentes finitos")
     literal = "[" + ",".join(str(float(x)) for x in vector) + "]"
     with conn.cursor() as cur:
         cur.execute(
@@ -86,17 +87,19 @@ def retrieve(conn: Any, tenant_id: uuid.UUID, vector: list[float]) -> list[tuple
                ORDER BY embedding <=> %s::vector LIMIT %s""",
             (tenant_id, "modelo-v1", literal, 5),
         )
-        return cur.fetchall()
+        return [content for (content,) in cur.fetchall()]
 ```
 
 ```csharp
 using System.Globalization;
+using System.Linq;
 using Npgsql;
 
 static async Task<List<string>> RetrieveAsync(
     NpgsqlConnection conn, Guid tenantId, float[] vector, CancellationToken ct)
 {
-    if (vector.Length != 3) throw new ArgumentException("Dimensão incompatível");
+    if (vector.Length != 3 || vector.Any(value => !float.IsFinite(value)))
+        throw new ArgumentException("Esperado um vetor de três componentes finitos");
     string literal = "[" + string.Join(",", vector.Select(x => x.ToString(CultureInfo.InvariantCulture))) + "]";
     await using var cmd = new NpgsqlCommand(
         "SELECT content FROM rag_chunks WHERE tenant_id=$1 AND model_version=$2 " +
@@ -113,6 +116,8 @@ static async Task<List<string>> RetrieveAsync(
 ```
 
 O literal vetorial continua sendo um parâmetro, não parte interpolada do SQL. Ajuste o índice ao operador `<=>` e mantenha índice relacional útil para os filtros.
+
+Use três trechos de teste: um do cliente autorizado com `modelo-v1`, outro do mesmo cliente com `modelo-v2` e um terceiro de outro cliente com o mesmo vetor da pergunta. A busca deve devolver somente o trecho autorizado com `modelo-v1`, mesmo se o terceiro for mais próximo.
 
 ## Qualidade e isolamento
 

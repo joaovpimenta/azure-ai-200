@@ -62,7 +62,7 @@ questions:
 
 # Event Grid: tópicos, eventos personalizados, filtros e retry/dead-letter
 
-Event Grid distribui notificações de acontecimentos, como a criação de um arquivo. Uma assinatura escolhe quais eventos receber e para onde enviá-los. Para trabalho demorado, a notificação pode iniciar um processamento em fila.
+Quando um manual é publicado, o Event Grid pode avisar o indexador e o serviço de auditoria. Cada assinatura escolhe quais acontecimentos quer receber. O assinante pode enfileirar o trabalho demorado e confirmar a entrega assim que tiver registrado o trabalho de forma durável.
 
 ## Publicação, assinatura e filtro
 
@@ -103,7 +103,7 @@ var notification = new EventGridEvent(
 await client.SendEventAsync(notification);
 ```
 
-O corpo deve conter identificadores e informações suficientes para buscar o recurso, sem expor segredos. Confirme que o schema configurado no tópico corresponde ao objeto publicado.
+Cadastre uma assinatura de laboratório para o tipo `Ai200.DocumentReady` e prefixo `documents/tenant-a/`. O evento dos exemplos deve chegar ao destino. Repita com `documents/tenant-b/` e verifique que essa assinatura não o recebe. Use IDs e versões que permitam achar o manual sem enviar o conteúdo ou credenciais no evento.
 
 ## Entrega, validação e recuperação
 

@@ -11,6 +11,7 @@ import {
   PROGRESSION_RANKS,
   PROGRESSION_WEIGHTS,
   createDefaultProgress,
+  completeConceptPractice,
   validateProgressSchema,
   calculateReadiness,
   mergeProgress,
@@ -19,6 +20,23 @@ import {
 } from '../web/progress-core.js';
 
 describe('Progress Core Engine (web/progress-core.js)', () => {
+  test('practice completion preserves checks, starts unused concepts, and survives a higher-rank import', () => {
+    const timestamp = '2026-11-18T14:00:00.000Z';
+    const state = createDefaultProgress();
+    state.conceptProgress['reviewed'] = { state: 'review', checks: { 0: { rating: 'hard' } } };
+    const finished = completeConceptPractice(state, 'reviewed', timestamp);
+    assert.equal(finished.conceptProgress.reviewed.state, 'review');
+    assert.deepEqual(finished.conceptProgress.reviewed.checks, state.conceptProgress.reviewed.checks);
+    assert.equal(state.conceptProgress.reviewed.practiceCompletedAt, undefined);
+    assert.equal(completeConceptPractice(finished, 'new-article', timestamp).conceptProgress['new-article'].state, 'studying');
+
+    const imported = createDefaultProgress();
+    imported.conceptProgress['reviewed'] = { state: 'mastered' };
+    for (const merged of [mergeProgress(finished, imported), mergeProgress(imported, finished)]) {
+      assert.equal(merged.conceptProgress.reviewed.state, 'mastered');
+      assert.equal(merged.conceptProgress.reviewed.practiceCompletedAt, timestamp);
+    }
+  });
   test('constants and schema defaults conform to specifications', () => {
     assert.equal(STORAGE_KEY, 'azure_ai_200_progress_v1');
     assert.equal(SCHEMA_VERSION, 1);

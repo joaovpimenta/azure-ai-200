@@ -64,7 +64,7 @@ questions:
 
 # OpenTelemetry e Azure Monitor Distro: traces, métricas e logs
 
-OpenTelemetry ajuda a acompanhar uma operação entre serviços. Um trace representa o caminho completo; spans representam etapas, como buscar documentos e chamar o modelo. Isso mostra onde a aplicação gastou tempo ou falhou.
+O assistente começou a demorar. A duração total confirma o problema, mas ainda falta saber se o tempo foi gasto na busca de manuais ou na geração da resposta. Com OpenTelemetry, um ==trace== agrupa o caminho da requisição. Cada ==span== registra uma etapa com início, fim e contexto. Abra o trace de uma resposta lenta e compare a duração dos spans.
 
 ## Sinais e propagação
 
@@ -72,9 +72,9 @@ OpenTelemetry ajuda a acompanhar uma operação entre serviços. Um trace repres
 
 | Sinal | Pergunta que responde |
 |---|---|
-| Trace/span | Onde uma operação gastou tempo e falhou? |
-| Métrica | Qual o comportamento agregado ao longo do tempo? |
-| Log | Qual evento e contexto específico ocorreu? |
+| Trace/span | Os 900 ms dessa requisição vieram principalmente da busca ou da geração? |
+| Métrica | O p95 de latência subiu depois da implantação? |
+| Log | Qual erro a busca registrou nessa requisição? |
 
 Instrumentação automática cobre bibliotecas suportadas, não toda função da aplicação. Spans personalizados ajudam a separar recuperação, reranking e geração. Evite criar spans por token ou atributos com muitos valores distintos (alta cardinalidade) sem necessidade.
 
@@ -116,7 +116,7 @@ app.MapGet("/health", () => {
 app.Run();
 ```
 
-O worker Python do exemplo é pontual; um serviço persistente deve deixar o provider ativo e encerrá-lo de forma graciosa para exportar lotes pendentes. No .NET, a origem personalizada precisa estar registrada com `AddSource` para gerar spans exportáveis.
+Execute o script Python ou inicie a API .NET e chame `/health` na URL local que ela anunciar. Procure `rag.retrieve` ou `rag.check` no Application Insights. No .NET, localize `rag.check` dentro da transação de `/health`. Se a requisição chegou mas o span personalizado sumiu, compare o nome em `AddSource` com o nome em `ActivitySource` e confira a amostragem. Em um worker persistente, mantenha o provedor ativo e encerre-o de forma graciosa para enviar a telemetria pendente.
 
 ## Qualidade e privacidade dos dados
 
@@ -125,9 +125,9 @@ O worker Python do exemplo é pontual; um serviço persistente deve deixar o pro
 Não grave credenciais, tokens, documentos ou prompts completos como atributos por padrão. Use nomes estáveis para operações e tags de baixa cardinalidade, como versão de deploy e tipo de operação. A telemetria também precisa de política de acesso e retenção.
 
 <details>
-<summary>Checagem Rápida: Um span aparece só porque ActivitySource foi instanciado?</summary>
+<summary>Checagem rápida · Duas APIs mostram o nome rag.retrieve, mas aparecem em traces separados. O que falta conferir?</summary>
 
-Não. A origem precisa ser ouvida pela configuração OpenTelemetry. Sem listener compatível, `StartActivity` pode retornar null.
+Confira se as duas etapas têm o mesmo `TraceId` e se o contexto chegou à segunda API. Usar o mesmo nome para um span ajuda nas buscas, mas a relação entre as etapas depende da propagação do contexto.
 
 </details>
 

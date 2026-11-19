@@ -9,7 +9,7 @@ Este documento estabelece as diretrizes canônicas e obrigatórias de engenharia
 A plataforma de estudos Azure AI-200 foi projetada sobre três pilares de ciências cognitivas comprovados empiricamente para maximizar a memorização e recuperação de informações complexas sob pressão de exame:
 
 1. **Efeito de Testagem (Retrieval Practice / Active Recall)**:
-   - Estudos seminais (Roediger & Karpicke, 2006) comprovam que o esforço deliberado de recuperar uma informação da memória consolida sinapses de forma significativamente superior à releitura passiva.
+   - Dê ao leitor uma pergunta que possa tentar responder de memória antes de ver a explicação. Use a justificativa para mostrar como reconhecer a mesma decisão em outro caso.
    - Todo conceito deve transformar o leitor de consumidor passivo em participante ativo através de **lacunas ocultáveis** (`==cloze==`), **checagens rápidas** (`<details>`) e **questões formativas** integradas.
 2. **Efeito de Espaçamento e Interleaving**:
    - Conceitos fundamentais de governança, escalabilidade, segurança e mensageria são revisitados de forma transversal ao longo dos capítulos, evitando o aprendizado em silos isolados.
@@ -66,7 +66,7 @@ Todo arquivo conceitual (`.md`) deve conter obrigatoriamente a seção `## Pegad
 ### Padrões Canônicos de Pegadinhas no Exame AI-200:
 1. **Defaults Perigosos**:
    - Exemplo: No SDK .NET do Cosmos DB, o modo default é `ConnectionMode.Direct`, que requer tráfego TCP nas portas 10000-20000. Se a VNet bloquear essa faixa, a conexão falhará, sendo necessário alternar para `ConnectionMode.Gateway` (HTTPS 443).
-   - Exemplo: O nível de consistência padrão da conta Cosmos DB é `Session`, mas clientes externos fora da sessão só leem dados sob consistência eventual a menos que passem o Session Token explicitamente.
+   - Exemplo: Ao gravar com um cliente e ler com outro no Cosmos DB, encaminhe o token de sessão se precisar preservar a garantia de leitura das próprias escritas.
 2. **Falsos Amigos de RBAC (Control Plane vs Data Plane)**:
    - Exemplo: Conceder a função `Key Vault Contributor` ou `Contributor` permite gerenciar o cofre, mas **NÃO** concede acesso para ler o valor dos segredos! Para leitura de segredos em tempo de execução, a identidade precisa da função `Key Vault Secrets User`.
 3. **Imutabilidade e Restrições de Recursos**:
@@ -83,10 +83,11 @@ Apresente cada pegadinha com a estrutura:
 
 ## 5. Paridade Dual SDK (Python e C#)
 
-O exame AI-200 exige proficiência no desenvolvimento de soluções de nuvem para IA utilizando tanto o ecossistema Python quanto o ecossistema .NET (C#).
+O guia do exame cita proficiência em Python. O repositório também oferece exemplos em C# para quem usa .NET. Compare a mesma operação nos dois SDKs e explicite quando eles têm capacidades diferentes.
 
 ### Regras de Código:
 1. **Adjacência de Blocos**: Todo bloco de implementação prática em Python (` ```python `) deve ser imediatamente sucedido pelo bloco correspondente em C# (` ```csharp `). O compilador static do hub detecta essa adjacência e cria abas sincronizadas (`.code-tabs`).
+   - Antes dos blocos, informe recursos, permissões e dados necessários. Depois dos blocos, descreva a saída esperada e uma pequena variação que comprove o conceito.
 2. **Versões e Bibliotecas Canônicas**:
    - **Python**: Versão 3.12+, uso de tipagem estrita com type hints (`from typing import Optional, List`), bibliotecas oficiais da Microsoft (`azure-cosmos >= 4.7.0`, `azure-identity >= 1.16.0`, `azure-storage-blob`).
    - **C#**: Versão .NET 8 / C# 12, padrões assíncronos (`async Task`, `await`, `CancellationToken`), bibliotecas oficiais NuGet (`Microsoft.Azure.Cosmos >= 3.39.0`, `Azure.Identity >= 1.11.0`).

@@ -13,8 +13,11 @@ import {
   evaluateAnswer,
   filterQuestions,
   calculateQuizScore,
+  createOrderingStart,
+  examSecondsLeft,
   extractMistakes,
-  shuffleArray
+  shuffleArray,
+  shuffleExamQuestions
 } from '../web/quiz-core.js';
 
 describe('Quiz Core Engine (web/quiz-core.js)', () => {
@@ -359,5 +362,31 @@ describe('Quiz Core Engine (web/quiz-core.js)', () => {
       assert.notEqual(orig, shuffled); // Not same instance
       assert.deepEqual([...shuffled].sort(), orig);
     });
+  });
+
+  test('an ordering attempt never starts with the solution already arranged', t => {
+    t.mock.method(Math, 'random', () => 0.999);
+    const question = { items: [{ id: 'first', order: 1 }, { order: 2 }, { id: 'last', order: 3 }] };
+    const start = createOrderingStart(question.items);
+    assert.deepEqual(new Set(start), new Set(['first', 'item_2', 'last']));
+    assert.equal(evaluateOrdering(question, start).isCorrect, false);
+    assert.equal(evaluateOrdering(question, ['first', 'item_2', 'last']).isCorrect, true);
+  });
+
+  test('mock timing uses elapsed clock time and stops at zero', () => {
+    const deadline = 120 * 60_000;
+    assert.equal(examSecondsLeft(deadline, 0), 7200);
+    assert.equal(examSecondsLeft(deadline, 30_250), 7170);
+    assert.equal(examSecondsLeft(deadline, deadline + 2000), 0);
+  });
+
+  test('the mock shuffles case options and code slots without altering the source or the answer', t => {
+    t.mock.method(Math, 'random', () => 0);
+    const options = [{ text: 'correct', correct: true }, { text: 'incorrect', correct: false }];
+    const questions = [{ id: 'case', questions: [{ id: 'child', options }] }, { id: 'code', slots: [{ id: 'slot', options }] }];
+    const [code, caseStudy] = shuffleExamQuestions(questions);
+    assert.equal(caseStudy.questions[0].options[1].correct, true);
+    assert.equal(code.slots[0].options[1].correct, true);
+    assert.equal(questions[0].questions[0].options[0].correct, true);
   });
 });

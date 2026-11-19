@@ -57,7 +57,7 @@ questions:
 
 # ACR Tasks: builds rápidos, multi-step e gatilhos
 
-ACR Tasks constrói imagens no Azure a partir do Dockerfile, o arquivo que descreve como montar o contêiner. Você pode iniciar uma execução manual ou configurar gatilhos, como uma alteração de código. Construir e publicar a imagem não atualiza a aplicação automaticamente.
+Você tem o `Dockerfile` do indexador e quer produzir uma imagem mesmo em uma máquina sem Docker. O ACR Tasks envia o contexto de build e monta a imagem no Azure. Escolha entre disparar um build agora e manter uma tarefa que reage a mudanças.
 
 ## Build rápido e tarefa persistente
 
@@ -88,7 +88,7 @@ az acr build --registry meuregistro \
   --image inferencia:2026.11.04-1 --file Dockerfile .
 ```
 
-Não é necessário executar o daemon Docker local para esse build. Um `.dockerignore` deve excluir segredos, ambientes virtuais, diretórios de saída e arquivos desnecessários antes do envio do contexto.
+Ao terminar, procure `inferencia:2026.11.04-1` no registro e confira o digest do artefato. Use um `.dockerignore` para excluir segredos, ambientes virtuais e arquivos de saída antes de enviar o contexto. O deploy é uma etapa posterior que deve usar o digest verificado.
 
 Uma tarefa multi-step pode compilar e depois publicar. Salve o trecho como `task.yaml`; as variáveis entre chaves são substituídas pelo ACR Tasks.
 

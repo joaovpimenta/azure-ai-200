@@ -60,7 +60,7 @@ questions:
 
 # Segredos, variáveis de ambiente e autenticação em registro privado
 
-Uma aplicação pode precisar baixar uma imagem privada do ACR e ler um segredo no Key Vault. São dois acessos separados. Identidade gerenciada identifica a aplicação sem uma senha no código, mas cada serviço ainda precisa conceder permissão.
+O Container App conseguiu baixar a imagem do assistente, mas a referência ao segredo falhou. Antes de mudar papéis, identifique qual chamada falhou. O pull vai ao ACR. A resolução do segredo vai ao Key Vault. Cada serviço avalia as permissões da identidade indicada para aquela chamada.
 
 ## Identidade, registro e segredo
 
@@ -97,7 +97,7 @@ O trecho é parte de um contêiner, não um manifesto completo. Configurações 
 
 ## Rotação e diagnóstico
 
-Segredos pertencem à aplicação, não a uma revisão específica. Atualizar um secret não produz automaticamente nova revisão. Para secrets inseridos diretamente, reinicie revisões consumidoras ou publique nova revisão. Referências ao Key Vault sem versão têm comportamento de atualização gerenciado; valide o prazo documentado e a renovação das réplicas antes de revogar a versão anterior.
+Segredos pertencem à aplicação. A referência em `API_KEY` pertence ao template da revisão. Se mudar um secret inserido diretamente, reinicie as revisões que o usam ou publique outra revisão. Para uma referência ao Key Vault sem versão usada em variável de ambiente, a plataforma busca versões novas em até 30 minutos e reinicia as revisões ativas que usam a referência. Confirme a nova versão com uma chamada de teste antes de revogar a credencial antiga; o valor do segredo dispensa impressão.
 
 <details>
 <summary>Checagem Rápida: A mesma identidade pode acessar ACR e Key Vault?</summary>

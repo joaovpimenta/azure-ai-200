@@ -58,7 +58,7 @@ questions:
 
 # Revisões, modos de revisão e divisão de tráfego
 
-Uma revisão guarda uma versão executável da aplicação. Você pode testar uma nova versão com parte do tráfego e voltar à anterior se surgirem erros. Essa volta é o rollback; ela não desfaz alterações feitas no banco.
+A nova API do assistente usa uma recuperação diferente. Você quer medir o impacto com uma parte das requisições antes de trocar a versão para todos. Cada revisão guarda uma versão executável. O modo de revisão determina se você pode manter duas versões disponíveis para esse teste.
 
 ## Revisão e configuração da aplicação
 
@@ -89,7 +89,7 @@ As porcentagens devem somar ==100==. Uma regra que aponta para `latestRevision` 
 
 ## Critérios de decisão
 
-Compare taxa de falhas, p95 (tempo abaixo do qual ficam 95% das respostas), custo por operação e qualidade das respostas. Um retorno HTTP 200 não comprova qualidade do modelo. Se houver rsaída de redeão, direcione 100% à revisão estável e confirme a recuperação antes de desativar a candidata. Retenha imagens e configurações necessárias ao rollback.
+Teste a URL com label antes de atribuir os 10%. Compare candidata e estável usando taxa de falhas, p95 (tempo abaixo do qual ficam 95% das respostas), custo e qualidade em perguntas de referência. Se houver regressão, direcione 100% à estável e confirme a recuperação antes de desativar a candidata. A reversão do tráfego não altera o que já foi gravado no banco.
 
 <details>
 <summary>Checagem Rápida: Atualizar o valor de um secret reinicia todas as revisões?</summary>

@@ -97,7 +97,7 @@ questions:
 
 # Change Feed Processor: alterações, leases e reprocessamento
 
-Change Feed permite ler mudanças nos documentos sem consultar repetidamente a tabela inteira. Um worker pode gerar embeddings após a gravação, deixando a chamada do usuário mais curta. A leitura do feed e o controle do progresso também consomem RUs.
+Ao receber um manual, a API do assistente pode salvar o documento e confirmar o envio antes de gerar o embedding. Um worker lê as mudanças com o Change Feed. Acompanhe onde ele registra o progresso e o que acontece se falhar entre gravar o embedding e atualizar o checkpoint.
 
 ## Como o processador trabalha
 
@@ -130,34 +130,23 @@ Marque o item com `isDeleted: true` e deixe o consumidor remover o dado derivado
 
 ## Exemplos de consumo
 
-Provisione `KnowledgeBase/Documents` e `KnowledgeBase/leases` (chave `/id`). Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT`; autorize leitura do feed e acesso de escrita aos leases para o processador.
+Provisione `KnowledgeBase/Documents` com chave `/tenantId` e `KnowledgeBase/leases` com chave `/id`. Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT`. Autorize a leitura do feed nos dois exemplos e a escrita nos leases para o processador .NET.
 
 Python abaixo faz uma leitura pelo modelo pull: não cria um CFP distribuído nem mantém monitoramento contínuo. Para um serviço, implemente repetição e checkpoints ou use um trigger de Cosmos DB em Functions. O exemplo C# usa CFP; os dois apenas demonstram recebimento, sem chamar um modelo de IA.
 
 ```python
+import os
 from azure.identity import DefaultAzureCredential
 from azure.cosmos import CosmosClient
 
-import os
-endpoint = os.environ["COSMOS_ENDPOINT"]
-client = CosmosClient(url=endpoint, credential=DefaultAzureCredential())
-
-database = client.get_database_client("KnowledgeBase")
-container = database.get_container_client("Documents")
-
-# Consumo do Change Feed via Pull Model em Python
-# query_items_change_feed monitora alterações a partir do início ou de um token prévio
-change_feed_iterator = container.query_items_change_feed(
-    partition_key_range_id=None, # Sem restringir a uma faixa específica
-    is_start_from_beginning=True
-)
-
-print("Iniciando escuta do Change Feed (Python Pull Model)...")
-for item in change_feed_iterator:
-    # Dispara geração de embedding para novo documento
-    doc_id = item.get("id")
-    content = item.get("content", "")
-    print(f"Documento a processar: {doc_id}")
+with DefaultAzureCredential() as credential:
+    with CosmosClient(os.environ["COSMOS_ENDPOINT"], credential) as client:
+        container = client.get_database_client("KnowledgeBase").get_container_client("Documents")
+        changes = container.query_items_change_feed(
+            start_time="Beginning", partition_key="tenant-a"
+        )
+        for item in changes:
+            print(f"Documento a processar: {item['id']}")
 ```
 
 ```csharp
@@ -168,9 +157,8 @@ using System.Threading.Tasks;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 
-string import os
-endpoint = os.environ["COSMOS_ENDPOINT"];
-CosmosClient client = new CosmosClient(endpoint, new DefaultAzureCredential());
+string endpoint = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!;
+using CosmosClient client = new CosmosClient(endpoint, new DefaultAzureCredential());
 
 Container monitoredContainer = client.GetContainer("KnowledgeBase", "Documents");
 Container leasesContainer = client.GetContainer("KnowledgeBase", "leases");
@@ -185,9 +173,8 @@ async Task ProcessChangesAsync(
     foreach (var item in changes)
     {
         string id = item.id;
-        string text = item.content;
-        // Chamada assíncrona ao modelo de embeddings do Azure OpenAI
-        Console.WriteLine($"Gerando embeddings para documento {id}...");
+        // Em um serviço real, aguarde aqui a gravação durável do resultado.
+        Console.WriteLine($"Documento a processar: {id}");
     }
     await Task.CompletedTask;
 }
@@ -208,6 +195,8 @@ Console.WriteLine("Change Feed Processor ativo e consumindo alterações...");
 Console.ReadLine();
 await processor.StopAsync();
 ```
+
+Grave um item como `{"id":"manual-1","tenantId":"tenant-a","content":"Manual de cobrança"}`. O Python lê as mudanças dessa partição a partir do início. O .NET lê pelo processador em execução e confirma o lote após o delegate terminar. Verifique o ID nos logs. Uma reinicialização do mesmo processador usa os checkpoints já gravados.
 
 ## Falhas e retomada
 

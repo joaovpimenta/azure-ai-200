@@ -113,7 +113,7 @@ questions:
 
 # Embeddings, política vetorial e VectorDistance()
 
-Um embedding é uma lista de números que representa conteúdo. Cosmos DB pode guardar texto, metadados e esse vetor no mesmo documento. A busca vetorial encontra documentos próximos da pergunta; no RAG, eles servem de contexto para o modelo responder.
+O assistente recebe uma pergunta sobre cobrança. Ele precisa achar os cinco trechos mais próximos dentro dessa categoria e apenas entre os manuais do cliente autorizado. Um ==embedding== é a lista de números que representa o significado aproximado de um trecho ou da pergunta. O Cosmos DB guarda texto, metadados e vetor no mesmo documento. No RAG, o assistente entrega os trechos recuperados ao modelo como contexto para a resposta.
 
 ## Duas configurações diferentes
 
@@ -149,11 +149,11 @@ Esse fragmento configura os vetores; o contêiner ainda precisa de nome e chave,
 | `quantizedFlat` | Compara vetores comprimidos; pode perder precisão | 4.096 |
 | `diskANN` | Busca aproximada por grafo, indicada para maior escala | 4.096 |
 
-Recall mede quantos vizinhos esperados a busca encontra. Índices aproximados não garantem recall fixo nem latência fixa. `quantizedFlat` e `diskANN` precisam de pelo menos 1.000 vetores indexados; abaixo disso, a busca pode usar varredura completa.
+Imagine que a busca exata encontra cinco vizinhos e a busca aproximada recupera quatro deles. Nesse teste, o `recall@5` é 4/5. Compare esse resultado com latência e RUs na carga real. Com menos de 1.000 vetores inseridos, `quantizedFlat` e `diskANN` recorrem a uma varredura completa, então um contêiner de laboratório pequeno ajuda a validar a consulta, mas não representa o desempenho do índice em produção.
 
 ## Consulta com Python e C#
 
-Pré-requisitos: contêiner `KnowledgeBase/DocumentEmbeddings` configurado como acima, dados com vetores de 1.536 dimensões e identidade com `Cosmos DB Built-in Data Reader`. Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT` e salve o embedding real da pergunta como array JSON em `query-vector.json`.
+Prepare `KnowledgeBase/DocumentEmbeddings` com chave `/tenantId`, a política acima e documentos com `id`, `tenantId`, `category`, `text` e `embedding`. Use vetores de 1.536 dimensões criados pelo mesmo modelo. Conceda `Cosmos DB Built-in Data Reader` à identidade que consulta. Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT` e salve o embedding da pergunta como array JSON em `query-vector.json`.
 
 ```python
 import json
@@ -170,10 +170,11 @@ with CosmosClient(os.environ["COSMOS_ENDPOINT"], DefaultAzureCredential()) as cl
     items = container.query_items(
         query="""SELECT TOP 5 c.id, c.text,
                  VectorDistance(c.embedding, @vector) AS distance
-                 FROM c WHERE c.tenantId = @tenant
+                 FROM c WHERE c.tenantId = @tenant AND c.category = @category
                  ORDER BY VectorDistance(c.embedding, @vector)""",
         parameters=[{"name": "@vector", "value": vector},
-                    {"name": "@tenant", "value": "tenant-contoso"}],
+                    {"name": "@tenant", "value": "tenant-contoso"},
+                    {"name": "@category", "value": "cobranca"}],
         partition_key="tenant-contoso",
     )
     for item in items:
@@ -181,6 +182,8 @@ with CosmosClient(os.environ["COSMOS_ENDPOINT"], DefaultAzureCredential()) as cl
 ```
 
 ```csharp
+using System;
+using System.IO;
 using System.Text.Json;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
@@ -193,8 +196,11 @@ using var client = new CosmosClient(
 var container = client.GetContainer("KnowledgeBase", "DocumentEmbeddings");
 var query = new QueryDefinition(
     "SELECT TOP 5 c.id, c.text, VectorDistance(c.embedding, @vector) AS distance " +
-    "FROM c WHERE c.tenantId = @tenant ORDER BY VectorDistance(c.embedding, @vector)")
-    .WithParameter("@vector", vector).WithParameter("@tenant", "tenant-contoso");
+    "FROM c WHERE c.tenantId = @tenant AND c.category = @category " +
+    "ORDER BY VectorDistance(c.embedding, @vector)")
+    .WithParameter("@vector", vector)
+    .WithParameter("@tenant", "tenant-contoso")
+    .WithParameter("@category", "cobranca");
 using var iterator = container.GetItemQueryIterator<dynamic>(query,
     requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey("tenant-contoso") });
 while (iterator.HasMoreResults)
@@ -202,7 +208,7 @@ while (iterator.HasMoreResults)
         Console.WriteLine($"{item.id}: {item.distance}");
 ```
 
-O cliente fixo é didático; em produção, derive `tenantId` da autorização. Com distância cosseno, menor valor significa maior proximidade. `WHERE` restringe documentos elegíveis; não presuma uma ordem física fixa de execução dos filtros.
+O resultado traz até cinco IDs, começando pelos que têm menor distância cosseno. Troque `cobranca` por uma categoria sem documentos para conferir o efeito do filtro. Em produção, derive `tenantId` da autorização da chamada. O `WHERE` restringe os documentos elegíveis sem determinar a ordem física das operações internas.
 
 <details>
 <summary>Checagem Rápida: Vetor com filtro de categoria já é busca híbrida?</summary>

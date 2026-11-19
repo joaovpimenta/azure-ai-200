@@ -64,7 +64,7 @@ questions:
 
 # Contêineres no App Service: porta, startup, app settings e Key Vault references
 
-O App Service executa aplicações web em contêiner sem exigir administração de Kubernetes. A imagem precisa iniciar um servidor HTTP que a plataforma consiga alcançar. Os primeiros pontos a conferir são endereço de escuta, porta e comando de inicialização.
+O contêiner da API funciona no seu computador, mas o App Service relata falha de inicialização. Separe o que a plataforma tenta alcançar do que o processo realmente abriu. Confira primeiro o comando de inicialização, o endereço de escuta e a porta.
 
 ## Porta, processo e modelo de configuração
 
@@ -94,6 +94,12 @@ az webapp config set --resource-group "$RG" --name "$APP" \
 ```
 
 Conceda à identidade da aplicação acesso de pull no ACR conforme seu modo de autorização. A referência à imagem e ao servidor de registro deve ser configurada separadamente. Valide a inicialização com logs de contêiner e uma requisição a um endpoint de saúde.
+
+| Observação nos logs | Verifique primeiro |
+|---|---|
+| A plataforma falha ao baixar a imagem | Referência da imagem, identidade de pull e acesso ao registro |
+| O contêiner inicia, mas só escuta em `127.0.0.1` | Binding do servidor em `0.0.0.0` |
+| O servidor escuta em `8000`, mas as sondas falham | Porta configurada no modelo de hospedagem e caminho HTTP da sonda |
 
 ## Segredos e implantação segura
 

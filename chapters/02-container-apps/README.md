@@ -5,8 +5,8 @@ Aprenda a executar APIs e processos em segundo plano no Container Apps. Comece p
 ## Roteiro de leitura
 
 1. [Ambientes e implantação no Container Apps (CLI e YAML)](./aca-ambientes-e-implantacao.md)
-2. [Revisões, modos de revisão e divisão de tráfego](./aca-revisoes-e-trafego.md)
-3. [Segredos, variáveis de ambiente e autenticação em registro privado](./aca-segredos-e-registro-privado.md)
+2. [Segredos, variáveis de ambiente e autenticação em registro privado](./aca-segredos-e-registro-privado.md)
+3. [Revisões, modos de revisão e divisão de tráfego](./aca-revisoes-e-trafego.md)
 4. [Regras de escala HTTP, TCP e KEDA (scale to zero)](./aca-escala-keda.md)
 5. [Sessões dinâmicas para executar código gerado por IA](./aca-sessoes-dinamicas.md)
 

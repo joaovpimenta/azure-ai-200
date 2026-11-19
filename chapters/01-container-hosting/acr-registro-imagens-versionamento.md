@@ -58,7 +58,7 @@ questions:
 
 # Azure Container Registry: registro, repositórios, tags e versionamento
 
-O Azure Container Registry (ACR) guarda imagens de contêiner: pacotes com a aplicação e suas dependências. O pipeline publica a imagem; a aplicação a baixa para executar. Para repetir uma implantação, identifique o conteúdo aprovado, não apenas seu nome.
+O pipeline aprovou a imagem do indexador pela manhã. À tarde, outro build atualizou a tag `:teste`. Qual imagem o ambiente vai baixar? O Azure Container Registry (ACR) guarda os pacotes com a aplicação e suas dependências. Fixar o digest permite implantar exatamente o conteúdo aprovado.
 
 ## Identidade da imagem e rastreabilidade
 
@@ -82,7 +82,7 @@ Não. A tag pode ter sido atualizada. Registre o digest produzido pelo build e u
 
 ## Publicar e inspecionar
 
-Pré-requisitos: Azure CLI autenticada, Docker em execução, ACR existente e permissão de push. Defina as variáveis com os valores do seu ambiente; `VERSION` deve corresponder ao commit ou release.
+Prepare um diretório com o `Dockerfile` da aplicação, Docker em execução e um ACR de laboratório. Use Azure CLI autenticada e uma identidade com permissão de publicação. Defina `VERSION` com o identificador do commit ou release.
 
 ```bash
 ACR_NAME="meuregistro"
@@ -95,7 +95,9 @@ az acr repository show --name "$ACR_NAME" \
   --image "inferencia:$VERSION" --query digest -o tsv
 ```
 
-A identidade do pipeline precisa publicar; a identidade da aplicação precisa apenas baixar. No modo RBAC tradicional, use `AcrPush` e ==AcrPull== respectivamente. Em registros habilitados para permissões de repositório com ABAC, selecione os papéis de repositório correspondentes, como `Container Registry Repository Reader`, conforme o modo do registro. Não habilite a conta de administrador para contornar uma atribuição ausente.
+A última linha devolve um valor como `sha256:…`. Combine-o com o servidor e repositório para obter `registro.azurecr.io/inferencia@sha256:…`. Guarde essa referência junto ao commit.
+
+A identidade do pipeline precisa publicar. A da aplicação só precisa baixar. No modo RBAC tradicional, use `AcrPush` e ==AcrPull==, respectivamente. No modo RBAC com permissões de repositório por ABAC, consulte os papéis `Container Registry Repository Writer` e `Container Registry Repository Reader`.
 
 ## Verificação e recuperação
 

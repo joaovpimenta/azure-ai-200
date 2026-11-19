@@ -61,7 +61,7 @@ questions:
 
 # pgvector: tipos vector/halfvec e índices HNSW vs IVFFlat
 
-Um embedding é uma lista de números que representa conteúdo. O pgvector permite guardar essas listas no PostgreSQL e procurar vetores próximos. Índices aproximados aceleram a busca, mas podem deixar de encontrar alguns resultados relevantes: essa cobertura é medida pelo recall.
+O assistente precisa encontrar trechos relacionados a cobrança. O pgvector acrescenta ao PostgreSQL um tipo para guardar embeddings e operadores para ordenar por distância. Comece com um conjunto pequeno para entender o resultado. Aumente a escala antes de comparar índices aproximados.
 
 ## Habilitar e escolher o tipo
 
@@ -77,16 +77,18 @@ CREATE TABLE chunks (
     embedding vector(3) NOT NULL
 );
 INSERT INTO chunks (content, embedding)
-VALUES ('Manual de instalação', '[0.1,0.2,0.3]');
+VALUES ('Manual de cobrança', '[1,0,0]'),
+       ('Manual de instalação', '[0,1,0]'),
+       ('Manual de planos e cobrança', '[1,1,0]');
 CREATE INDEX chunks_embedding_hnsw
     ON chunks USING hnsw (embedding vector_cosine_ops);
-SELECT id, content, embedding <=> '[0.2,0.1,0.4]'::vector AS distance
+SELECT id, content, embedding <=> '[1,0,0]'::vector AS distance
 FROM chunks
-ORDER BY embedding <=> '[0.2,0.1,0.4]'::vector
+ORDER BY embedding <=> '[1,0,0]'::vector
 LIMIT 5;
 ```
 
-Três dimensões tornam o exemplo legível; use a dimensão real do modelo. A consulta ordena pela distância crescente. Para cosseno, a similaridade pode ser calculada como `1 - distance`, mas o planejador precisa da forma adequada de `ORDER BY` para usar o índice.
+O manual de cobrança deve vir primeiro, com distância zero. O de instalação deve vir por último. Os vetores de três dimensões são ilustrativos. Em uma tabela tão pequena, o PostgreSQL pode preferir varredura sequencial mesmo com o índice criado. Use `EXPLAIN` com um volume representativo antes de avaliar HNSW ou IVFFlat.
 
 ## HNSW versus IVFFlat
 

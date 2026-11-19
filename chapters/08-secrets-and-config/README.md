@@ -4,7 +4,7 @@ Separe três perguntas: quem é a aplicação, o que ela pode acessar e quais va
 
 ## Roteiro de leitura
 
-1. [Managed identities, RBAC e DefaultAzureCredential](./identidade-gerenciada-defaultazurecredential.md)
+1. [Identidade gerenciada e acesso aos dados no Azure](./identidade-gerenciada-defaultazurecredential.md)
 2. [Key Vault: segredos, versões, rotação e soft delete](./key-vault-segredos-rotacao.md)
 3. [App Configuration: chaves, rótulos, refresh e feature flags](./app-configuration-chaves-rotulos-feature-flags.md)
 

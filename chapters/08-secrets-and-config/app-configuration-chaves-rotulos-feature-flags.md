@@ -65,7 +65,7 @@ questions:
 
 # App Configuration: chaves, rótulos, refresh e feature flags
 
-App Configuration centraliza parâmetros da aplicação, como quantos documentos buscar. Feature flags permitem ativar recursos sem publicar outra imagem. Use Key Vault para segredos e configure como cada processo deve buscar atualizações.
+O assistente precisa buscar cinco trechos em produção e dez em testes. Guarde os dois valores no App Configuration. Se quiser liberar o novo modo de busca para uma parte do público, use uma feature flag. Cada processo precisa escolher a configuração que lê e saber quando pedir alterações.
 
 ## Chaves, labels e flags
 
@@ -111,7 +111,7 @@ if (topK is < 1 or > 50) throw new InvalidOperationException("topK fora do inter
 Console.WriteLine(topK);
 ```
 
-Esses clientes fazem leitura pontual: eles não ativam atualização dinâmica por si só. Para isso, integre o provider apropriado à linguagem e ao host.
+Para testar a seleção, crie `rag:topK` com valor `5` em `prod` e `10` em `test`. Rode o exemplo com `prod` e depois com `test`. A saída deve mudar de `5` para `10`. Os dois clientes fazem leitura pontual. Para atualizar um serviço que continua em execução, integre o provedor de configuração apropriado à linguagem e ao host.
 
 ## Atualização e falhas
 

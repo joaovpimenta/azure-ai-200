@@ -60,7 +60,7 @@ questions:
 
 # Modelagem de esquemas, tipos de dados e índices B-tree/GIN
 
-No PostgreSQL, o esquema define tabelas, tipos e regras dos dados. Para uma aplicação de IA, guarde o texto, seu documento de origem e a versão do modelo que gerou o vetor. Isso permite atualizar dados sem perder a relação entre conteúdo e embedding.
+O assistente precisa responder a dois pedidos: listar os documentos que um cliente atualizou recentemente e achar os documentos marcados com uma determinada categoria. Decida quais campos precisam de coluna própria, quais podem ficar em `jsonb` e qual tipo de índice ajuda cada consulta.
 
 ## Escolher tipos e invariantes
 
@@ -99,6 +99,8 @@ No B-tree `(tenant_id, updated_at)`, o prefixo atende bem consultas por tenant. 
 ## Medir antes de adicionar índices
 
 Use `EXPLAIN (ANALYZE, BUFFERS)` em ambiente controlado para observar linhas estimadas, linhas reais e leituras. `ANALYZE` executa a consulta; tenha cuidado com instruções que alteram dados e com custo sobre produção. Mantenha estatísticas atualizadas após cargas grandes.
+
+Com dados de teste, compare o plano de uma consulta com `WHERE tenant_id = … ORDER BY updated_at DESC LIMIT 10` com o de `WHERE metadata @> '{"category":"manual"}'::jsonb`. Procure o índice escolhido para cada filtro. Se a tabela for pequena, o planejador pode preferir ler todos os registros.
 
 <details>
 <summary>Checagem Rápida: Um índice sempre reduz o custo total da aplicação?</summary>

@@ -64,7 +64,7 @@ questions:
 
 # Manifestos Kubernetes: Deployment, Service, ConfigMap e Secret
 
-O Azure Kubernetes Service (AKS) executa aplicações em um cluster, um conjunto de máquinas. Um Pod agrupa um ou mais contêineres. Manifestos YAML descrevem o estado desejado, como manter duas cópias da API; os controladores trabalham para manter esse estado.
+Você quer que a API tenha duas cópias em execução e um endereço estável, mesmo quando uma cópia for substituída. No AKS, um Pod agrupa um ou mais contêineres. Use o Deployment para controlar as cópias, e o Service para dar aos clientes um endereço que sobrevive à troca de Pods.
 
 ## Recursos e responsabilidades
 
@@ -79,7 +79,7 @@ Labels são etiquetas dos Pods; o selector escolhe quais etiquetas procurar. O =
 
 ## Manifesto mínimo verificável
 
-Salve como `api.yaml`, com contexto de um cluster de laboratório selecionado. A imagem pública é apenas uma demonstração HTTP; substitua por sua API e probes compatíveis. O namespace `ai200` deve existir.
+Salve como `api.yaml`, com o contexto de um cluster de laboratório selecionado. Os comandos abaixo criam o namespace `ai200` se você ainda não o tem. A imagem pública é uma demonstração HTTP para testar o manifesto.
 
 ```yaml
 apiVersion: v1
@@ -146,6 +146,8 @@ kubectl apply -f api.yaml
 kubectl rollout status deployment/api -n ai200
 kubectl get pods,svc,endpointslices -n ai200
 ```
+
+Confirme dois Pods prontos e endereços associados ao Service. Se houver Pods prontos mas o Service estiver vazio, compare `spec.selector` do Service com `spec.template.metadata.labels` do Deployment antes de alterar as portas.
 
 Use `secretKeyRef` ou volume para consumir um Secret já provisionado de forma segura. Para Key Vault, considere o Secrets Store CSI Driver e identidade da aplicação. Não versione secrets em texto ou base64. Variáveis de ambiente são capturadas ao iniciar o processo; atualizar um ConfigMap não altera o ambiente de Pods existentes.
 

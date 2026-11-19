@@ -59,7 +59,7 @@ questions:
 
 # Índices vetoriais (FT.CREATE, HNSW/FLAT) e cache semântico
 
-Cache semântico busca perguntas com significado parecido para reutilizar uma resposta. A aplicação compara embeddings, mas só aceita um resultado se ele estiver autorizado, atualizado e próximo o suficiente. O vizinho mais próximo pode não ser uma boa resposta.
+“Como vejo minha fatura?” e “Onde encontro minha cobrança?” podem levar à mesma resposta, mesmo com textos diferentes. O cache semântico propõe essa reutilização pela distância entre embeddings. Para aceitar a resposta, confira também o cliente autorizado, a versão e o limite de distância escolhido em avaliação.
 
 ## Índice e contrato binário
 
@@ -77,7 +77,7 @@ O número `6` conta os argumentos de configuração do vetor. Três dimensões s
 
 ## Armazenar e consultar
 
-Os trechos pressupõem clientes já autenticados como no artigo de cache e o índice criado acima. Os valores fixos de tenant/modelo demonstram filtros; em produção, derive-os da autorização e escape valores conforme a sintaxe TAG.
+Use clientes já autenticados como no artigo de cache e o índice criado acima. No Python, mantenha `decode_responses=False` quando ler campos vetoriais binários. Os valores fixos de cliente e modelo demonstram filtros. Em produção, derive o escopo da autorização e escape valores conforme a sintaxe TAG.
 
 ```python
 import struct
@@ -121,7 +121,7 @@ static async Task<RedisResult> SearchAsync(IDatabase db)
 }
 ```
 
-Use respostas binárias no cliente Python ao lidar com blobs vetoriais. O exemplo usa duas operações para hash e TTL; em produção, coordene-as com transação ou script quando a atomicidade for necessária.
+Busque pelo mesmo vetor gravado: a resposta da chave de teste deve aparecer com distância próxima de zero. Troque o filtro para um cliente sem dados e confirme que a mesma pergunta não reutiliza a resposta. O exemplo usa duas operações para hash e TTL; em produção, coordene-as com transação ou script quando precisar que sejam atômicas.
 
 <details>
 <summary>Checagem Rápida: O vizinho mais próximo é sempre reutilizável?</summary>

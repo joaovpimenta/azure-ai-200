@@ -70,7 +70,7 @@ questions:
 
 # Functions: triggers, bindings e modelo de programação
 
-Azure Functions executa código em resposta a um evento. O trigger é o gatilho, como uma chamada HTTP ou mensagem na fila. Bindings são integrações de entrada ou saída que reduzem o código necessário para ler ou gravar dados.
+O usuário pede reindexação por HTTP. A API precisa responder rápido e deixar a tarefa para outro processo. Em Azure Functions, o trigger HTTP inicia a função, e um binding de saída pode gravar a mensagem na fila. O consumidor é outra função, iniciada pelo trigger da fila.
 
 ## Modelo de execução
 
@@ -120,7 +120,7 @@ public class HealthFunction
 }
 ```
 
-O host, `host.json` e dependências vêm do projeto gerado; um arquivo isolado não configura todo o runtime. Localmente, Core Tools pode não exigir a chave como no Azure. Não conclua que o endpoint publicado está anônimo só porque funcionou sem chave no laboratório.
+Inicie `func start` no projeto gerado e chame o endereço anunciado, normalmente `http://localhost:7071/api/health`. Espere HTTP 200 com `{"status":"ok"}`. A configuração do host e os pacotes vêm do projeto. O Core Tools pode dispensar a chave localmente, enquanto o endpoint publicado com `AuthorizationLevel.Function` continua exigindo a credencial da função.
 
 ## API HTTP com output binding para fila
 
@@ -175,7 +175,7 @@ public class EnqueueFunction
 }
 ```
 
-O trigger recebe HTTP; o binding de saída grava a mensagem ao concluir a execução. Teste o POST e confira a mensagem na fila para validar configuração e autorização. O retorno 202 significa aceitação, não conclusão da reindexação. O consumidor deve persistir status e processar de forma idempotente; uma repetição do POST pode criar outro trabalho. Se a API precisar controlar diretamente erros de envio ou deduplicação por chave do cliente, considere o SDK explícito.
+Envie um POST a `/api/jobs`. Espere HTTP 202 com `job_id` e confira se uma mensagem com o mesmo ID e `operation: reindex` chegou à fila. Isso verifica a aceitação. O consumidor precisa registrar conclusão e tolerar reentrega. Repetir o POST pode criar outro trabalho. Se a API precisa tratar falhas de envio diretamente ou deduplicar por chave do cliente, use o SDK para controlar a operação.
 
 ## Integração com mensagens
 

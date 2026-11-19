@@ -5,7 +5,7 @@ Cosmos DB guarda documentos JSON. Estude primeiro como os dados são divididos, 
 ## Roteiro de leitura
 
 1. [Modelo de recursos, partition key e Request Units](./cosmos-db-modelo-de-recursos-e-particionamento.md)
-2. [SDK: CosmosClient, CRUD, consultas parametrizadas e paginação](./cosmos-db-sdk-conexao-e-consultas.md)
+2. [CosmosClient, leitura pontual, consultas e paginação](./cosmos-db-sdk-conexao-e-consultas.md)
 3. [Políticas de indexação, níveis de consistência e otimização de RUs](./cosmos-db-indexacao-consistencia-rus.md)
 4. [Embeddings, políticas vetoriais e VectorDistance()](./cosmos-db-busca-vetorial.md)
 5. [Change feed processor: leases, delegates e reprocessamento](./cosmos-db-change-feed-processor.md)

@@ -57,7 +57,7 @@ questions:
 
 # Regras de escala HTTP, TCP e KEDA (scale to zero)
 
-Escalar significa aumentar ou reduzir o número de cópias da aplicação, chamadas réplicas. O Container Apps usa ==KEDA== para reagir a sinais externos, como mensagens pendentes. Para um worker que espera chamadas de IA, o tamanho da fila costuma ser mais útil que o uso de CPU.
+O indexador ficou sem trabalho e reduziu a zero cópias em execução. Um manual novo chegou. Quem percebe a mensagem se o processo está parado? O ==KEDA== observa sinais externos, como a fila, para o Container Apps ajustar o número de cópias da aplicação, chamadas réplicas.
 
 ## Escolher o sinal
 
@@ -96,6 +96,8 @@ az containerapp update --name api-ai200 --resource-group rg-ai200 \
   --scale-rule-name http --scale-rule-type http \
   --scale-rule-http-concurrency 20
 ```
+
+No laboratório, espere a fila esvaziar e observe se o indexador chega a zero réplicas. Envie uma mensagem válida e confirme que uma réplica inicia e consome a mensagem. Se a fila crescer com zero réplicas, examine primeiro os eventos de escala, o nome da fila e a identidade da regra. Se a réplica subir mas a fila continuar crescendo, confira os logs do consumidor e a taxa de processamento.
 
 ## Dimensionar sem transferir o gargalo
 

@@ -1,13 +1,13 @@
 # Azure AI-200 Study Hub
 
-Material de estudo para **Microsoft Certified: Azure AI Cloud Developer Associate (AI-200)**: 35 artigos, questões comentadas e revisão rápida em nove trilhas. Consulte o [curso e guia oficial](https://learn.microsoft.com/pt-br/training/courses/ai-200t00#study-guide) para conferir o escopo vigente.
+Material de estudo para **Microsoft Certified: Azure AI Cloud Developer Associate (AI-200)** com 35 artigos, questões comentadas e revisão rápida. Confira o escopo vigente no [guia oficial do exame](https://learn.microsoft.com/pt-br/credentials/certifications/resources/study-guides/ai-200).
 
 ## Comece por aqui
 
-1. Siga o roteiro da home: fundamentos de identidade, imagens e documentos → hospedagem e conexão → dados de IA → operação e revisão. Os números das trilhas organizam o material; não são uma ordem obrigatória de leitura.
-2. Tente responder à checagem rápida antes de abrir a resposta. As lacunas ocultáveis ajudam a lembrar termos sem reler tudo.
-3. Faça as questões no modo estudo e leia a justificativa de cada alternativa, inclusive das erradas.
-4. Volte ao caderno de erros e use **Revisão rápida (Cram)** para revisar resumos e pegadinhas.
+1. Na home, escolha **Começar pelo primeiro artigo**. As quatro primeiras leituras acompanham um assistente de suporte, do acesso aos manuais ao diagnóstico. **Ver roteiro completo** mostra os 35 artigos na ordem sugerida.
+2. Formule uma resposta ao desafio antes da leitura. Durante o artigo, tente responder à checagem rápida antes de abrir a solução.
+3. Em **Pratique este conceito**, responda às questões daquele tema e confira as explicações. A leitura e a prática têm um link para o próximo artigo.
+4. A home salva as práticas concluídas neste navegador e retoma o primeiro artigo pendente. Ao terminar, abra **Preparação** e faça o simulado cronometrado, os laboratórios por área e a avaliação oficial. Consulte o [guia de preparação e referências](docs/preparacao-ai-200.md).
 
 Os exemplos de SDK usam abas Python/C#. Prepare os recursos e permissões descritos antes de executar. Trechos de configuração são identificados quando não representam um projeto completo.
 
@@ -15,7 +15,8 @@ Os exemplos de SDK usam abas Python/C#. Prepare os recursos e permissões descri
 
 - Leitura com lacunas interativas, autoavaliações e exemplos de código.
 - Simulado com escolha única/múltipla, código, ordenação e estudo de caso.
-- Modo estudo com feedback imediato e modo cronometrado. O corte de 70% é uma regra de treino do site, não conversão da pontuação oficial.
+- Modo estudo com feedback imediato e simulado separado com 40 questões, 120 minutos, revisão de marcadas e correção ligada aos artigos.
+- Página de preparação com Microsoft Learn, laboratórios, avaliação oficial, sandbox, vídeos e podcasts.
 - Progresso salvo no navegador, exportação/importação e sincronização opcional com Gist não listado.
 - Instalação para uso offline e leitura em áudio.
 - [Comparação de bancos vetoriais](comparisons/vector-stores-azure.md).
@@ -61,7 +62,7 @@ npm test
 # 6. Gerar brief de autoria para um próximo conceito da ementa
 npm run brief -- --chapter 02-container-apps --slug aca-escala-keda
 
-# 7. Servir preview local em http://localhost:4173
+# 7. Servir preview local em http://localhost:3000
 npm run preview
 ```
 
@@ -74,4 +75,4 @@ npm run preview
 3. Pull Requests passam pela validação automática em [`.github/workflows/validate.yml`](.github/workflows/validate.yml).
 4. A publicação gera e verifica áudio para todos os artigos. Para baixar a narração sem publicar o site, acione manualmente [`.github/workflows/kokoro-audio.yml`](.github/workflows/kokoro-audio.yml) na aba **Actions**.
 
-O pipeline TTS e os comandos locais estão em [tools/tts/README.md](tools/tts/README.md). A home apresenta um roteiro por fundamentos, aplicação, dados de IA e operação, com sugestões do que deixar para a segunda leitura.
+O pipeline TTS e os comandos locais estão em [tools/tts/README.md](tools/tts/README.md).

@@ -61,7 +61,7 @@ questions:
 
 # Conexão com psycopg/Npgsql e autenticação Microsoft Entra
 
-Uma aplicação pode acessar PostgreSQL usando sua identidade do Microsoft Entra, sem guardar senha fixa. O token comprova quem ela é. O usuário precisa existir no banco e receber permissões SQL; a rede também precisa permitir a conexão.
+O assistente recebe um token do Microsoft Entra, mas PostgreSQL recusa a consulta. Separe a conexão em três verificações: a aplicação consegue chegar ao servidor, o banco reconhece a identidade e esse usuário tem permissão SQL para ler a tabela.
 
 ## Preparar servidor, principal e rede
 
@@ -71,7 +71,7 @@ A credencial solicita token para ==https://ossrdbms-aad.database.windows.net/.de
 
 ## Consulta parametrizada em ambos os clientes
 
-Instale `psycopg[binary]` e `azure-identity`; no .NET 8, `Npgsql` e `Azure.Identity`. Defina host, banco, usuário Entra provisionado e caminho do certificado CA confiável. Os exemplos fazem uma conexão e consultam a identidade autenticada.
+Instale `psycopg[binary]` e `azure-identity`; no .NET 8, `Npgsql` e `Azure.Identity`. Defina `PGHOST` com o nome DNS do servidor, `PGDATABASE` com o banco, `PGUSER` com o usuário Entra provisionado e `PGSSLROOTCERT` com o caminho do certificado CA confiável. Os dois exemplos devem exibir o usuário reconhecido e a mensagem `conexao-validada`.
 
 ```python
 import os
@@ -111,7 +111,7 @@ await conn.OpenAsync();
 await using var cmd = new NpgsqlCommand("SELECT current_user, $1::text", conn);
 cmd.Parameters.AddWithValue("conexao-validada");
 await using var reader = await cmd.ExecuteReaderAsync();
-while (await reader.ReadAsync()) Console.WriteLine(reader.GetString(0));
+if (await reader.ReadAsync()) Console.WriteLine($"{reader.GetString(0)}: {reader.GetString(1)}");
 ```
 
 O parâmetro ==%s== no psycopg não é interpolação Python. No Npgsql, `$1` referencia o primeiro parâmetro. Nunca concatene entrada do usuário na consulta.

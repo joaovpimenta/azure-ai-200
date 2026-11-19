@@ -121,7 +121,7 @@ questions:
 
 # CosmosClient, leitura pontual, consultas e paginação
 
-O SDK é a biblioteca usada pela aplicação para acessar Cosmos DB. Reutilize um `CosmosClient` por conta e configuração durante a vida do processo: ele mantém conexões e informações de roteamento. Criar um cliente a cada requisição desperdiça esse trabalho.
+O assistente tem dois pedidos. Para reabrir uma conversa específica, ele conhece o ID e a chave completa. Para listar as conversas de um usuário, ele precisa procurar por `userId`. Escolha a operação em cada caso e reutilize um `CosmosClient` por conta e configuração durante a vida do serviço.
 
 ## Direct e Gateway
 
@@ -140,7 +140,11 @@ Use SQL para localizar itens por outros critérios. Passe valores como parâmetr
 
 ## Exemplos nos dois SDKs
 
-Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT` e conceda `Cosmos DB Built-in Data Reader`. Este exemplo usa `KnowledgeBase/AgentMemories` com chave simples `/tenantId`, diferente do contêiner hierárquico do artigo anterior. Prepare o item `mem-1001` no tenant `tenant-alpha`.
+Instale `azure-cosmos` e `azure-identity`, ou `Microsoft.Azure.Cosmos` e `Azure.Identity` em .NET 8. Defina `COSMOS_ENDPOINT` e conceda `Cosmos DB Built-in Data Reader`. Prepare `KnowledgeBase/AgentMemories` com chave simples `/tenantId` e grave um item de teste.
+
+```json
+{"id":"mem-1001","tenantId":"tenant-alpha","userId":"usr-42","sessionSummary":"Dúvida sobre cobrança"}
+```
 
 ```python
 from azure.identity import DefaultAzureCredential
@@ -183,8 +187,7 @@ using System.Threading.Tasks;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 
-string import os
-endpoint = os.environ["COSMOS_ENDPOINT"];
+string endpoint = Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!;
 
 // Configuração do cliente em Direct Mode (Padrão no C#)
 CosmosClientOptions options = new CosmosClientOptions
@@ -195,7 +198,7 @@ CosmosClientOptions options = new CosmosClientOptions
 };
 
 // Instância única (Singleton)
-CosmosClient client = new CosmosClient(endpoint, new DefaultAzureCredential(), options);
+using CosmosClient client = new CosmosClient(endpoint, new DefaultAzureCredential(), options);
 Container container = client.GetContainer("KnowledgeBase", "AgentMemories");
 
 // 1. Point Read: observe o custo real na resposta
@@ -222,7 +225,6 @@ using (FeedIterator<dynamic> feedIterator = container.GetItemQueryIterator<dynam
         FeedResponse<dynamic> page = await feedIterator.ReadNextAsync();
         Console.WriteLine($"Página retornada com {page.Count} itens. Custo: {page.RequestCharge} RU");
 
-        string continuationToken = page.ContinuationToken; // Token para próxima página stateless
         foreach (var item in page)
         {
             Console.WriteLine($"Item ID: {item.id}");
@@ -230,6 +232,8 @@ using (FeedIterator<dynamic> feedIterator = container.GetItemQueryIterator<dynam
     }
 }
 ```
+
+A leitura pontual e a consulta devem encontrar `mem-1001`. Mude apenas o `userId` da consulta para ver por que o resultado dela muda enquanto a leitura pontual continua encontrando o mesmo item.
 
 ## Paginação
 

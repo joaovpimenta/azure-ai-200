@@ -16,7 +16,7 @@
     "managed-identity",
     "architecture"
   ],
-  "stem": "Leia as quatro abas e responda usando os requisitos do cenário. Metas de desempenho precisam ser validadas por testes; não são garantias automáticas de um serviço.",
+  "stem": "Leia as quatro abas. Antes de responder, identifique quais requisitos eliminam opções e quais exigem medição na carga real.",
   "tabs": [
     {
       "title": "Visão Geral",

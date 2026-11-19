@@ -6,6 +6,7 @@
     "certification": "Microsoft Certified: Azure AI Cloud Developer Associate",
     "course": "AI-200T00",
     "passingScore": 700,
+    "durationMinutes": 120,
     "studyGuideUrl": "https://learn.microsoft.com/pt-br/credentials/certifications/resources/study-guides/ai-200",
     "courseUrl": "https://learn.microsoft.com/pt-br/training/courses/ai-200t00",
     "studyGuideUpdated": "2026-10-30"
@@ -225,7 +226,7 @@
       "summary": "Key Vault (segredos, rotação, recuperação), App Configuration, managed identities e DefaultAzureCredential.",
       "domains": ["secure-monitor-troubleshoot"],
       "concepts": [
-        { "slug": "identidade-gerenciada-defaultazurecredential", "title": "Managed identities, RBAC e DefaultAzureCredential", "skills": ["secure-solutions"] },
+        { "slug": "identidade-gerenciada-defaultazurecredential", "title": "Identidade gerenciada e acesso aos dados no Azure", "skills": ["secure-solutions"] },
         { "slug": "key-vault-segredos-rotacao", "title": "Key Vault: segredos, versões, rotação e soft delete", "skills": ["secure-solutions"] },
         { "slug": "app-configuration-chaves-rotulos-feature-flags", "title": "App Configuration: chaves, rótulos, refresh e feature flags", "skills": ["secure-solutions"] }
       ]

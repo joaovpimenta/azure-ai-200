@@ -27,11 +27,11 @@ questions:
     type: single-choice
     title: "KQL: where, summarize, bin, join e render"
     exam_domain: secure-monitor-troubleshoot
-    stem: Um join entre AppRequests e AppDependencies aumenta a contagem de
-      requisições. Qual é uma correção adequada para uma linha por requisição?
+    stem: Uma requisição tem três dependências filhas diretas. Você quer
+      exibir os totais sem transformar a requisição em três linhas. Como fazer?
     options:
       - id: opt-1
-        text: Agregar dependências por OperationId antes do join.
+        text: Agregar dependências por OperationId e ParentId e ligar ParentId ao Id da requisição.
         correct: true
         rationale: Isso evita multiplicar linhas pela quantidade de dependências da
           operação no escopo consultado.
@@ -65,7 +65,7 @@ questions:
 
 # KQL: where, summarize, bin, join e render
 
-KQL é a linguagem usada para consultar logs no Azure Monitor. Você pode filtrar um período, contar falhas e comparar tempos de resposta. O p95 é o tempo abaixo do qual ficaram 95% das medições; ele ajuda a enxergar lentidão que a média esconde.
+O assistente ficou mais lento após uma implantação. Use KQL para descobrir quando mudou, quantas requisições foram afetadas e quais dependências falharam. O p95 é o tempo abaixo do qual ficaram 95% das medições. Compare-o ao volume para distinguir um pico isolado de um problema que atinge muitos usuários.
 
 ## Contexto e esquema
 
@@ -84,32 +84,33 @@ AppRequests
     P95Ms=percentile(DurationMs, 95)
     by bin(TimeGenerated, 5m), AppRoleName
 | order by TimeGenerated asc
+| project TimeGenerated, AppRoleName, P95Ms
 | render timechart
 ```
 
-`Samples` e `FailedSamples` contam linhas observadas. `EstimatedRequests` usa peso de amostragem. O p95 acima é dos registros presentes; se precisar de percentil ponderado, escolha agregação compatível com o peso. Não apresente métricas amostradas como contagem exata de todas as requisições.
+O gráfico mostra p95 em milissegundos. Remova `project` e `render` para ver os volumes. `Samples` e `FailedSamples` contam linhas observadas, e `EstimatedRequests` soma os pesos `ItemCount` da amostragem. Use agregação ponderada para incorporar esses pesos ao percentil.
 
 ## Correlacionar dependências sem duplicar requisições
 
-Uma requisição pode ter várias dependências. Agregue o lado de dependências antes do join quando quiser uma linha por requisição. Execute no escopo da aplicação desejada; se consultar vários recursos juntos, inclua também a identificação do recurso na correlação.
+Várias requisições em serviços diferentes podem compartilhar `OperationId` em um trace. Para contar só as dependências filhas diretas de cada requisição, agrupe pelo `ParentId` e associe-o ao `Id` da requisição dentro da mesma operação.
 
 ```kql
-let DependenciesByOperation = AppDependencies
-| where TimeGenerated > ago(1h)
+let DependenciesByRequest = AppDependencies
+| where TimeGenerated > ago(1h) and isnotempty(ParentId)
 | summarize DependencyCalls=count(),
     DependencyFailures=countif(Success == false)
-    by OperationId;
+    by OperationId, ParentId;
 AppRequests
 | where TimeGenerated > ago(1h)
-| project TimeGenerated, OperationId, Name, DurationMs, Success
-| join kind=leftouter DependenciesByOperation on OperationId
+| project TimeGenerated, OperationId, Id, Name, DurationMs, Success
+| join kind=leftouter DependenciesByRequest on OperationId, $left.Id == $right.ParentId
 | project TimeGenerated, Name, DurationMs, Success,
     DependencyCalls, DependencyFailures, OperationId
 | order by DurationMs desc
 | take 20
 ```
 
-A soma das durações de dependências pode exceder o tempo da requisição quando há paralelismo. Não some essas durações e trate o resultado como latência percebida pelo usuário.
+Se uma requisição fez três chamadas diretas, espere uma linha com `DependencyCalls = 3`. Uma requisição sem correspondência permanece com as colunas da dependência vazias. Spans aninhados podem ter outro pai. Para investigar toda a árvore, abra o trace. Chamadas em paralelo podem se sobrepor, por isso a duração percebida pelo usuário vem da requisição.
 
 ## Ler e interpretar
 

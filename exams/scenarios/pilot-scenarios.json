@@ -229,7 +229,7 @@
       "parameterized-queries",
       "scenario"
     ],
-    "stem": "Complete o cliente Python com DefaultAzureCredential e o método de consulta SQL parametrizada. O SDK Python usa Gateway (HTTPS), não Direct. O contêiner tem chave /tenantId e a identidade já está autorizada.",
+    "stem": "A identidade do indexador já tem acesso ao contêiner. Complete a credencial por token do Microsoft Entra e execute a consulta parametrizada na partição do cliente. O contêiner usa /tenantId.",
     "code_template": "from azure.cosmos import CosmosClient\nfrom azure.identity import DefaultAzureCredential\n\n# Instanciar cliente autenticado com Entra ID\nclient = CosmosClient(\n    url=\"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    credential={{slot_1}},\n    connection_mode=\"Gateway\"\n)\n\ndatabase = client.get_database_client(\"knowledge-repo\")\ncontainer = database.get_container_client(\"embeddings\")\n\n# Executar consulta parametrizada\nquery_text = \"SELECT c.id, c.title FROM c WHERE c.category = @cat\"\nparams = [{\"name\": \"@cat\", \"value\": \"generative-ai\"}]\n\nresults = list(container.{{slot_2}}(\n    query=query_text,\n    parameters=params,\n    partition_key=\"tenant-contoso\"\n))",
     "slots": [
       {
@@ -305,7 +305,7 @@
       "leases",
       "scenario"
     ],
-    "stem": "Complete a configuração do Change Feed Processor (CFP), que distribui a leitura de alterações. Use Direct. A rede, as permissões, os contêineres e a classe ArticleDocument já estão preparados. HandleChangesAsync é a função que processa cada lote; o host mantém o processo ativo.",
+    "stem": "Complete o worker que distribui a leitura das alterações. A rede permite a conexão TCP do SDK .NET com as réplicas e a equipe quer evitar o salto adicional no acesso aos dados. A identidade, os contêineres e ArticleDocument já estão preparados. HandleChangesAsync trata cada lote; o host mantém o processo ativo.",
     "code_template": "using System;\nusing System.Threading.Tasks;\nusing Microsoft.Azure.Cosmos;\nusing Azure.Identity;\n\nCosmosClient client = new CosmosClient(\n    accountEndpoint: \"https://contoso-ai-cosmos.documents.azure.com:443/\",\n    tokenCredential: new DefaultAzureCredential(),\n    clientOptions: new CosmosClientOptions\n    {\n        ConnectionMode = {{slot_1}}\n    }\n);\n\nContainer sourceContainer = client.GetContainer(\"AIEngineDb\", \"RawArticles\");\nContainer leaseContainer = client.GetContainer(\"AIEngineDb\", \"leases\");\n\nChangeFeedProcessor processor = sourceContainer\n    .{{slot_2}}(\"EmbeddingWorker\", HandleChangesAsync)\n    .WithInstanceName(Environment.MachineName)\n    .WithLeaseContainer(leaseContainer)\n    .Build();\n\nawait processor.StartAsync();",
     "slots": [
       {

@@ -65,7 +65,7 @@ questions:
 
 # Peek-lock, dead-letter queue, sessões e retentativas
 
-Um worker, processo em segundo plano, grava o resultado e depois confirma a mensagem. Se cair entre essas etapas, Service Bus pode entregar a mensagem novamente. O processamento deve ser idempotente: repetir a operação não pode duplicar seu efeito.
+O indexador grava o embedding e perde a conexão antes de confirmar a mensagem. O Service Bus pode entregá-la novamente. O indexador precisa reconhecer que aquele documento e versão já foram processados. Essa propriedade se chama idempotência.
 
 ## Settlement e lock
 
@@ -81,7 +81,7 @@ Em ==PeekLock==, renove locks para trabalhos demorados, observando o limite conf
 
 ## Receber explicitamente
 
-Pré-requisitos: fila `embeddings`, identidade com `Azure Service Bus Data Receiver` e pacotes oficiais usados no artigo de filas. Os exemplos demonstram validação e confirmação; substitua o comentário pela gravação idempotente real. Não confirme um efeito que ainda não ocorreu.
+Crie a fila `embeddings-lab` para testar confirmação e rejeição sem consumir trabalho real. Conceda `Azure Service Bus Data Receiver` à identidade do exemplo e instale os mesmos pacotes do artigo de filas. Use `SERVICEBUS_NAMESPACE` com o nome DNS do namespace.
 
 ```python
 import os
@@ -92,7 +92,7 @@ from azure.servicebus import ServiceBusClient, ServiceBusReceiveMode
 with DefaultAzureCredential() as credential:
     with ServiceBusClient(os.environ["SERVICEBUS_NAMESPACE"], credential) as client:
         with client.get_queue_receiver(
-            queue_name="embeddings", receive_mode=ServiceBusReceiveMode.PEEK_LOCK,
+            queue_name="embeddings-lab", receive_mode=ServiceBusReceiveMode.PEEK_LOCK,
         ) as receiver:
             for message in receiver.receive_messages(max_message_count=1, max_wait_time=5):
                 try:
@@ -103,7 +103,7 @@ with DefaultAzureCredential() as credential:
                 except (ValueError, KeyError, TypeError):
                     receiver.dead_letter_message(message, reason="InvalidPayload")
                     continue
-                # Grave o resultado idempotente usando document_id + versão.
+                print(f"Mensagem de laboratório validada: {document_id}")
                 receiver.complete_message(message)
 ```
 
@@ -114,7 +114,7 @@ using System.Text.Json;
 
 await using var client = new ServiceBusClient(
     Environment.GetEnvironmentVariable("SERVICEBUS_NAMESPACE"), new DefaultAzureCredential());
-await using var receiver = client.CreateReceiver("embeddings",
+await using var receiver = client.CreateReceiver("embeddings-lab",
     new ServiceBusReceiverOptions { ReceiveMode = ServiceBusReceiveMode.PeekLock });
 ServiceBusReceivedMessage? message = await receiver.ReceiveMessageAsync(TimeSpan.FromSeconds(5));
 if (message is not null) {
@@ -125,16 +125,15 @@ if (message is not null) {
             field.ValueKind != JsonValueKind.String ||
             string.IsNullOrWhiteSpace(field.GetString()))
             throw new JsonException("document_id deve ser string não vazia");
-        string id = field.GetString()!;
-        // Grave o resultado idempotente usando id + versão.
+        Console.WriteLine($"Mensagem de laboratório validada: {field.GetString()}");
         await receiver.CompleteMessageAsync(message);
-    } catch (Exception ex) when (ex is JsonException or KeyNotFoundException) {
+    } catch (JsonException) {
         await receiver.DeadLetterMessageAsync(message, "InvalidPayload");
     }
 }
 ```
 
-Falhas transitórias de rede/banco devem ser tratadas separadamente de conteúdo inválido da mensagem. Os exemplos são de uma operação curta, sem renovação automática de lock.
+Envie `{"document_id":"manual-1"}` e `{}` à fila de laboratório. Execute o consumidor uma vez por mensagem. A válida deve ser confirmada; a inválida deve aparecer na DLQ com motivo `InvalidPayload`. No indexador real, confirme só após persistir o resultado de forma idempotente. Trate falhas transitórias separadamente e renove o lock quando o trabalho for longo.
 
 ## DLQ, sessões e recuperação
 

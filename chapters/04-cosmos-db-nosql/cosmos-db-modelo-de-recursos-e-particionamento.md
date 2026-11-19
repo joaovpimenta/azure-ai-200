@@ -126,7 +126,7 @@ questions:
 
 # Modelo de recursos, chave de partição e RUs
 
-Cosmos DB for NoSQL guarda documentos JSON. Para distribuir dados e tráfego, agrupa documentos pela chave de partição. Uma boa chave evita concentrar trabalho em poucos grupos.
+O assistente guarda conversas de vários clientes como documentos JSON. Se um cliente acumular 45 GB e a chave for só `tenantId`, todos esses dados cairão na mesma partição lógica. A chave de partição define como o Cosmos DB distribui os documentos e por onde procura quando você consulta.
 
 ## Do recurso ao documento
 
@@ -159,6 +159,8 @@ A chave `[/tenantId, /userId, /sessionId]` tem três níveis: cliente, usuário 
 | Os três valores | Uma partição lógica |
 | Só `userId` | Não aproveita o prefixo da hierarquia |
 
+Para testar a ideia sem criar recursos, escreva três itens numa folha. Use dois clientes diferentes e repita o par usuário/sessão em ambos. Com os três valores presentes, a consulta identifica uma partição lógica. Com só o usuário, ela não consegue usar o primeiro nível para eliminar clientes.
+
 <details>
 <summary>Checagem Rápida: Filtrar por tenantId sempre custa 1 RU?</summary>
 
@@ -190,6 +192,8 @@ var container = client.GetContainer("KnowledgeBase", "AgentMemoriesHierarchical"
 var properties = (await container.ReadContainerAsync()).Resource;
 Console.WriteLine(string.Join(", ", properties.PartitionKeyPaths));
 ```
+
+As duas versões devem mostrar `/tenantId`, `/userId`, `/sessionId`, nessa ordem. Esse é o prefixo que orienta o roteamento das consultas.
 
 ## Pegadinhas de Prova
 

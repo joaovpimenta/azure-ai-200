@@ -166,7 +166,7 @@ export function createMarkdownCompiler(opts = {}) {
 /**
  * Compiles markdown content to accessible HTML and extracts metadata.
  * @param {string} content
- * @param {{ strict?: boolean, rootRel?: string }} [options={}]
+ * @param {{ strict?: boolean, resolveLink?: (href: string) => string }} [options={}]
  * @returns {{ html: string, metadata: { title: string, headings: Array<any>, pegadinhas: string, clozeCount: number, hasCodeTabs: boolean, hasMermaid: boolean, narrationText: string }, pegadinhas: { found: boolean, raw: string, html: string } }}
  */
 export function compileMarkdown(content, options = {}) {
@@ -209,6 +209,11 @@ export function compileMarkdown(content, options = {}) {
   // Parse markdown with tokens
   const rawTokens = instance.lexer(content);
   const groupedTokens = groupAdjacentCodeTabs(rawTokens);
+  if (options.resolveLink) {
+    instance.walkTokens(groupedTokens, token => {
+      if (token.type === 'link') token.href = options.resolveLink(token.href);
+    });
+  }
   let rawHtml = instance.parser(groupedTokens);
 
   // Format <details> check cards

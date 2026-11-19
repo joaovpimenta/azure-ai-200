@@ -7,7 +7,6 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { chunkNarrationText, AudioPlayer } from '../web/audio-player.js';
-import { renderHtmlShell } from '../scripts/build-site.mjs';
 
 const ROOT_DIR = resolve(process.cwd());
 
@@ -95,15 +94,8 @@ describe('Service Worker Strategy (web/sw.js)', () => {
 });
 
 describe('Security Gate Finding F-01 Verification', () => {
-  test('renderHtmlShell outputs <template id="page-metadata"> and ZERO inline scripts without src', () => {
-    const html = renderHtmlShell({
-      title: 'Cosmos DB Indexing',
-      description: 'Understanding RUs',
-      content: '<article>Content</article>',
-      rootRel: '../../',
-      currentRoute: 'chapter/04/concept',
-      metadata: { slug: 'cosmos-db-indexing', tldr: 'RUs & Partitioning' }
-    });
+  test('the built article uses a metadata template and script elements with src', () => {
+    const html = readFileSync(join(ROOT_DIR, 'dist', 'chapters', '04-cosmos-db-nosql', 'cosmos-db-indexacao-consistencia-rus', 'index.html'), 'utf8');
 
     // 1. Must contain <template id="page-metadata">
     assert.ok(html.includes('<template id="page-metadata">'), 'Must use <template id="page-metadata">');

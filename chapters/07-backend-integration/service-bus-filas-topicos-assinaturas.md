@@ -65,7 +65,7 @@ questions:
 
 # Service Bus: filas, tópicos, assinaturas e filtros
 
-Service Bus transporta mensagens entre aplicações. Uma fila distribui trabalho entre consumidores; um tópico com assinaturas entrega cópias a fluxos independentes. Por exemplo: vetorização e auditoria precisam de assinaturas distintas para receber o mesmo documento.
+Ao publicar um manual, o assistente precisa avisar a vetorização e a auditoria. Se as duas usarem consumidores concorrentes na mesma fila, só uma delas recebe aquela entrega. Quando cada fluxo precisa de uma cópia independente, use um tópico com uma assinatura por fluxo.
 
 ## Roteamento e contrato
 
@@ -117,7 +117,7 @@ message.ApplicationProperties["tipo"] = "manual";
 await sender.SendMessageAsync(message);
 ```
 
-Uma assinatura com filtro de correlação `tipo = manual` pode receber essa mensagem. Outros consumidores acessam sua própria assinatura; eles não leem diretamente o tópico como se fosse uma fila.
+Para observar o roteamento, prepare uma assinatura com filtro `tipo = manual` e outra com `tipo = contrato`, sem a regra padrão que aceita tudo. Envie a mensagem do exemplo e procure `doc-123:v1` na assinatura de manuais. Depois mude a propriedade para `contrato` e use outro `MessageId` para distinguir o teste da primeira publicação.
 
 ## Entrega e idempotência
 

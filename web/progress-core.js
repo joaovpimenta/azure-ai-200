@@ -63,6 +63,23 @@ export function createDefaultProgress() {
   };
 }
 
+export function completeConceptPractice(state, slug, timestamp = new Date().toISOString()) {
+  const previous = state.conceptProgress?.[slug];
+  return {
+    ...state,
+    lastModified: timestamp,
+    conceptProgress: {
+      ...state.conceptProgress,
+      [slug]: {
+        ...previous,
+        state: (PROGRESSION_RANKS[previous?.state] ?? 0) > 0 ? previous.state : 'studying',
+        practiceCompletedAt: timestamp,
+        lastModified: timestamp
+      }
+    }
+  };
+}
+
 /**
  * Validates progress state schema structure and version.
  * @param {any} state
@@ -324,6 +341,13 @@ export function mergeProgress(localState, remoteState) {
         } else {
           mergedConcepts[slug] = structuredClone(localEntry);
         }
+      }
+      const localPractice = Date.parse(localEntry.practiceCompletedAt) || 0;
+      const remotePractice = Date.parse(remoteEntry.practiceCompletedAt) || 0;
+      if (localPractice || remotePractice) {
+        mergedConcepts[slug].practiceCompletedAt = localPractice >= remotePractice
+          ? localEntry.practiceCompletedAt
+          : remoteEntry.practiceCompletedAt;
       }
     }
   });

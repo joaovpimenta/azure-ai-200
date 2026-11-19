@@ -41,7 +41,7 @@ related_links:
 
 # Escolher um banco vetorial no Azure
 
-Busca vetorial encontra conteúdo por proximidade entre embeddings, listas de números geradas por um modelo. No RAG, os documentos recuperados ajudam o modelo a responder. A escolha do banco depende dos dados, filtros, escala e custo; o nome do serviço não garante uma latência.
+Você precisa escolher onde o assistente vai buscar os trechos que usa para responder. Antes de comparar índices, anote o formato dos dados, quais filtros são obrigatórios e se precisa persistir a informação ou só reutilizá-la. Depois compare os candidatos com a mesma lista de perguntas e documentos esperados.
 
 ## Comparação rápida
 
@@ -102,6 +102,17 @@ Não use números universais de milissegundos ou consultas por segundo. Teste vo
 4. Caso contrário, recupere contexto, chame o modelo e grave o resultado com TTL.
 
 Perguntas parecidas podem precisar de respostas diferentes. Não existe um limiar de similaridade universal, e um acerto no cache ainda pode ter custo de embedding e infraestrutura.
+
+## Exercício de decisão
+
+Os manuais estão em tabelas PostgreSQL, e a busca deve respeitar permissões por cliente e Estado. Proponha um primeiro teste para recuperar cinco trechos. Depois decida o que mudaria se as respostas pudessem ser reaproveitadas durante cinco minutos.
+
+<details>
+<summary>Conferir uma solução</summary>
+
+Teste pgvector junto às tabelas e compare os cinco resultados esperados por cliente com os resultados de um índice aproximado. Meça quantos vizinhos autorizados aparecem e a latência com os filtros reais. Para respostas reutilizáveis, avalie Redis como cache com expiração, escopo de autorização e versão dos manuais na chave.
+
+</details>
 
 <details>
 <summary>Checagem Rápida: Redis é sempre a escolha quando há uma meta de baixa latência?</summary>

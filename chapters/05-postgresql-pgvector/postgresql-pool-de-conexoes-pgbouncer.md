@@ -55,7 +55,7 @@ questions:
 
 # Pool de conexões, PgBouncer e otimização de throughput
 
-Um pool mantém conexões abertas para reutilização. Assim, cada requisição evita repetir conexão, TLS e autenticação. Isso importa quando várias réplicas da API acessam PostgreSQL: cada processo tem seu próprio pool, e a soma pode exceder o limite do banco.
+A API do assistente passou de duas para vinte réplicas. O banco agora tem mais conexões, mesmo quando o volume de perguntas está baixo. Um pool reutiliza conexões e evita repetir TLS e autenticação, mas cada processo tem seu próprio limite. Para dimensionar, some os limites de todas as réplicas.
 
 ## Dois níveis de pool
 
@@ -71,7 +71,7 @@ No pooling transacional, evite depender de `SET` persistente, tabelas temporári
 
 ## Uso dos clientes
 
-Exemplos de ciclo de vida: instale `psycopg_pool` no Python e `Npgsql` no .NET. `PG_CONNECTION_STRING` deve vir de configuração protegida e incluir TLS verificado. Para Entra, configure renovação de token na criação das conexões físicas; não injete um único token em um pool de longa duração.
+Instale `psycopg[binary,pool]` no Python e `Npgsql` no .NET. Use `PG_CONNECTION_STRING` com a sintaxe do cliente escolhido, TLS verificado e credencial vinda de configuração protegida. Os exemplos limitam o pool do processo a cinco conexões e devem retornar `1`. Para Entra, configure renovação de token na criação das conexões físicas do serviço.
 
 ```python
 import os
@@ -82,15 +82,19 @@ with ConnectionPool(os.environ["PG_CONNECTION_STRING"], min_size=1, max_size=5) 
     with pool.connection() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT 1")
-            print(cur.fetchone())
+            print(cur.fetchone()[0])
 ```
 
 ```csharp
 using Npgsql;
 
 // Mantenha um NpgsqlDataSource por configuração durante a vida do processo.
-await using var dataSource = NpgsqlDataSource.Create(
-    Environment.GetEnvironmentVariable("PG_CONNECTION_STRING")!);
+var settings = new NpgsqlConnectionStringBuilder(
+    Environment.GetEnvironmentVariable("PG_CONNECTION_STRING")!)
+{
+    MaxPoolSize = 5
+};
+await using var dataSource = NpgsqlDataSource.Create(settings.ConnectionString);
 await using (var conn = await dataSource.OpenConnectionAsync())
 {
     await using var cmd = new NpgsqlCommand("SELECT 1", conn);

@@ -3,7 +3,7 @@
  * Versioned Offline Cache with Stale-While-Revalidate and Network-First routing.
  */
 
-const CACHE_NAME = 'azure-ai-200-cache-v3';
+const CACHE_NAME = 'azure-ai-200-cache-v6';
 
 // Core assets to pre-cache on install
 const PRECACHE_ASSETS = [
@@ -25,6 +25,8 @@ const PRECACHE_ASSETS = [
   './data/catalog.json',
   './data/cram-index.json',
   './data/questions.json',
+  './data/mock-exam.json',
+  './preparacao/index.html',
   './cram/index.html',
   './simulator/index.html',
   './mastery/index.html',

@@ -37,7 +37,7 @@ questions:
       - id: opt-4
         text: Aumentar réplicas imediatamente.
         correct: false
-        rationale: Todas podem repetir o mesma falha ao iniciar.
+        rationale: Todas podem repetir a mesma falha ao iniciar.
         learn_url: https://learn.microsoft.com/en-us/troubleshoot/azure/azure-kubernetes/welcome-azure-kubernetes
       - id: opt-1
         text: kubectl logs POD -c CONTAINER --previous no namespace correto.
@@ -63,6 +63,8 @@ questions:
 # Troubleshooting: kubectl logs/describe/events e logs do Container Apps
 
 Após uma implantação, a API deixa de responder. Primeiro descubra se a imagem não foi baixada, se o processo encerrou ou se o tráfego não chega até ele. Logs mostram o que a aplicação registrou; eventos mostram ações e falhas da plataforma.
+
+Exercício de diagnóstico: se você vê `ImagePullBackOff` e o console está vazio, procure a falha nos eventos ou logs do sistema. Se o processo chegou a iniciar e terminou, procure a primeira exceção nos logs do contêiner e anote o código de saída. A ordem das evidências muda conforme o ponto da falha.
 
 ## Sequência de investigação no AKS
 
@@ -116,7 +118,7 @@ Não. É o recuo entre reinícios repetidos. Logs, estado de término e eventos 
 
 </details>
 
-Se a rsaída de redeão coincide com um deploy, mitigue com rollback ou redirecionamento de tráfego enquanto preserva as evidências. Depois valide pelo caminho real do usuário e acompanhe erros e latência.
+Se a regressão coincide com um deploy, mitigue com rollback ou redirecionamento de tráfego enquanto preserva as evidências. Depois valide pelo caminho real do usuário e acompanhe erros e latência.
 
 ## Pegadinhas de Prova
 

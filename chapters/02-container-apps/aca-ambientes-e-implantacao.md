@@ -61,11 +61,11 @@ questions:
 
 # Ambientes e implantação no Container Apps (CLI e YAML)
 
-O Azure Container Apps executa APIs e workers, processos que trabalham em segundo plano. Um ==managed environment== é o ambiente que reúne aplicações e compartilha rede e recursos de operação. Cada aplicação mantém sua própria imagem, configuração e escala.
+O assistente tem dois processos. A API recebe perguntas por HTTP. O indexador trabalha em segundo plano, consultando a fila de manuais novos. Os dois podem rodar no mesmo ==managed environment==, que fornece infraestrutura de rede e operação. Cada aplicação mantém sua imagem, configuração e escala.
 
 ## Fronteiras e conectividade
 
-Diferencie três decisões: ambiente integrado à VNet, ambiente interno ou externo e ingress de cada aplicação. Uma aplicação com ingress interno não se torna pública apenas porque outra aplicação no ambiente aceita tráfego externo. Resolução de nomes, rotas e acesso aos serviços de dados continuam necessários.
+Comece pelas setas do fluxo. As chamadas **para** a API dependem do ==ingress== configurado nela. As chamadas **do** indexador para o Service Bus dependem de DNS, rota de saída e autorização no broker. No nível do ambiente, a integração com a VNet e o tipo de ambiente determinam quais caminhos podem existir.
 
 | Configuração | Escopo | Consequência |
 |---|---|---|
@@ -73,9 +73,14 @@ Diferencie três decisões: ambiente integrado à VNet, ambiente interno ou exte
 | Ingress e secrets | Aplicação | Definir exposição e referências |
 | Imagem, CPU, memória e escala | Template da revisão | Produzir nova versão executável |
 
+| Processo | Entrada | Sinal de escala |
+|---|---|---|
+| API de perguntas | Ingress HTTP, com exposição adequada ao cliente | Requisições HTTP simultâneas |
+| Indexador | Ingress desabilitado, com saída para a fila | Fila do Service Bus |
+
 ## Implantar com CLI
 
-Pré-requisitos: assinatura selecionada, provedores registrados e CLI com a extensão `containerapp`. Os nomes de recursos devem ser únicos quando exigido. A imagem pública abaixo é apenas um teste de conectividade; substitua-a pela imagem da aplicação.
+Use uma assinatura de laboratório, com os provedores registrados e a extensão `containerapp` na CLI. Este exercício sobe uma API de teste pública para verificar o caminho de entrada. O indexador precisa da própria imagem e de uma fila configurada.
 
 ```bash
 az group create --name rg-ai200 --location eastus
@@ -88,7 +93,7 @@ az containerapp show --name api-ai200 --resource-group rg-ai200 \
   --query properties.configuration.ingress.fqdn -o tsv
 ```
 
-Para uma API real, fixe a imagem por versão ou digest, configure probes e ajuste CPU/memória conforme o perfil de carga. O processo precisa escutar na interface e porta corretas. Workers de fila podem operar sem ingress.
+Abra em HTTPS o endereço retornado e confirme que a página de demonstração carrega. Se o endereço existir mas a API falhar, confira se o processo escuta na porta indicada por `targetPort` e se a revisão está pronta. Para uma API real, fixe a imagem por versão ou digest e configure sondas de saúde e recursos.
 
 ## Template declarativo
 
@@ -114,9 +119,9 @@ properties:
 ```
 
 <details>
-<summary>Checagem Rápida: Um worker sem ingress consegue consumir mensagens?</summary>
+<summary>Checagem rápida · O indexador está saudável, mas o Service Bus rejeita a conexão. Habilitar ingress ajuda?</summary>
 
-Sim, desde que tenha saída de rede, autorização no broker e regra de escala adequada. Ingress controla conexões recebidas; não é requisito para todo processamento.
+Inspecione a direção da chamada. O indexador inicia uma conexão de saída ao broker. Confira DNS, regras de rede e a permissão de recebimento da identidade do indexador.
 
 </details>
 

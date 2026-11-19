@@ -65,7 +65,7 @@ questions:
 
 # Key Vault: segredos, versões, rotação e soft delete
 
-Key Vault guarda segredos, como credenciais de serviços externos. A aplicação pode carregar uma nova versão sem reconstruir sua imagem. Rotacionar uma credencial exige atualizar tanto o serviço que a aceita quanto os consumidores que a utilizam.
+O assistente usa uma API externa que aceita duas chaves durante a troca. O Key Vault guarda o valor que a aplicação deve usar. Para trocar a chave sem interromper o serviço, acompanhe três lugares: onde a chave é aceita, qual versão está no cofre e qual versão cada aplicação carregou.
 
 ## Versões e permissões
 
@@ -101,11 +101,11 @@ KeyVaultSecret secret = (await client.GetSecretAsync("api-key")).Value;
 Console.WriteLine($"Versão carregada: {secret.Properties.Version}");
 ```
 
-Cache local reduz latência e chamadas ao cofre, mas precisa de expiração e estratégia de renovação. Não consulte o cofre repetidamente para cada token gerado pelo modelo.
+Em um cofre de laboratório, rode o exemplo, anote o ID de versão, grave uma nova versão de teste e rode novamente. O ID deve mudar. Em um processo que mantém o valor em cache, verifique quando ele fará a próxima leitura e como vai trocar o cliente que ainda usa a chave antiga.
 
 ## Rotacionar e recuperar
 
-Rotação exige criar ou atualizar a credencial no sistema de origem, publicar a nova versão, renovar consumidores, testar o acesso e só então revogar a antiga. Uma nova versão no cofre não altera magicamente a senha do serviço externo. Automação pode usar eventos e Functions; a política automática de rotação de keys não equivale à rotação genérica de qualquer secret.
+Quando o serviço aceita duas chaves, crie a segunda na origem. Publique a nova versão no cofre, atualize os consumidores e teste uma chamada real com a nova credencial. Revogue a chave antiga depois de confirmar a troca em todos os consumidores. Se a origem aceita uma só credencial, planeje a troca coordenada com os clientes. A automação pode usar eventos e Functions. A política de rotação de chaves criptográficas do cofre atende outro tipo de recurso.
 
 ==Soft delete== mantém um recurso excluído recuperável durante a retenção configurada. Purge protection, uma vez habilitada, impede purga antecipada até o fim desse período, inclusive por administradores. Planeje nomes e recuperação, pois recursos excluídos podem continuar reservando nomes.
 
